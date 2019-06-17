@@ -1,0 +1,7 @@
+.pipeline.white .pipeline-item { 
+  cursor: pointer;
+}
+.pipeline-item .pi-controls { top: 20px; }
+.form-control:focus { border-color: transparent; }
+
+.element-box { min-height: calc(100vh - 320px); }

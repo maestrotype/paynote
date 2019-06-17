@@ -1,0 +1,780 @@
+<div aria-hidden="true" class="onboarding-modal onboarding-in-dwolla-modal modal fade animated" role="dialog" 
+     tabindex="-1" [ngClass]="{ 'show-on-load': isShowOnLoad() }">
+  <div class="modal-dialog modal-centered" role="document">
+    <div class="modal-content text-center">
+      <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+        <span class="close-label"></span><span class="os-icon os-icon-close"></span>
+      </button>
+      <div class="formStepper">
+        <mat-horizontal-stepper [linear]="true" #stepper *ngIf="showPopupSteper1">
+            <!--/******************************** STEP FRONT ************8*********************/-->
+          <mat-step [stepControl]="businessTypeFormGroup" label="Step 1">            
+            <div class="onboarding-content with-gradient-ver">
+              <div class="row">
+                <div class="col-sm-5">
+                  <img style="width: 228px;" src="assets/img/bigicon5.png" class="addFundingSourceImg">
+                </div>
+                <div class="col-sm-7 text-center">
+                  <form [formGroup]="businessTypeFormGroup" >
+                    <h4 class="modal-title text-center">Welcome!</h4>
+                    <p [innerHTML]="messages.get('POPUP_SIGNUP_INFO_TEXT_FOR_PERSONAL_TYPE')"></p>
+                    <div class="row" *ngIf="canContinueSignUp">
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <button class="btn btn-primary btn-lg btn-block btn-rounded"  style="margin-right: 30px;" id="select_personal_type" 
+                                  (click)="selectVerifiedAccountType('personal')" id="personalBTN">Personal</button>              
+                        </div>
+                        <div class="form-group text-center">
+                          <label>
+                            Send or receive digital checks as an individual
+                          </label>
+                        </div>
+                      </div>
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <button class="btn btn-primary btn-lg btn-block btn-rounded" id="select_business_type"
+                                  (click)="selectVerifiedAccountType('business')" id="bussinessBTN">Business</button>
+                        </div>
+                        <div class="form-group text-center">
+                          <label>
+                            Send or receive digital checks as a business
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="alert alert-danger" role="alert" *ngIf="errorService.isError" [innerHTML]=errorService.errorMessage></div>
+                  </form>
+                </div>
+              </div>
+              <br><br><br>        
+            </div>            
+          </mat-step>
+
+            <!--/******************************** STEP 1 PERSONAL ************8*********************/-->
+          <mat-step [stepControl]="personalFormGroupFirst" *ngIf="isPersonalAccount">
+            <div class="modal-blue-bg onboarding-content">
+              <form [formGroup]="personalFormGroupFirst" (ngSubmit)="registerPersonalAccount()">
+                  <!--<ng-template matStepLabel>Fill out your name</ng-template>-->
+                <div class="matStepBody">
+                  <div class="text-center">
+                    <h4 class="modal-title text-center">We’re happy you are here</h4>
+                    <p>We filled some information from your profile to make things easier. Why don’t you fill the rest?</p>
+                  </div>
+                  <mat-form-field>
+                    <input matInput placeholder="First name" formControlName="firstName" required>
+                    <mat-error *ngIf="personalFormGroupFirst.get('firstName').errors && personalFormGroupFirst.get('firstName').errors.validFirstName">
+                      First name not valid
+                    </mat-error>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Last name" formControlName="lastName" required>
+                    <mat-error *ngIf="personalFormGroupFirst.get('lastName').errors && personalFormGroupFirst.get('lastName').errors.validLastName">
+                      Last name not valid
+                    </mat-error>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Email" formControlName="email" type="email">
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Phone" formControlName="phone" [textMask]="{mask: utility.maskPhone}">
+                  </mat-form-field>
+                  <mat-form-field class="postalcode">
+                    <input matInput [min]="minDate" [matDatepicker]="myDatepicker" formControlName="dateOfBirth" 
+                             placeholder="Date of Birth" required autocomplete="off" (click)="myDatepicker.open()">
+                    <mat-datepicker-toggle matSuffix [for]="myDatepicker"></mat-datepicker-toggle>
+                    <mat-datepicker #myDatepicker></mat-datepicker>
+                    <mat-error *ngIf="personalFormGroupFirst.get('dateOfBirth').errors &&
+                        personalFormGroupFirst.get('dateOfBirth').dirty &&
+                        personalFormGroupFirst.get('dateOfBirth').errors.validBirthDate">
+                        Must be 18 years or older
+                    </mat-error>
+                    <mat-hint align="end">MM/DD/YYYY</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field *ngIf="!userService.isDwollaRetry()">
+                    <input matInput placeholder="Ssn" formControlName="ssn" required maxlength="4" appNumbers>
+                    <mat-hint align="end">Last four digits.</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field *ngIf="userService.isDwollaRetry()">
+                    <input matInput placeholder="Ssn" formControlName="ssn" required minlength="11" maxlength="11"
+                         [textMask]="{mask: utility.maskFullSsn, guide: false}">
+                  </mat-form-field>
+                </div>
+                <div class='formStepperButtons'>
+                  <button mat-button matStepperPrevious  id="personalStepOneBack">
+                    <i class="fa fa-long-arrow-left"></i>
+                    Back
+                  </button>
+                  <ul class="rectangle-steps">
+                    <li class="active" (click)="changeStep(1)">&nbsp;</li>
+                    <li (click)="changeStep(2)">&nbsp;</li>
+                    <li (click)="changeStep(3)">&nbsp;</li>
+                  </ul>
+                  <button mat-button matStepperNext class="pull-right" id="personalStepOneNext">
+                    Next
+                    <i class="fa fa-long-arrow-right"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </mat-step>
+
+          <!--/******************************** STEP 2 PERSONAL ************8*********************/-->
+          <mat-step [stepControl]="personalFormGroupSecond" *ngIf="isPersonalAccount">
+            <div class="modal-blue-bg onboarding-content">
+              <form [formGroup]="personalFormGroupSecond" (ngSubmit)="registerPersonalAccount()">
+                <!--<ng-template matStepLabel>Fill out your name</ng-template>-->
+                <div class="matStepBody"> 
+                  <div class="text-center">
+                    <h4 class="modal-title text-center">We’re happy you are here</h4>
+                    <p>We filled some information from your profile to make things easier. Why don’t you fill the rest?</p>
+                  </div>
+                  <mat-form-field>
+                    <input matInput placeholder="Address 1" formControlName="address1" required>
+                    <mat-hint align="end">Note: PO Boxes are not allowed.</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Address 2" formControlName="address2">
+                    <mat-hint align="end">Note: PO Boxes are not allowed.</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="City" formControlName="city" required>
+                  </mat-form-field>
+                  <mat-form-field class="states">
+                    <mat-select placeholder="State" formControlName="state" required>
+                      <mat-option *ngFor="let state of arrStates" [value]="state.abbreviation">
+                        {{ state.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field >
+                    <input matInput placeholder="Postal Code" maxlength="10" formControlName="postalCode" required>
+                    <mat-hint align="end">{{personalFormGroupSecond.value.postalCode.length}} / 10</mat-hint>
+                  </mat-form-field>
+
+                </div>
+                <div class='formStepperButtons'>
+                  <button mat-button matStepperPrevious  id="personalStepTwoBack">
+                    <i class="fa fa-long-arrow-left"></i>
+                    Back
+                  </button>
+                  <ul class="rectangle-steps">
+                    <li (click)="changeStep(1)">&nbsp;</li>
+                    <li class="active" (click)="changeStep(2)">&nbsp;</li>
+                    <li (click)="changeStep(3)">&nbsp;</li>
+                  </ul>
+                  <button mat-button matStepperNext class="pull-right" id="personalStepTwoNext">
+                    Next
+                    <i class="fa fa-long-arrow-right"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </mat-step>
+          <!--/******************************** STEP 3 ************8*********************/-->
+          <mat-step [stepControl]="businesFormGroupStep1" *ngIf="isBusinessAccount">
+            <div class="modal-blue-bg onboarding-content">
+              <form [formGroup]="businesFormGroupStep1" (ngSubmit)="registerBusinessAccount()">
+                <div class="matStepBody"> 
+                  <div class="text-center">
+                    <h4 class="modal-title text-center">Paynote is made for businesses</h4>
+                    <p>Fill the required information about your business & yourself and start using Paynote today.</p>
+                  </div>
+                  <div class="formStepperLabel">
+                    <span style="margin-right: 50px;">Business Information</span>
+                  </div>
+                  <mat-form-field>
+                    <input matInput placeholder="Legal Business Name" formControlName="businessName" required>
+                    <mat-error *ngIf="businesFormGroupStep1.get('businessName').errors && businesFormGroupStep1.get('businessName').errors.validFullName">
+                      Legal Business Name not valid
+                    </mat-error>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Doing Business As (optional)" formControlName="doingBusinessAs">
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-select placeholder="Business Type" formControlName="businessType" required (selectionChange)="changeBusinessType($event)">
+                      <mat-option *ngFor="let structure of arrBusinessStructures" [value]="structure.value">
+                        {{ structure.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="EIN" formControlName="ein" required minlength="10" [textMask]="{mask: maskEIN}">
+                           <mat-hint>Format XX-XXXXXXX</mat-hint>
+                    <mat-hint align="end">{{businesFormGroupStep1.value.ein.length}} / 10</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input autocomplete="nope" type="text" placeholder="Business Classification" matInput 
+                           formControlName="businessClassificationFilter" required [matAutocomplete]="auto">
+                    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectedBussinessClassification($event)">
+                      <mat-optgroup *ngFor="let bClass of businessClassificationOptions | async" [label]="bClass.name">  
+                        <mat-option *ngFor="let bClassIndustry of bClass.list" [value]="bClassIndustry.name" title="{{bClassIndustry.name}}">
+                          {{bClassIndustry.name}}
+                        </mat-option>
+                      </mat-optgroup>
+                    </mat-autocomplete>
+                  </mat-form-field>
+                  <mat-form-field *ngIf="!isRequireBusController">
+                    <input matInput [min]="minDate" [matDatepicker]="BusinessDatepicker" formControlName="dateOfBirth" 
+                           placeholder="Date Of Birth" required>
+                    <mat-datepicker-toggle matSuffix [for]="BusinessDatepicker"></mat-datepicker-toggle>
+                    <mat-datepicker #BusinessDatepicker></mat-datepicker>
+                    <mat-error *ngIf="businesFormGroupStep1.get('dateOfBirth').errors &&
+                      businesFormGroupStep1.get('dateOfBirth').dirty &&
+                      businesFormGroupStep1.get('dateOfBirth').errors.validBirthDate">
+                      Must be 18 years or older
+                    </mat-error>
+                    <mat-hint align="end">MM/DD/YYYY</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field *ngIf="!userService.isDwollaRetry()" class="ssnInput">
+                    <input matInput placeholder="Ssn" formControlName="ssn" required minlength="4" maxlength="4" appNumbers>
+                    <mat-hint align="end">Last four digits.</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field *ngIf="userService.isDwollaRetry()">
+                    <input matInput placeholder="Ssn" formControlName="ssn" required minlength="11" maxlength="11"
+                         [textMask]="{mask: utility.maskFullSsn, guide: false}">
+                  </mat-form-field>
+                  <mat-form-field style="width: 90px;">
+                    <mat-select class="dataTransferProtocol" formControlName="dataTransferProtocol" required style="margin-top: 10px;">
+                      <mat-option *ngFor="let dataTP of dtp" [value]="dataTP.value">
+                        {{ dataTP.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field id="websiteBusines" style="width: 32%;">
+                    <input matInput formControlName="website" required placeholder="Website">
+                    <mat-error *ngIf="businesFormGroupStep1.get('website').errors && businesFormGroupStep1.get('website').dirty &&
+                     businesFormGroupStep1.get('website').errors.validUrlSite">
+                     Website is not valid
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+                <div class='formStepperButtons'>
+                  <button mat-button matStepperPrevious id="personalStepThreeBack">
+                    <i class="fa fa-long-arrow-left"></i>
+                    Back
+                  </button>
+                  <ul class="rectangle-steps">
+                    <li class="active" (click)="changeStep(1)">&nbsp;</li>
+                    <li (click)="changeStep(2)">&nbsp;</li>
+                    <li (click)="changeStep(3)">&nbsp;</li>
+                    <li *ngIf="isRequireBusController" (click)="changeStep(4)">&nbsp;</li>
+                    <li *ngIf="isRequireBusController" (click)="changeStep(5)">&nbsp;</li>
+                    <li *ngIf="isRequireControllerPassport" (click)="changeStep(6)">&nbsp;</li>
+                  </ul>
+                  <button mat-button matStepperNext class="pull-right" id="personalStepThreeNext">
+                    Next
+                    <i class="fa fa-long-arrow-right"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </mat-step>
+          <mat-step [stepControl]="businesFormGroupStep2" *ngIf="isBusinessAccount">
+            <div class="modal-blue-bg onboarding-content">
+              <form [formGroup]="businesFormGroupStep2" (ngSubmit)="registerBusinessAccount()">
+                <div class="matStepBody"> 
+                  <div class="text-center">
+                    <h4 class="modal-title text-center">Paynote is made for businesses</h4>
+                    <p>Fill the required information about your business & yourself and start using Paynote today.</p>
+                  </div>
+                  <mat-form-field style="width: 100%;">
+                    <input matInput placeholder="Address" formControlName="address1" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Address 1 (Optional)" formControlName="address2">
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="City" formControlName="city" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-select placeholder="State" formControlName="state" required>
+                      <mat-option *ngFor="let state of arrStates" [value]="state.abbreviation">
+                        {{ state.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Postal Code" formControlName="postalCode" required maxlength="10">
+                    <mat-hint align="end">{{businesFormGroupStep2.value.postalCode.length}} / 10</mat-hint>
+                  </mat-form-field>
+                </div>
+                <div class='formStepperButtons'>
+                  <button mat-button matStepperPrevious id="personalStepThreeBack2">
+                    <i class="fa fa-long-arrow-left"></i>
+                    Back
+                  </button>
+                  <ul class="rectangle-steps">
+                    <li (click)="changeStep(1)">&nbsp;</li>
+                    <li class="active" (click)="changeStep(2)">&nbsp;</li>
+                    <li (click)="changeStep(3)">&nbsp;</li>
+                    <li *ngIf="isRequireBusController" (click)="changeStep(4)">&nbsp;</li>
+                    <li *ngIf="isRequireBusController" (click)="changeStep(5)">&nbsp;</li>
+                    <li *ngIf="isRequireControllerPassport" (click)="changeStep(6)">&nbsp;</li>
+                  </ul>
+                  <button mat-button matStepperNext class="pull-right" id="personalStepThreeNext2">
+                    Next
+                    <i class="fa fa-long-arrow-right"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </mat-step>
+
+
+
+          <mat-step [stepControl]="controllerBusinessFormGroupStep1" *ngIf="isRequireBusController">
+            <div class="modal-blue-bg onboarding-content">
+              <form [formGroup]="controllerBusinessFormGroupStep1" (ngSubmit)="registerBusinessAccount()">
+                <div class="matStepBody">
+                  <div class="text-center">
+                    <h4 class="modal-title text-center">Paynote is made for businesses</h4>
+                    <p>Fill the required information about your business & yourself and start using Paynote today.</p>
+                  </div>
+                  <!--<ng-template matStepLabel>Fill out your name</ng-template>-->
+                  <div class="formStepperLabel">
+                    <span style="margin-right: 50px;">Officer Information</span>
+                    <mat-checkbox formControlName="isOfficerSameAsOwner" (change)="changeOfficerSameAsOwner()" style="font-size: 14px;">
+                      Officer same as owner
+                    </mat-checkbox>
+                  </div>
+                  <mat-form-field>
+                    <input matInput placeholder="First name" formControlName="firstName" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Last name" formControlName="lastName" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Title" formControlName="title" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput [min]="minDate" [matDatepicker]="controllerDatepicker" formControlName="dateOfBirth"
+                           placeholder="Date Of Birth MM/DD/YYYY" required>
+                           <mat-datepicker-toggle matSuffix [for]="controllerDatepicker"></mat-datepicker-toggle>
+                    <mat-datepicker #controllerDatepicker></mat-datepicker>
+                    <mat-error *ngIf="controllerBusinessFormGroupStep1.get('dateOfBirth').errors &&
+                      controllerBusinessFormGroupStep1.get('dateOfBirth').dirty &&
+                      controllerBusinessFormGroupStep1.get('dateOfBirth').errors.validBirthDate">
+                      Must be 18 years or older
+                    </mat-error>
+                  </mat-form-field>
+                  <mat-form-field *ngIf="!userService.isDwollaRetry()" class="ssnInput">
+                    <input matInput placeholder="Ssn" formControlName="ssn" required minlength="4" maxlength="4" appNumbers>
+                    <mat-hint align="end">Last four digits.</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field *ngIf="userService.isDwollaRetry()">
+                    <input matInput placeholder="Ssn" formControlName="ssn" required minlength="11" maxlength="11"
+                           [textMask]="{mask: utility.maskFullSsn, guide: false}">
+                  </mat-form-field>
+                </div>
+                <div class='formStepperButtons'>
+                  <button mat-button matStepperPrevious  id="businessStepOneBack">
+                    <i class="fa fa-long-arrow-left"></i>
+                    Back
+                  </button>
+                  <ul class="rectangle-steps">
+                    <li (click)="changeStep(1)">&nbsp;</li>
+                    <li (click)="changeStep(2)">&nbsp;</li>
+                    <li class="active" (click)="changeStep(3)">&nbsp;</li>
+                    <li *ngIf="isRequireBusController" (click)="changeStep(4)">&nbsp;</li>
+                    <li *ngIf="isRequireBusController" (click)="changeStep(5)">&nbsp;</li>
+                    <li *ngIf="isRequireControllerPassport" (click)="changeStep(6)">&nbsp;</li>
+                  </ul>
+                  <button mat-button matStepperNext class="pull-right" id="businessStepOneNext">
+                    Next
+                    <i class="fa fa-long-arrow-right"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </mat-step>
+          <mat-step [stepControl]="controllerBusinessFormGroupStep2" *ngIf="isRequireBusController">
+            <div class="modal-blue-bg onboarding-content">
+              <form [formGroup]="controllerBusinessFormGroupStep2" (ngSubmit)="registerBusinessAccount()">
+                <div class="matStepBody">
+                  <div class="text-center">
+                    <h4 class="modal-title text-center">Paynote is made for businesses</h4>
+                    <p>Fill the required information about your business & yourself and start using Paynote today.</p>
+                  </div>
+                  <div class="formStepperLabel">
+                    <span style="margin-right: 50px;">Officer Information</span>
+                  </div>
+                  <!--<ng-template matStepLabel>Fill out your name</ng-template>-->
+                  <mat-form-field>
+                    <input matInput placeholder="Address" formControlName="address1" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="City" formControlName="city" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-select placeholder="State" formControlName="stateProvinceRegion" required>
+                      <mat-option *ngFor="let state of arrStates" [value]="state.abbreviation">
+                        {{ state.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-select placeholder="Country" formControlName="country" required (selectionChange)="changeControllerAddressCountry($event)">
+                      <mat-option *ngFor="let country of arrCountries" [value]="country.code">
+                        {{ country.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Postal Code" formControlName="postalCode" required maxlength="10">
+                    <mat-hint align="end">{{controllerBusinessFormGroupStep2.value.postalCode.length}} / 10</mat-hint>
+                  </mat-form-field>
+                </div>
+                <div class='formStepperButtons'>
+                  <button mat-button matStepperPrevious id="businessStepTwoBack">
+                    <i class="fa fa-long-arrow-left"></i>
+                    Back
+                  </button>
+                  <ul class="rectangle-steps">
+                    <li (click)="changeStep(1)">&nbsp;</li>
+                    <li (click)="changeStep(2)">&nbsp;</li>
+                    <li (click)="changeStep(3)">&nbsp;</li>
+                    <li class="active" *ngIf="isRequireBusController" (click)="changeStep(4)">&nbsp;</li>
+                    <li *ngIf="isRequireBusController" (click)="changeStep(5)">&nbsp;</li>
+                    <li *ngIf="isRequireControllerPassport" (click)="changeStep(6)">&nbsp;</li>
+                  </ul>
+                  <button mat-button matStepperNext class="pull-right" id="businessStepTwoNext">
+                    Next
+                    <i class="fa fa-long-arrow-right"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </mat-step>
+
+          <mat-step [stepControl]="controllerPassportBusinessFormGroup" *ngIf="isRequireControllerPassport">
+            <div class="modal-blue-bg onboarding-content">
+              <br>
+              <br>
+              <div class="row">
+                <div class="col-sm-12 text-center">
+                  <form [formGroup]="controllerPassportBusinessFormGroup" (ngSubmit)="registerBusinessAccount()">
+                    <div class="matStepBody">
+                      <h4 class="modal-title text-center">Paynote is made for businesses</h4>
+                      <p>Fill the required information about your business & yourself and start using Paynote today.</p>
+                      <div class="formStepperLabel">Officer Passport Information</div>
+                      <mat-form-field>
+                        <input matInput placeholder="Number" formControlName="number" required>
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-select placeholder="Country" formControlName="country" required>
+                          <mat-option *ngFor="let country of arrCountries" [value]="country.code">
+                            {{ country.name }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <div class='formStepperButtons'>
+                      <button mat-button matStepperPrevious id="businessStepThreeBack">
+                        <i class="fa fa-long-arrow-left"></i>
+                        Back
+                      </button>
+                      <ul class="rectangle-steps">
+                        <li (click)="changeStep(1)">&nbsp;</li>
+                        <li (click)="changeStep(2)">&nbsp;</li>
+                        <li (click)="changeStep(3)">&nbsp;</li>
+                        <li *ngIf="isRequireBusController" (click)="changeStep(4)">&nbsp;</li>
+                        <li class="active" *ngIf="isRequireBusController" (click)="changeStep(5)">&nbsp;</li>
+                        <li *ngIf="isRequireControllerPassport" (click)="changeStep(6)">&nbsp;</li>
+                      </ul>
+                      <button mat-button matStepperNext class="pull-right" id="businessStepThreeNext">
+                        Next
+                        <i class="fa fa-long-arrow-right"></i>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>  
+            </div>
+          </mat-step>
+
+          <mat-step *ngIf="showPopupSteper1">
+            <div class="modal-blue-bg onboarding-content">
+              <br>
+              <br>
+              <div class="row">
+                <div class="col-sm-12 text-center">
+                  <!--<div class="text-center">-->
+                  <h4 class="modal-title text-center">You’re all set</h4>
+                  <p>You can start sending and requesting payments from your {{businessTypeFormGroup.value.type}} account. Have fun!</p>
+                  <br>
+                  <br>
+                  <mat-spinner mode="indeterminate" *ngIf="isLoading" style="margin: auto;"></mat-spinner>
+
+                  <button *ngIf="canShowContinueButton" style="padding: 7px 25px;" class="btn btn-primary btn-rounded" type="button" 
+                    (click)="onConfirmSetupDwollaAccount()" id="businessStepContinue">
+                    Continue to your profile  <i class="fa fa-long-arrow-right"></i>
+                  </button>
+                  <br>
+                  <br>
+                  <div class="alert alert-danger" role="alert" *ngIf="errorService.isError" [innerHTML]=errorService.errorMessage></div>
+                </div>
+                <div class='formStepperButtons' style="width: 100%"  *ngIf="canShowContinueButton || !isLoading">
+                  <button mat-button matStepperPrevious style="float: left;" id="businessStepBack1">
+                    <i class="fa fa-long-arrow-left"></i>
+                    Back
+                  </button>
+                  <ul class="rectangle-steps">
+                    <li (click)="changeStep(1)">&nbsp;</li>
+                    <li (click)="changeStep(2)">&nbsp;</li>
+                    <li (click)="changeStep(3)" [ngClass]="{ 'active': isPersonalAccount || ( isBusinessAccount && !isRequireBusController ) }">&nbsp;</li>
+                    <li *ngIf="isRequireBusController" (click)="changeStep(4)">&nbsp;</li>
+                    <li *ngIf="isRequireBusController" (click)="changeStep(5)" 
+                      [ngClass]="{ 'active': isBusinessAccount && isRequireBusController }">&nbsp;</li>
+                    <li *ngIf="isRequireControllerPassport" (click)="changeStep(6)" 
+                      [ngClass]="{ 'active': isBusinessAccount && isRequireControllerPassport }">&nbsp;</li>
+                  </ul>
+                </div>
+              </div>
+              <br>
+              <br>
+            </div>
+          </mat-step>
+        </mat-horizontal-stepper>
+        <mat-horizontal-stepper [linear]="true" #stepper2 *ngIf="showPopupSteper2">
+          <mat-step [stepControl]="beneficiarFormGroup">
+            <div class="modal-blue-bg onboarding-content">
+              <div *ngIf="isLoading">
+                <br>
+                <br>
+                <br>
+                <br>
+                <mat-spinner mode="indeterminate" style="margin: auto;"></mat-spinner>
+                <br>
+                <br>
+                <br>
+                <br>
+              </div>
+              <form [formGroup]="beneficiarFormGroup" (ngSubmit)="registerBeneficialOwner()" *ngIf="!isLoading">
+                <div class="matStepBody">
+                  <div class="text-center">
+                    <h4 class="modal-title text-center">Paynote is made for businesses</h4>
+                    <p>Fill the required information about your business & yourself and start using Paynote today.</p>
+                  </div>
+                  <div class="formStepperLabel">
+                    <span style="margin-right: 50px;">Beneficial Ownership Information</span>
+                    <mat-checkbox formControlName="isBeneficialSameAsOfficer" (change)="changeBeneficialSameAsOfficer()" style="font-size: 14px;">
+                      Beneficial Owner same as Officer
+                    </mat-checkbox>
+                  </div>
+                  <mat-form-field>
+                    <input matInput placeholder="First name" formControlName="firstName" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Last name" formControlName="lastName" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput [min]="minDate" [matDatepicker]="controllerDatepicker" formControlName="dateOfBirth"
+                           placeholder="Date Of Birth MM/DD/YYYY" required>
+                           <mat-datepicker-toggle matSuffix [for]="controllerDatepicker"></mat-datepicker-toggle>
+                    <mat-datepicker #controllerDatepicker></mat-datepicker>
+                    <mat-error *ngIf="beneficiarFormGroup.get('dateOfBirth').errors &&
+                      beneficiarFormGroup.get('dateOfBirth').dirty &&
+                      beneficiarFormGroup.get('dateOfBirth').errors.validBirthDate">
+                      Must be 18 years or older
+                    </mat-error>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Ssn" formControlName="ssn" required minlength="11" maxlength="11"
+                         [textMask]="{mask: utility.maskFullSsn, guide: false}">
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Address" formControlName="address1" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="City" formControlName="city" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-select placeholder="State" formControlName="stateProvinceRegion" required>
+                      <mat-option *ngFor="let state of arrStates" [value]="state.abbreviation">
+                        {{ state.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-select placeholder="Country" formControlName="country" required (selectionChange)="changeBeneficiarAddressCountry($event)">
+                      <mat-option *ngFor="let country of arrCountries" [value]="country.code">
+                        {{ country.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Postal Code" formControlName="postalCode" required maxlength="10">
+                    <mat-hint align="end">{{beneficiarFormGroup.value.postalCode.length}} / 10</mat-hint>
+                  </mat-form-field>
+                  <div class="formStepperLabel" *ngIf="isRequireBeneficiarPassport">
+                    <span style="margin-right: 50px;">Beneficial passport</span>
+                  </div>
+                  <mat-form-field *ngIf="isRequireBeneficiarPassport">
+                    <input matInput placeholder="Number" formControlName="number" required>
+                  </mat-form-field>
+                  <mat-form-field *ngIf="isRequireBeneficiarPassport">
+                    <mat-select placeholder="Country" formControlName="passportCountry" required>
+                      <mat-option *ngFor="let country of arrCountries" [value]="country.code">
+                        {{ country.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+                <div class='formStepperButtons'>
+                  <button mat-button matStepperPrevious id="businessStepBOBack">
+                    &nbsp;
+<!--                    <i class="fa fa-long-arrow-left"></i>
+                    Back-->
+                  </button>
+<!--                  <ul class="rectangle-steps">
+                    <li class="active" (click)="changeStepBeneficiarForm(0)">&nbsp;</li>
+                    <li (click)="changeStepBeneficiarForm(1)">&nbsp;</li>
+                    <li (click)="changeStepBeneficiarForm(2)">&nbsp;</li>
+                    <li *ngIf="isRequireBeneficiarPassport" (click)="changeStepBeneficiarForm(3)">&nbsp;</li>
+                  </ul>-->
+                  <button mat-button matStepperNext class="pull-right" id="businessStepBONext">
+                    Submit
+                    <i class="fa fa-long-arrow-right"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </mat-step>
+<!--          <mat-step [stepControl]="beneficiarAddressFormGroup">
+            <div class="modal-blue-bg onboarding-content">
+              <form [formGroup]="beneficiarAddressFormGroup" (ngSubmit)="registerBeneficialOwner()">
+                <div class="matStepBody">
+                  <div class="text-center">
+                    <h4 class="modal-title text-center">Paynote is made for businesses</h4>
+                    <p>Fill the required information about your business & yourself and start using Paynote today.</p>
+                  </div>
+                  <div class="formStepperLabel">
+                    <span style="margin-right: 50px;">Beneficial Ownership Information</span>
+                  </div>
+                  <mat-form-field>
+                    <input matInput placeholder="Address" formControlName="address1" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="City" formControlName="city" required>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-select placeholder="State" formControlName="stateProvinceRegion" required>
+                      <mat-option *ngFor="let state of arrStates" [value]="state.abbreviation">
+                        {{ state.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <mat-select placeholder="Country" formControlName="country" required (selectionChange)="changeBeneficiarAddressCountry($event)">
+                      <mat-option *ngFor="let country of arrCountries" [value]="country.code">
+                        {{ country.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field>
+                    <input matInput placeholder="Postal Code" formControlName="postalCode" required maxlength="10">
+                    <mat-hint align="end">{{beneficiarAddressFormGroup.value.postalCode.length}} / 10</mat-hint>
+                  </mat-form-field>
+                </div>
+                <div class='formStepperButtons'>
+                  <button mat-button matStepperPrevious>
+                    <i class="fa fa-long-arrow-left"></i>
+                    Back
+                  </button>
+                  <ul class="rectangle-steps">
+                    <li (click)="changeStepBeneficiarForm(0)">&nbsp;</li>
+                    <li class="active" (click)="changeStepBeneficiarForm(1)">&nbsp;</li>
+                    <li (click)="changeStepBeneficiarForm(2)">&nbsp;</li>
+                    <li *ngIf="isRequireBeneficiarPassport" (click)="changeStepBeneficiarForm(3)">&nbsp;</li>
+                  </ul>
+                  <button mat-button matStepperNext class="pull-right">
+                    Next
+                    <i class="fa fa-long-arrow-right"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </mat-step>-->
+<!--          <mat-step [stepControl]="beneficiarPassportGroup" *ngIf="isRequireBeneficiarPassport">
+            <div class="modal-blue-bg onboarding-content">
+              <br>
+              <br>
+              <div class="row">
+                <div class="col-sm-12 text-center">
+                  <form [formGroup]="beneficiarPassportGroup" (ngSubmit)="registerBeneficialOwner()">
+                    <div class="matStepBody">
+                      <h4 class="modal-title text-center">Paynote is made for businesses</h4>
+                      <p>Fill the required information about your business & yourself and start using Paynote today.</p>
+                      <div class="formStepperLabel">Beneficial Ownership Passport Information</div>
+                      <mat-form-field>
+                        <input matInput placeholder="Number" formControlName="number" required>
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-select placeholder="Country" formControlName="country" required>
+                          <mat-option *ngFor="let country of arrCountries" [value]="country.code">
+                            {{ country.name }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <div class='formStepperButtons'>
+                      <button mat-button matStepperPrevious>
+                        <i class="fa fa-long-arrow-left"></i>
+                        Back
+                      </button>
+                      <ul class="rectangle-steps">
+                        <li (click)="changeStepBeneficiarForm(0)">&nbsp;</li>
+                        <li (click)="changeStepBeneficiarForm(1)">&nbsp;</li>
+                        <li class="active" (click)="changeStepBeneficiarForm(2)">&nbsp;</li>
+                        <li *ngIf="!isRequireBeneficiarPassport" (click)="changeStepBeneficiarForm(3)">&nbsp;</li>
+                      </ul>
+                      <button mat-button matStepperNext class="pull-right">
+                        Next
+                        <i class="fa fa-long-arrow-right"></i>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>  
+            </div>
+          </mat-step>-->
+          <!--     Final Popup for register Beneficial Ownership         -->
+          <mat-step>
+            <div class="modal-blue-bg onboarding-content">
+              <br>
+              <br>
+              <div class="row">
+                <div class="col-sm-12 text-center">
+                  <!--<div class="text-center">-->
+                  <h4 class="modal-title text-center">You’re all set</h4>
+                  <p>You can start sending and requesting payments from your {{businessTypeFormGroup.value.type}} account. Have fun!</p>
+                  <br>
+                  <br>
+                  <mat-spinner mode="indeterminate" *ngIf="isLoading" style="margin: auto;"></mat-spinner>
+
+                  <button *ngIf="canShowContinueButton" style="padding: 7px 25px;" class="btn btn-primary btn-rounded" type="button" 
+                    (click)="onConfirmSetupDwollaAccount()" id="businessBOContinue">
+                    Continue to your profile  <i class="fa fa-long-arrow-right"></i>
+                  </button>
+                  <br>
+                  <br>
+                  <div class="alert alert-danger" role="alert" *ngIf="errorService.isError" [innerHTML]=errorService.errorMessage></div>
+                </div>
+                <div class='formStepperButtons' style="width: 100%"  *ngIf="canShowContinueButton || !isLoading">
+                  <button mat-button matStepperPrevious style="float: left;" id="businessBOBack">
+                    <i class="fa fa-long-arrow-left"></i>
+                    Back
+                  </button>
+                </div>
+              </div>
+              <br>
+              <br>
+            </div>
+          </mat-step>
+        </mat-horizontal-stepper>
+      </div>
+    </div>
+  </div>
+</div>

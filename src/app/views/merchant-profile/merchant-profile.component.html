@@ -1,0 +1,2417 @@
+<div class="element-wrapper account-settings">
+  <div class="element-box" *ngIf="objUserInfo">
+    <div class="row" style="margin-bottom: 15px;">
+      <div class="col-lg-6 text-left">
+        <h5 class="form-header">
+          <span class="text-capitalize">{{getFullName()}}</span>
+          &nbsp;&nbsp;
+          <a href="javascript:void(0);" (click)="userService.ghostLogin(merchantObject.u_token)" title="Ghost Login" class="action-gost-login">
+            <i class="os-icon os-icon-user-male-circle"></i>
+          </a>
+          
+          <span *ngIf="objMerchantProfile.isReview" style="position: relative;top: -5px;">&nbsp;
+            <button class="btn btn-primary btn-rounded btn-sm" type="button" (click)="reviwedUser()">Reviewed</button>
+          </span>
+          <!--<span *ngIf="this.merchantObject.settings.personal_signup_approve == 0 && this.merchantObject.status == 'Locked'">&nbsp;&nbsp;-->
+          <span *ngIf="canShowButtonApproveSignUp()" style="position: relative;top: -5px;">&nbsp;
+            <button class="btn btn-primary btn-rounded btn-sm" type="button" (click)="approvePersonalSignUp()">Approve Personal SignUp</button>
+          </span>
+          <br>
+          <table *ngIf="canShowResultSearchFraud()" style="margin-top: 10px;">
+            <tr>
+              <td><img src="/assets/img/AI.png" style="height: 50px;margin-right: 10px;"></td>
+              <td>
+                <span [ngStyle]="{'color': getColorForFraudRisk()}" style="font-size: 14px;" [innerHTML]="getLabelFraudRisk()"></span>
+                <br>
+                <a href="javascript:void(0);" (click)="toogleFraud(merchantObject)" 
+                   title="{{merchantObject.fraud == 1 ? 'Fraud / Mark as normal' : 'Normal / Mark as fraud'}}" 
+                   class="btn btn-outline-secondary action-toogle-fraud" *ngIf="canShowFraudButton()">
+                  <span style="font-size: 14px;">{{merchantObject.fraud == 1 ? 'Mark as normal' : 'Mark as fraud'}}</span>
+                </a>
+              </td>
+              <td style="padding-left: 10px;">
+                <a href="javascript:void(0);" (click)="toogleFraud(merchantObject)" title="{{merchantObject.fraud == 1 ? 'Fraud / Mark as normal' : 'Normal / Mark as fraud'}}" 
+                  class="action-toogle-fraud" *ngIf="canShowFraudButton()">
+                 <i class="icon-feather-alert-triangle" style="font-size: 52px; color: gainsboro;" [ngClass]="{ 'has-fraud': merchantObject.fraud == 1 }"></i>
+               </a>
+              </td>
+            </tr>
+          </table>
+        </h5>
+      </div>
+      <div class="col-lg-6 text-right">
+        <div class="pull-right">
+          <label>Set Status &nbsp;</label>
+          <select name="userStatus" class="form-control text-capitalize" placeholder="Select Status" 
+                  style="min-width: 140px;display: inline-block;max-width: 150px;"
+                  [(ngModel)]="objUserInfo.status" #status="ngModel" (change)="changeMerchantStatus()">
+            <option class="text-capitalize" *ngFor="let status of lstUserStatuses" [value]="status"> 
+                    {{ status }} 
+          </option>                     
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="form-desc">
+      <div *ngIf="isVerified()" class="status-pill green" data-title="Complete" data-toggle="tooltip" data-original-title="" title=""></div>
+      <div *ngIf="!isVerified()" class="status-pill red" data-title="Cancelled" data-toggle="tooltip" data-original-title="" title=""></div>
+      <span class="text-capitalize">
+        {{getUserStatus()}}
+      </span> | 
+      Type:
+      <span class="text-capitalize">
+        {{objUserInfo.type}}
+      </span>
+      <span *ngIf="merchantObject.labels && merchantObject.labels.length">
+        &nbsp;&nbsp;
+        <span *ngFor="let label of merchantObject.labels">
+          <a class="badge badge-warning" href="javascript:void(0)" *ngIf="userService.labelIsSameFingerprint(label)" style="margin-left: 3px;"
+              (click)="showSameModalList('fingerPrint')">
+            {{label}}
+          </a>
+          <a class="badge badge-warning" href="javascript:void(0)" *ngIf="userService.labelIsSameIp(label)" style="margin-left: 3px;"
+             (click)="showSameModalList('IP')">
+            {{label}}
+          </a>
+          <a class="badge badge-warning" href="javascript:void(0)" *ngIf="userService.labelIsSameBank(label)" style="margin-left: 3px;"
+             (click)="showSameModalList('bankAccount')">
+            {{label}}
+          </a>
+        </span>
+      </span>
+  </div>
+  <div class="os-tabs-w">
+    <div class="os-tabs-controls" *ngIf="merchantObject.dwl_customer.dwl_token">
+      <ul class="nav nav-tabs bigger">
+        <li class="nav-item">
+          <a class="nav-link active" data-toggle="tab" href="#tab_details">Details</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" (click)="getPlanDetails()" data-toggle="tab" href="#tab_plan_details">Plan & Limits</a>
+        </li>
+        <li *ngIf="merchantObject.role != 'Client'" class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#tab_billing" (click)="initBillingInfo()">Billing</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#tab_bank_account" (click)="initBankAccounts()">Bank Accounts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#tab_documents" (click)="initDocuments()">Documents</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#tab_transactions" (click)="initListTransactions()">Transactions</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#tab_fraud" (click)="initFraud()">Fraud</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#tab_notes">Notes</a>
+        </li>
+        <li class="nav-item" *ngIf="objMerchantProfileComp.canShowApiTab">
+          <a class="nav-link" data-toggle="tab" href="#tab_api">API</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#tab_events_logs" (click)="initEventAndLogs()">Events and Logs</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#tab_failed_payments" (click)="initListFailedPayments()">Failed Payments</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="tab-content">
+      <div class="tab-pane" id="tab_documents">
+        <h6 style="margin-top: 17px;">Documents</h6>
+        <hr>
+        <table width="100%" class="table table-striped table-lightfont dataTable" role="grid" aria-describedby="dataTable1_info" 
+               style="width: 100%;" *ngIf="lstMerchantDocuments.length">
+          <thead>
+            <tr role="row">
+              <th>Status</th>
+              <th>Document Type</th>
+              <th>Comment</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr role="row" *ngFor="let document of lstMerchantDocuments">
+              <td class="text-capitalize">
+                <span *ngIf="!document.failureReason">{{document.status}}</span>
+                <span *ngIf="document.failureReason">Failed Review</span>
+              </td>
+              <td class="text-capitalize">{{document.type}} </td>
+              <td class="text-capitalize">{{messages.get(document.failureReason)}} </td>
+              <td>{{userService.getDateFormat(document.created)}}</td>
+              <td>
+                <a class="btn btn-primary btn-sm btn-rounded" style="color: white;" 
+                     (click)="getMerchantDocumentByDwlToken(document.id)" >View</a> 
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane active" id="tab_details">
+        <div class="row">
+          <div class="col-sm-12 col-lg-6 col-md-6 col-xs-12">
+            <h6 style="margin-top: 17px;">Merchant Info</h6>
+            <hr>
+            <dl>
+              <dt class="text-uppercase">Type</dt><dd class="text-capitalize">{{objUserInfo.type}}</dd>
+              <dt class="text-uppercase">Dwolla User ID</dt><dd class="text-capitalize">{{merchantObject.dwl_customer.dwl_token}}</dd>
+              <dt *ngIf="isBussinesType() && merchantObject.dwl_customer && merchantObject.dwl_customer.business_classification" class="text-uppercase">Business<br>Classification</dt>
+              <dd *ngIf="isBussinesType() && merchantObject.dwl_customer && merchantObject.dwl_customer.business_classification">{{merchantObject.dwl_customer.business_classification}}</dd>
+              <dt class="text-uppercase">Created</dt><dd class="text-capitalize">
+                {{userService.getDateFormat(objUserInfo.created)}}
+              </dd>
+              <dt class="text-uppercase">IP Address</dt>
+              <dd class="text-capitalize" style="position: relative;top: -5px;">
+                <label style="top: -5px; position: relative; display: inline-block; margin-right: 10px;" [ngClass]="{'red': merchantObject.blocked_ip}">
+                  {{merchantObject.ip_address}}
+                </label>
+                <a (click)="openModal(merchantObjectIpAddressInfo)" *ngIf="merchantObject.geo_ip"  href="javascript:void(0)" 
+                  style="font-size: 25px;display: inline-block;" title="MaxMind Results">
+                  <i class="icon-feather-info"></i>
+                </a>
+                <button *ngIf="!merchantObject.blocked_ip && merchantObject.ip_address" class="btn btn-danger btn-rounded" 
+                  style="position: relative;margin-left: 10px;margin-bottom: 11px;" (click)="blockUnblockUserIp()">
+                  <i class="fa fa-lock"></i> Block
+                </button>
+                <button *ngIf="merchantObject.blocked_ip && merchantObject.ip_address" class="btn btn-danger btn-rounded" 
+                  style="position: relative;margin-left: 10px;margin-bottom: 11px;" (click)="blockUnblockUserIp()">
+                  <i class="fa fa-unlock"></i> Unblock
+                </button>
+              </dd>
+<!--              <dt class="text-uppercase">Minfraud Insights</dt>
+              <dd class="text-capitalize" style="position: relative;max-width: 400px;width: 100%;">
+                <a (click)="openBigModal(merchantObjectMinfraudInsightsInfo)"  href="javascript:void(0)" 
+                  *ngIf="merchantObject.dwl_customer.mf_insights && !merchantObject.dwl_customer.mf_insights.error" 
+                    title="Minfraud Insights">Details
+                </a>
+                <span *ngIf="merchantObject.dwl_customer.mf_insights && merchantObject.dwl_customer.mf_insights.error">
+                  <span class="badge-warning" style="padding: 1px 6px;border-radius: 3px;">{{merchantObject.dwl_customer.mf_insights.error}}</span>
+                </span>
+                <span *ngIf="!merchantObject.dwl_customer.mf_insights">
+                  <span class="badge-warning" style="padding: 1px 6px;border-radius: 3px;">Missing</span>
+                </span>
+              </dd>-->
+            </dl>
+            <br>
+            <p>&nbsp;</p>
+            <div class="col-sm-12 col-lg-6 col-md-6 col-xs-12" *ngIf="merchantObject.machine_learning" style="margin-bottom: 40px;clear: both;">
+              <label class="text-center" style="width: 100%;font-size: 20px;color: black;">Fraud Risk (%)</label>
+              <round-progress [current]="merchantObject.machine_learning.risk" [max]="100" [color]="getColorForFraudRisk()"
+                [background]="'#eaeaea'"
+                [radius]="125"
+                [stroke]="20"
+                [semicircle]="true"
+                [rounded]="true"
+                [clockwise]="true"
+                [responsive]="true"
+                [duration]="800"
+                [animation]="'easeInOutQuart'"
+                [animationDelay]="0">
+              </round-progress>
+              <label class="pull-left" style="font-size: 14px;position: relative;left: 10px;">0</label>
+              <label class="text-center" style="position: absolute; left: 0px; width: 100%;font-size: 30px;bottom: 10px;color: black;">
+                {{merchantObject.machine_learning.risk}}
+              </label>
+              <label class="pull-right" style="font-size: 14px;position: relative;">100</label>
+            </div>
+          </div>
+          <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6">
+            <h6 style="display: inline-block;margin-right: 14px;">Contact Info</h6>
+            <a (click)="openModal(editContactInfo)"  href="javascript:void(0)" title="Update Contact Info" style="font-size: 22px;color: #b0b5bb;display: inline-block;">
+              <i class="picons-thin-icon-thin-0001_compose_write_pencil_new"></i>
+            </a>&nbsp;&nbsp;
+            <a (click)="openModal(updateEmail)"  href="javascript:void(0)" title="Update Email" style="font-size: 22px;color: #b0b5bb;display: inline-block;">
+              <i class="picons-thin-icon-thin-0313_email_at_sign"></i>
+            </a>
+            <hr>
+            <div>
+              <dl>
+                <dt class="text-uppercase" *ngIf="objUserInfo.type == 'business'">First Name</dt>
+                <dd class="text-capitalize" *ngIf="objUserInfo.type == 'business'">{{objUserInfo.first_name}}</dd>
+                <dt class="text-uppercase" *ngIf="objUserInfo.type == 'business'">Last Name</dt>
+                <dd class="text-capitalize" *ngIf="objUserInfo.type == 'business'">{{objUserInfo.last_name}}</dd>
+                <dt class="text-uppercase">Email</dt>
+                <dd class="">
+                  <label style="position: relative;top: -5px;margin-right: 10px;">{{objUserInfo.email}}</label>
+                  <i class="icon-feather-alert-circle" style="color: red;font-size: 25px;" title="Email is unverified"
+                                 *ngIf="merchantObject.settings.email_confirmation == 0"></i>
+                  <i class="icon-feather-check-circle" style="color: #00d000;font-size: 25px;" title="Email is verified"
+                                 *ngIf="merchantObject.settings.email_confirmation == 1"></i>
+                </dd>
+                <dt class="text-uppercase">Address 1</dt><dd class="text-capitalize">{{objUserInfo.address1}}</dd>
+                <dt class="text-uppercase">Address 2</dt><dd class="text-capitalize">{{objUserInfo.address2}}</dd>
+                <dt class="text-uppercase">Phone</dt><dd class="text-capitalize">
+                  <span style="white-space: pre;">{{objUserInfo.phone | phone}}</span></dd>
+                <dt class="text-uppercase">City</dt><dd class="text-capitalize">{{objUserInfo.city}}</dd>
+                <dt class="text-uppercase">State</dt><dd class="text-capitalize">{{objUserInfo.state}}</dd>
+                <dt class="text-uppercase">Zip</dt><dd class="text-capitalize">{{objUserInfo.postal_code}}</dd>
+
+                <dt class="text-uppercase" *ngIf="objUserInfo.type == 'business'">Business Name</dt>
+                <dd class="text-capitalize" *ngIf="objUserInfo.type == 'business'">{{objUserInfo.business_name}}</dd>
+
+                <dt class="text-uppercase" *ngIf="objUserInfo.type == 'business' && objUserInfo.doing_business_as ">DBA</dt>
+                <dd class="text-capitalize" *ngIf="objUserInfo.type == 'business' && objUserInfo.doing_business_as ">{{objUserInfo.doing_business_as}}</dd>
+
+                <dt class="text-uppercase" *ngIf="objUserInfo.type == 'business' && objUserInfo.website">Website</dt>
+                <dd class="" *ngIf="objUserInfo.type == 'business' && objUserInfo.website">
+                  <a href="{{objUserInfo.website}}" target="_blank">
+                    <i class="fa fa-external-link fa-lg" aria-hidden="true"></i>&nbsp;&nbsp;{{objUserInfo.website}}
+                  </a>
+                  <br>
+                  <span style="border: gainsboro solid 1px; padding: 5px; display: inline-block; border-radius: 5px; margin-top: 10px;"
+                        *ngIf="merchantObject.dwl_customer.website_info">
+                    Status: {{merchantObject.dwl_customer.website_info.status}}
+                    <br>
+                    SSL: {{merchantObject.dwl_customer.website_info.is_ssl ? 'Yes' : 'No'}}
+                    <br>
+                    Google Search Results: {{merchantObject.dwl_customer.website_info.google_search_results}}
+                    <a href="{{'https://www.google.com/search?q=site:' + objUserInfo.website}}" target="_blank">
+                      <i class="fa fa-external-link fa-lg" aria-hidden="true"></i>
+                    </a>
+                  </span>
+                </dd>
+              </dl>
+            </div>
+          </div>
+          
+          <div class="col-sm-12 col-lg-6 col-md-6 col-xs-12" *ngIf="merchantObject.dwl_customer.mf_insights">
+            <h6>Minfraud Insights Info</h6>
+            <hr>
+            <div class="row" *ngIf="merchantObject.dwl_customer.mf_insights.error">
+              {{merchantObject.dwl_customer.mf_insights.error}}
+            </div>
+            <div class="row" *ngIf="merchantObject.dwl_customer.mf_insights.ip_address">
+              <div class="col-sm-6 col-xs-12 col-md-6 col-lg-6">
+                <label class="text-center" style="width: 100%;font-size: 20px;color: black;">riskScore</label>
+                <round-progress [current]="merchantObject.dwl_customer.mf_insights.risk_score" [max]="100" [color]="'#e61f33'"
+                  [background]="'#eaeaea'"
+                  [radius]="125"
+                  [stroke]="20"
+                  [semicircle]="true"
+                  [rounded]="true"
+                  [clockwise]="true"
+                  [responsive]="true"
+                  [duration]="800"
+                  [animation]="'easeInOutQuart'"
+                  [animationDelay]="0">
+                </round-progress>
+                <label class="pull-left" style="font-size: 14px;position: relative;left: 10px;">0</label>
+                <label class="text-center" style="position: absolute; left: 0px; width: 100%;font-size: 30px;bottom: 10px;color: black;">
+                  {{merchantObject.dwl_customer.mf_insights.risk_score}}
+                </label>
+                <label class="pull-right" style="font-size: 14px;position: relative;">100</label>
+              </div>
+              <div class="col-sm-6 col-xs-12 col-md-6 col-lg-6" style="margin-bottom: 20px">
+                <label class="text-center" style="width: 100%;font-size: 20px;color: black;">IP Risk Score</label>
+                <round-progress [current]="merchantObject.dwl_customer.mf_insights.ip_address.risk" [max]="100" [color]="'#ec9500'"
+                  [background]="'#eaeaea'"
+                  [radius]="125"
+                  [stroke]="20"
+                  [semicircle]="true"
+                  [rounded]="true"
+                  [clockwise]="true"
+                  [responsive]="true"
+                  [duration]="800"
+                  [animation]="'easeInOutQuart'"
+                  [animationDelay]="0">
+                </round-progress>
+                <label class="pull-left" style="font-size: 14px;position: relative;left: 10px;">0</label>
+                <label class="text-center" style="position: absolute; left: 0px; width: 100%;font-size: 30px;bottom: 10px;color: black;">
+                  {{merchantObject.dwl_customer.mf_insights.ip_address.risk}}
+                </label>
+                <label class="pull-right" style="font-size: 14px;position: relative;">100</label>
+              </div>
+              <div class="clear-block"></div>
+              <hr style="width: 100%;border-top: 1px solid rgb(0, 0, 0);">
+              <div class="clear-block"></div>
+              <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12">
+                <div class="element-wrapper" style="padding-bottom: 10px;">
+                  <h6>IP Address Cheks</h6>
+                  <div class="table-responsive">
+                    <table class="table table-lightborder">
+                      <tbody>
+                        <tr>
+                          <td>High risk country</td>
+                          <td>
+                            <i class="icon-feather-check-circle" style="color: #00d000;font-size: 25px;"
+                               *ngIf="merchantObject.dwl_customer.mf_insights.ip_address.country && !merchantObject.dwl_customer.mf_insights.ip_address.country.is_high_risk"></i>
+                            {{merchantObject.dwl_customer.mf_insights.ip_address.country && merchantObject.dwl_customer.mf_insights.ip_address.country.is_high_risk ? 'Yes' : 'No'}}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Time zone</td>
+                          <td>
+                            <span *ngIf="merchantObject.dwl_customer.mf_insights.ip_address.location.time_zone">
+                              {{merchantObject.dwl_customer.mf_insights.ip_address.location.time_zone}}
+                            </span>
+                            <span *ngIf="!merchantObject.dwl_customer.mf_insights.ip_address.location.time_zone">N/A</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>City</td>
+                          <td>
+                            <span *ngIf="merchantObject.dwl_customer.mf_insights.ip_address.city">
+                              {{merchantObject.dwl_customer.mf_insights.ip_address.city.names.en}}
+                            </span>
+                            <span *ngIf="!merchantObject.dwl_customer.mf_insights.ip_address.city">N/A</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Country</td>
+                          <td>{{merchantObject.dwl_customer.mf_insights.ip_address.country.names.en}}</td>
+                        </tr>
+                        <tr>
+                          <td>User type</td>
+                          <td class="text-capitalize">{{merchantObject.dwl_customer.mf_insights.ip_address.traits.user_type}}</td>
+                        </tr>
+                        <tr>
+                          <td>Local date/time of IP address</td>
+                          <td>{{userService.getDateFormat(merchantObject.dwl_customer.mf_insights.ip_address.location.local_time)}}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12" *ngIf="merchantObject.dwl_customer.mf_insights.billing_address">
+                <div class="element-wrapper" style="padding-bottom: 10px;">
+                  <h6>Billing Address Checks</h6>
+                  <!--<div class="element-box" style="padding: 0.5rem 0.5rem;">-->
+                    <div class="table-responsive">
+                      <table class="table table-lightborder">
+                        <tbody>
+                          <tr>
+                            <td>Billing postal code is in the billing city</td>
+                            <td>
+                              <i class="icon-feather-check-circle" style="color: #00d000;font-size: 25px;"
+                                 *ngIf="merchantObject.dwl_customer.mf_insights.billing_address.is_postal_in_city"></i>
+                              {{merchantObject.dwl_customer.mf_insights.billing_address.is_postal_in_city ? 'Yes' : 'No'}}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Billing postal code longitude</td>
+                            <td>{{merchantObject.dwl_customer.mf_insights.billing_address.longitude}}</td>
+                          </tr>
+                          <tr>
+                            <td>Billing postal code latitude</td>
+                            <td>{{merchantObject.dwl_customer.mf_insights.billing_address.latitude}}</td>
+                          </tr>
+                          <tr>
+                            <td>Billing postal code to IP address distance</td>
+                            <td>{{merchantObject.dwl_customer.mf_insights.billing_address.distance_to_ip_location}} km</td>
+                          </tr>
+                          <tr>
+                            <td>Billing address is in IP country</td>
+                            <td class="text-capitalize">
+                              <i class="icon-feather-check-circle" style="color: #00d000;font-size: 25px;"
+                                 *ngIf="merchantObject.dwl_customer.mf_insights.billing_address.is_in_ip_country"></i>
+                              {{merchantObject.dwl_customer.mf_insights.billing_address.is_in_ip_country ? 'Yes' : 'No'}}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  <!--</div>-->
+                </div>
+              </div>
+              <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12">
+                <div class="element-wrapper" style="padding-bottom: 10px;">
+                  <h6>Email Checks</h6>
+                  <!--<div class="element-box" style="padding: 0.5rem 0.5rem;">-->
+                    <div class="table-responsive">
+                      <table class="table table-lightborder">
+                        <tbody>
+                          <tr>
+                            <td>Free email</td>
+                            <td>
+                              <span *ngIf="merchantObject.dwl_customer.mf_insights.email">
+                                <i class="icon-feather-check-circle" style="color: #00d000;font-size: 25px;"
+                                   *ngIf="!merchantObject.dwl_customer.mf_insights.email.is_free"></i>
+                                {{merchantObject.dwl_customer.mf_insights.email.is_free ? 'Yes' : 'No'}}
+                              </span>
+                              <span *ngIf="!merchantObject.dwl_customer.mf_insights.email">N/A</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Carder email</td>
+                            <td>
+                              <span *ngIf="merchantObject.dwl_customer.mf_insights.email">
+                                <i class="icon-feather-check-circle" style="color: #00d000;font-size: 25px;"
+                                   *ngIf="merchantObject.dwl_customer.mf_insights.email && !merchantObject.dwl_customer.mf_insights.email.is_high_risk"></i>
+                                {{merchantObject.dwl_customer.mf_insights.email && merchantObject.dwl_customer.mf_insights.email.is_high_risk ? 'Yes' : 'No'}}
+                              </span>
+                              <span *ngIf="!merchantObject.dwl_customer.mf_insights.email">N/A</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Email first seen</td>
+                            <td>
+                              <span *ngIf="merchantObject.dwl_customer.mf_insights.email">
+                                {{userService.getDateFormat(merchantObject.dwl_customer.mf_insights.email.first_seen)}}
+                              </span>
+                              <span *ngIf="!merchantObject.dwl_customer.mf_insights.email">N/A</span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  <!--</div>-->
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-12 col-lg-6 col-md-6 col-xs-12" 
+               *ngIf="merchantObject.dwl_customer.phone_carrier && !merchantObject.dwl_customer.phone_carrier.error">
+            <div class="element-wrapper" style="padding-bottom: 10px;">
+              <h6 style="display: inline-block;">Phone Carrier</h6>
+              <hr>
+              <!--<div class="element-box" style="padding: 0.5rem 0.5rem;">-->
+                <div class="table-responsive">
+                  <table class="table table-lightborder">
+                    <tbody>
+                      <tr *ngIf="merchantObject.dwl_customer.phone_carrier.caller_name && merchantObject.dwl_customer.phone_carrier.caller_name.caller_name">
+                        <td>Caller Name</td>
+                        <td class="text-capitalize">
+                          {{merchantObject.dwl_customer.phone_carrier.caller_name.caller_name}}
+                        </td>
+                      </tr>
+                      <tr *ngIf="merchantObject.dwl_customer.phone_carrier.caller_name && merchantObject.dwl_customer.phone_carrier.caller_name.caller_type">
+                        <td>Caller Type</td>
+                        <td class="text-capitalize">
+                          {{merchantObject.dwl_customer.phone_carrier.caller_name.caller_type}}
+                        </td>
+                      </tr>
+                      <tr *ngIf="merchantObject.dwl_customer.phone_carrier.caller_name">
+                        <td>Caller Error Code</td>
+                        <td class="text-capitalize">
+                          {{merchantObject.dwl_customer.phone_carrier.caller_name.error_code || 'N/A'}}
+                        </td>
+                      </tr>
+                      <tr *ngIf="merchantObject.dwl_customer.phone_carrier.carrier">
+                        <td>Carrier Error Code</td>
+                        <td class="text-capitalize">
+                          {{merchantObject.dwl_customer.phone_carrier.carrier.error_code || 'N/A'}}
+                        </td>
+                      </tr>
+                      <tr *ngIf="merchantObject.dwl_customer.phone_carrier.carrier">
+                        <td>Carrier Mobile Country Code</td>
+                        <td class="text-capitalize">
+                          {{merchantObject.dwl_customer.phone_carrier.carrier.mobile_country_code || 'N/A'}}
+                        </td>
+                      </tr>
+                      <tr *ngIf="merchantObject.dwl_customer.phone_carrier.carrier">
+                        <td>Carrier Mobile Network Code</td>
+                        <td class="text-capitalize">
+                          {{merchantObject.dwl_customer.phone_carrier.carrier.mobile_network_code || 'N/A'}}
+                        </td>
+                      </tr>
+                      <tr *ngIf="merchantObject.dwl_customer.phone_carrier.carrier">
+                        <td>Carrier Name</td>
+                        <td class="text-capitalize">
+                          {{merchantObject.dwl_customer.phone_carrier.carrier.name || 'N/A'}}
+                        </td>
+                      </tr>
+                      <tr *ngIf="merchantObject.dwl_customer.phone_carrier.carrier">
+                        <td>Carrier Type</td>
+                        <td class="text-capitalize">
+                          {{merchantObject.dwl_customer.phone_carrier.carrier.type || 'N/A'}}
+                        </td>
+                      </tr>
+                      <tr *ngIf="merchantObject.dwl_customer.phone_carrier.country_code">
+                        <td>Country Code</td>
+                        <td class="text-capitalize">
+                          {{merchantObject.dwl_customer.phone_carrier.country_code}}
+                        </td>
+                      </tr>
+                      <tr *ngIf="merchantObject.dwl_customer.phone_carrier.location">
+                        <td>State Code</td>
+                        <td class="text-capitalize">
+                          {{merchantObject.dwl_customer.phone_carrier.location}}
+                        </td>
+                      </tr>
+                      <tr *ngIf="merchantObject.dwl_customer.phone_carrier.national_format">
+                        <td>National Format</td>
+                        <td class="text-capitalize">
+                          {{merchantObject.dwl_customer.phone_carrier.national_format}}
+                        </td>
+                      </tr>
+                      <tr *ngIf="merchantObject.dwl_customer.phone_carrier.phone_number">
+                        <td>Phone Number</td>
+                        <td class="text-capitalize">
+                          <span style="white-space: pre;">{{merchantObject.dwl_customer.phone_carrier.phone_number | phone}}</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              <!--</div>-->
+            </div>
+          </div>
+          <div class="col-sm-12 col-lg-6 col-md-6 col-xs-12" *ngIf="merchantObject.geo_ip">
+            <div class="element-wrapper" style="padding-bottom: 10px;">
+              <h6>IP Address Info</h6>
+              <!--<div class="element-box" style="padding: 0.5rem 0.5rem;">-->
+                <div class="table-responsive">
+                  <table class="table table-lightborder">
+                    <tbody>
+                      <tr>
+                        <td><b>IP Risk</b></td>
+                        <td>{{merchantObject.ip_risk}}%</td>
+                      </tr>
+                      <tr>
+                        <td><b>Country</b></td>
+                        <td>
+                          <span *ngIf="merchantObject.geo_ip.country">
+                            {{merchantObject.geo_ip.country.names.en || '' }} ({{merchantObject.geo_ip.country.iso_code || ''}})
+                          </span>
+                          <span *ngIf="!merchantObject.geo_ip.country">N/A</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><b>City</b></td>
+                        <td>
+                          <span *ngIf="merchantObject.geo_ip.city">
+                            {{merchantObject.geo_ip.city.names.en || ''}}
+                          </span>
+                          <span *ngIf="!merchantObject.geo_ip.city">N/A</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><b>State</b></td>
+                        <td>
+                          <span *ngIf="merchantObject.geo_ip.subdivisions">
+                            {{merchantObject.geo_ip.subdivisions['0'].names.en || ''}}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><b>Zip</b></td>
+                        <td>
+                          <span *ngIf="merchantObject.geo_ip.postal">
+                            {{merchantObject.geo_ip.postal.code || ''}}
+                          </span>
+                          <span *ngIf="!merchantObject.geo_ip.postal">N/A</span>
+                        </td>
+                      </tr>
+<!--                      <tr>
+                        <td><b>As</b></td>
+                        <td>{{merchantObject.geo_ip.as || ''}}</td>
+                      </tr>-->
+                      <tr>
+                        <td><b>ISP</b></td>
+                        <td>
+                          <span *ngIf="merchantObject.geo_ip.traits">
+                            {{merchantObject.geo_ip.traits.isp || ''}}
+                          </span>
+                          <span *ngIf="!merchantObject.geo_ip.traits">N/A</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><b>Org</b></td>
+                        <td>
+                          <span *ngIf="merchantObject.geo_ip.traits">
+                            {{merchantObject.geo_ip.traits.organization || ''}}
+                          </span>
+                          <span *ngIf="!merchantObject.geo_ip.traits">N/A</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><b>Time Zone</b></td>
+                        <td>
+                          <span *ngIf="merchantObject.geo_ip.location">
+                            {{merchantObject.geo_ip.location.time_zone || ''}}
+                          </span>
+                          <span *ngIf="!merchantObject.geo_ip.location">N/A</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              <!--</div>-->
+            </div>
+          </div>
+          <div class="col-sm-12 col-lg-6 col-md-6 col-xs-12" *ngIf="merchantObject.dwl_customer.mf_insights && merchantObject.dwl_customer.mf_insights.device">
+            <h6>Device ID Checks</h6>
+            <hr>
+            <dl>
+              <dt>Device ID</dt><dd>{{merchantObject.dwl_customer.mf_insights.device.id}}</dd>
+              <dt>Device confidence score</dt><dd>{{merchantObject.dwl_customer.mf_insights.device.confidence}}</dd>
+              <dt>Device last seen</dt><dd>{{userService.getDateFormat(merchantObject.dwl_customer.mf_insights.device.last_seen)}}</dd>
+              <dt>Device local time</dt><dd>{{userService.getDateFormat(merchantObject.dwl_customer.mf_insights.device.local_time)}}</dd>
+            </dl>
+          </div>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="tab-pane" id="tab_api" *ngIf="objMerchantProfileComp.canShowApiTab">
+        <app-api-manage [u_token]="merchantObject.u_token" [ext_app_id]="merchantObject.ext_app_id"></app-api-manage>
+      </div>
+      <div class="tab-pane" id="tab_plan_details">
+        <div class="pull-left col-sm-10 settingsLimits">
+          <div class="row">
+            <div class="col-sm-3">
+              <span *ngIf="merchantObject.settings.send_limit.Enabled">
+                <div class="status-pill green" style="width: 9px;height: 9px;margin-right: 5px;"></div>
+              </span>
+              <span *ngIf="!merchantObject.settings.send_limit.Enabled">
+                <div class="status-pill red" style="width: 9px;height: 9px;margin-right: 5px;"></div>
+              </span>
+              <label style="font-size: 16px;">
+                Send -
+                <span *ngIf="merchantObject.settings.send_limit.Enabled">
+                  <b>Enabled</b>
+                </span>
+                <span *ngIf="!merchantObject.settings.send_limit.Enabled">
+                  <b>Disabled</b>
+                </span>
+              </label>
+              <br>
+              <label style="font-size: 16px;">
+                Funding -
+<!--                <span *ngIf="!merchantObject.settings.send_limit.next_day || merchantObject.settings.send_limit.next_day == 0">-->
+<!--                  <b>Standard</b>-->
+<!--                </span>-->
+<!--                <span *ngIf="merchantObject.settings.send_limit.next_day == 1">-->
+<!--                  <b>Next Day</b>-->
+<!--                </span>-->
+
+                <span *ngIf="!merchantObject.settings.send_limit.delayed || merchantObject.settings.send_limit.delayed == 0">
+                  {{merchantObject.settings.send_limit.next_day == 1 ? 'Next Day' : 'Standard' }}
+                </span>
+                <span *ngIf="merchantObject.settings.send_limit.delayed > 0">
+                  {{merchantObject.settings.send_limit.delayed}} day delay
+                </span>
+              </label>
+            </div>
+
+            <div class="col-sm-3">
+              <span *ngIf="merchantObject.settings.receive_limit.Enabled">
+                <div class="status-pill green" style="width: 9px;height: 9px;margin-right: 5px;"></div>
+              </span>
+              <span *ngIf="!merchantObject.settings.receive_limit.Enabled">
+                <div class="status-pill red" style="width: 9px;height: 9px;margin-right: 5px;"></div>
+              </span>
+              <label  style="font-size: 16px;">
+                Receive -
+                <span *ngIf="merchantObject.settings.receive_limit.Enabled">
+                  <b>Enabled</b>
+                </span>
+                <span *ngIf="!merchantObject.settings.receive_limit.Enabled">
+                  <b>Disabled</b>
+                </span>
+              </label>
+              <br>
+              <label style="font-size: 16px;">
+                Funding -
+<!--                <span *ngIf="!merchantObject.settings.receive_limit.next_day || merchantObject.settings.receive_limit.next_day == 0">-->
+<!--                  <b>Standard</b>-->
+<!--                </span>-->
+<!--                <span *ngIf="merchantObject.settings.receive_limit.next_day == 1">-->
+<!--                  <b>Next Day</b>-->
+<!--                </span>-->
+                <span *ngIf="!merchantObject.settings.receive_limit.delayed || merchantObject.settings.receive_limit.delayed == 0">
+                  {{merchantObject.settings.receive_limit.next_day == 1 ? 'Next Day' : 'Standard' }}
+                </span>
+                <span *ngIf="merchantObject.settings.receive_limit.delayed > 0">
+                  {{merchantObject.settings.receive_limit.delayed}} day delay
+                </span>
+              </label>
+            </div>    
+            <div class="col-sm-4">
+              <span *ngIf="merchantObject.settings.billing_link">
+                <div class="status-pill green" style="width: 9px;height: 9px;margin-right: 5px;"></div>
+              </span>
+              <span *ngIf="!merchantObject.settings.billing_link">
+                <div class="status-pill red" style="width: 9px;height: 9px;margin-right: 5px;"></div>
+              </span>
+              <label  style="font-size: 16px;">
+                Payment Page -
+                <span *ngIf="merchantObject.settings.billing_link">
+                  <b>Enabled</b>
+                </span>
+                <span *ngIf="!merchantObject.settings.billing_link">
+                  <b>Disabled</b>
+                </span>
+              </label>
+            </div>    
+          </div>
+        </div>
+        <div class="pull-right">
+          <button class="btn btn-primary btn-lg" title="Update Merchant Limits" (click)="openCustomModal(editLimitsProfile, 'updateMerchantModal')">
+            <i class="fa fa-battery-quarter fa-lgx"></i>
+          </button>
+        </div>
+        <div class="clear-block"></div>
+        <hr>
+        <div class="col-12 settingsLimits">
+          <div class="row">
+            <div class="col-lg-6 col-md-6 col-xl-6 col-sm-12">
+              <label style="font-size: 20px;">Send limits</label>
+              <div>
+                <ul *ngIf="merchantObject.settings.send_limit && merchantObject.limits">
+                  <li [innerHTML]="sanitizer.bypassSecurityTrustHtml(utility.renderLimitProgressBar('Daily', merchantObject.limits.send_daily || 0, merchantObject.limits.send_limit_daily))"></li>
+                  <li [innerHTML]="sanitizer.bypassSecurityTrustHtml(utility.renderLimitProgressBar('Monthly', merchantObject.limits.send_monthly || 0, merchantObject.limits.send_limit_monthly))"></li>
+                  <li>Checks (
+                    {{merchantObject.settings.send_limit.Checks || 0 | currency:'':'symbol'}}
+                    )</li>
+                </ul>
+              </div>
+
+            </div>
+            <div class="col-lg-6 col-md-6 col-xl-6 col-sm-12">
+              <label  style="font-size: 20px;" for="">Receive limits</label>
+              <div>
+                <ul *ngIf="merchantObject.settings.receive_limit && merchantObject.limits">
+                  <li [innerHTML]="sanitizer.bypassSecurityTrustHtml(utility.renderLimitProgressBar('Daily', merchantObject.limits.receive_daily || 0, merchantObject.limits.receive_limit_daily))"></li>
+                  <li [innerHTML]="sanitizer.bypassSecurityTrustHtml(utility.renderLimitProgressBar('Monthly', merchantObject.limits.receive_monthly || 0, merchantObject.limits.receive_limit_monthly))"></li>
+                  <li>Invoices (
+                    {{merchantObject.settings.receive_limit.Invoices || 0 | currency:'':'symbol'}}
+                    )</li>
+                </ul>
+              </div>
+            </div>                
+          </div>
+        </div>
+        <h6 class="pull-left">Active Subscriptions</h6>
+        <div class="pull-right">
+          <!--          <button class="btn btn-primary btn-lg" title="Update Current Cycle Limit Features" (click)="openModal(editLimits)">
+                      <i class="fa fa-battery-quarter fa-lgx"></i>
+                    </button>-->
+          <button class="btn btn-primary btn-lg"  (click)="openModal(replacePrimaryPlan)" title="Replace Primary Plan">
+            <i class="fa fa-exchange fa-lgx"></i>
+          </button>
+        </div>
+        <div class="clear-block"></div>
+        <hr>
+        <table width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+          <thead>
+            <tr role="row">
+              <th scope="col">Subscription</th>
+              <th scope="col">Receive</th>
+              <th scope="col">Send</th>
+              <th scope="col">Price</th>
+              <th scope="col">Next Day Funding</th>
+              <th scope="col">Billing Start</th>
+              <th scope="col">Billing Date</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr role="row" *ngFor="let subscription of subscriptionList">
+                <td data-title="Subscription" scope="row">
+                <b>Name:</b> {{subscription.p_name}}<br>
+                <b>Status:</b> {{subscription.status}}<br>
+                <b>Type:</b> {{subscription.base.send_receive}}
+              </td>
+              <td data-title="Receive">
+                <!--<b>Quantity: </b>{{subscription.base.receive.num || 0}}<br>-->
+                <b>Free Qty: </b>{{subscription.base.receive.num_free || 0}}<br>
+                <b>Overage: </b><span *ngIf="subscription.base.receive.over_pct">{{subscription.base.receive.over || 0}}%</span>
+                <span *ngIf="!subscription.base.receive.over_pct">{{subscription.base.receive.over || 0 | currency:'':'symbol'}}</span><br>
+                <b>Request check fee: </b><span *ngIf="subscription.base.receive.verify_pct">{{subscription.base.receive.verify || 0}}%</span>
+                <span *ngIf="!subscription.base.receive.verify_pct">{{subscription.base.receive.verify || 0 | currency:'':'symbol'}}</span>
+              </td>
+              <td data-title="Send">
+                <b>Quantity: </b>{{subscription.base.send.num || 0}}<br>
+                <b>Free Qty: </b>{{subscription.base.send.num_free || 0}}<br>
+                <b>Overage: </b><span *ngIf="subscription.base.send.over_pct">{{subscription.base.send.over || 0}}%</span>
+                <span *ngIf="!subscription.base.send.over_pct">{{subscription.base.send.over || 0 | currency:'':'symbol'}}</span><br>
+              </td>
+              <td data-title="Price">{{subscription.remaining.amount | currency:'':'symbol' || '&nbsp;'}}</td>
+              <td data-title="Next Day Funding">
+                <span *ngIf="primarySubscription.remaining.next_day">Enabled</span>
+                <span *ngIf="!primarySubscription.remaining.next_day">Disabled</span>                
+              </td>
+              <td data-title="Billing Start">
+                {{userService.getDateFormat(subscription.created_at)}}
+              </td>
+              <td data-title="Billing Date">
+                {{userService.getDateFormat(subscription.next_payment_attempt)}}
+              </td>
+              <td data-title="Action">
+                <button class="btn btn-danger"  (click)="cancelSubscription()" title="Cancel Subscription">
+                  Cancel
+                </button>
+              </td>
+            </tr>
+            <tr role="row" *ngIf="primarySubscription && primarySubscription.remaining">
+                <td data-title="" scope="row" class="text-right"><b>Limits:</b></td>
+              <td data-title="Number">
+                <!--<b>Quantity: </b>{{primarySubscription.remaining.receive.num || 0}}<br>-->
+                <b>Free Qty: </b>{{primarySubscription.remaining.receive.num_free || 0}}<br>
+                <b>Rate: </b>
+                <span *ngIf="primarySubscription.remaining.receive.verify_pct">
+                  {{primarySubscription.remaining.receive.verify || 0}}%
+                </span>
+                <span *ngIf="!primarySubscription.remaining.receive.verify_pct">
+                  {{primarySubscription.remaining.receive.verify || 0 | currency:'':'symbol'}}
+                </span>
+              </td>
+              <td data-title="Number">
+                <b>Quantity: </b>{{primarySubscription.remaining.send.num || 0}}<br>
+                <b>Free Qty: </b>{{primarySubscription.remaining.send.num_free || 0}}<br>
+              </td>
+              <td data-title="">&nbsp;</td>
+              <td data-title="">&nbsp;</td>
+              <td data-title="">&nbsp;</td>
+              <td data-title="">&nbsp;</td>
+              <td data-title="">&nbsp;</td>
+            </tr>
+            <tr *ngIf="!subscriptionList.length">
+              <td data-title="" colspan="100">
+                <div class="form-desc">This customer currently doesn’t have Active Subscriptions.</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="tab_fraud">
+        <h6>Same Fingerprints</h6>
+        <hr>
+        <div class="form-desc" *ngIf="!listSameFingerprints.length">This customer currently doesn’t have Same Fingerprints.</div>
+        <div style="margin-bottom: 30px;" *ngIf="listSameFingerprints.length">
+          <table width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+            <thead>
+              <tr role="row">
+                <th scope="col">Name / Email</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Role</th>
+                <th scope="col">Status</th>
+                <th scope="col">Created</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr role="row" *ngFor="let sameFingerprint of listSameFingerprints">
+                <td data-title="Name" scope="row">
+                  {{sameFingerprint.name || '&nbsp;'}}<br>
+                  {{sameFingerprint.email || '&nbsp;'}}
+                </td>
+                <td data-title="Phone"><span style="white-space: pre;">{{sameFingerprint.phone || '&nbsp;' | phone}}</span></td>
+                <td data-title="Role">{{sameFingerprint.role || '&nbsp;'}}</td>
+                <td data-title="Status">{{sameFingerprint.status || '&nbsp;'}}</td>
+                <td data-title="Created">
+                  {{userService.getDateFormat(sameFingerprint.created_at)}}
+                </td>
+                <td data-title="Action">
+                  <a href="javascript:void(0);" (click)="closeModal(); userService.ghostLogin(sameFingerprint.u_token)" title="Ghost Login" 
+                     class="action-gost-login" *ngIf="sameFingerprint.dwl_token">
+                    <i class="os-icon os-icon-user-male-circle"></i>
+                  </a>
+                  <a href="/users/{{sameFingerprint.dwl_token}}/{{sameFingerprint.u_token}}" style="margin-left: 8px;" title="Edit" 
+                     class="action-edit-merchant" *ngIf="sameFingerprint.dwl_token">
+                    <i class="picons-thin-icon-thin-0001_compose_write_pencil_new"></i>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <h6>Same Bank Accounts</h6>
+        <hr>
+        <div class="form-desc" *ngIf="!listSameBankAccounts.length">This customer currently doesn’t have Same Bank Accounts.</div>
+        <div style="margin-bottom: 30px;" *ngIf="listSameBankAccounts.length">
+          <table width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+            <thead>
+              <tr role="row">
+                <th scope="col">Name / Email</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Role</th>
+                <th scope="col">Status</th>
+                <th scope="col">Created</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr role="row" *ngFor="let sameBankAccount of listSameBankAccounts">
+                <td data-title="Name" scope="row">
+                  {{sameBankAccount.name || '&nbsp;'}}<br>
+                  {{sameBankAccount.email || '&nbsp;'}}
+                </td>
+                <td data-title="Phone"><span style="white-space: pre;">{{sameBankAccount.phone || '&nbsp;' | phone }}</span></td>
+                <td data-title="Role">{{sameBankAccount.role || '&nbsp;'}}</td>
+                <td data-title="Status">{{sameBankAccount.status || '&nbsp;'}}</td>
+                <td data-title="Created">
+                  {{userService.getDateFormat(sameBankAccount.created_at)}}
+                </td>
+                <td data-title="Action">
+                  <a href="javascript:void(0);" (click)="closeModal(); userService.ghostLogin(sameBankAccount.u_token)" title="Ghost Login" 
+                     class="action-gost-login" *ngIf="sameBankAccount.dwl_token">
+                    <i class="os-icon os-icon-user-male-circle"></i>
+                  </a>
+                  <a href="/users/{{sameBankAccount.dwl_token}}/{{sameBankAccount.u_token}}" style="margin-left: 8px;" title="Edit" 
+                     class="action-edit-merchant" *ngIf="sameBankAccount.dwl_token">
+                    <i class="picons-thin-icon-thin-0001_compose_write_pencil_new"></i>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <h6>Same IPs</h6>
+        <hr>
+        <div class="form-desc" *ngIf="!listSameIP.length">This customer currently doesn’t have Same IPs.</div>
+        <div style="margin-bottom: 30px;" *ngIf="listSameIP.length">
+          <table width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+            <thead>
+              <tr role="row">
+                <th scope="col">Name / Email</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Role</th>
+                <th scope="col">Status</th>
+                <th scope="col">Created</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr role="row" *ngFor="let sameBankAccount of listSameIP">
+                <td data-title="Name" scope="row">
+                  {{sameBankAccount.name || '&nbsp;'}}<br>
+                  {{sameBankAccount.email || '&nbsp;'}}
+                </td>
+                <td data-title="Phone"><span style="white-space: pre;">{{sameBankAccount.phone || '&nbsp;' | phone}}</span></td>
+                <td data-title="Role">{{sameBankAccount.role || '&nbsp;'}}</td>
+                <td data-title="Status">{{sameBankAccount.status || '&nbsp;'}}</td>
+                <td data-title="Created">
+                  {{userService.getDateFormat(sameBankAccount.created_at)}}
+                </td>
+                <td data-title="Action">
+                  <a href="javascript:void(0);" (click)="closeModal(); userService.ghostLogin(sameBankAccount.u_token)" title="Ghost Login" 
+                     class="action-gost-login" *ngIf="sameBankAccount.dwl_token">
+                    <i class="os-icon os-icon-user-male-circle"></i>
+                  </a>
+                  <a href="/users/{{sameBankAccount.dwl_token}}/{{sameBankAccount.u_token}}" style="margin-left: 8px;" title="Edit" 
+                     class="action-edit-merchant" *ngIf="sameBankAccount.dwl_token">
+                    <i class="picons-thin-icon-thin-0001_compose_write_pencil_new"></i>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="tab-pane" id="tab_billing" style="background-color: #fffffff;">
+        <app-billing *ngIf="showBillingInfo" [uToken]="_u_token"></app-billing>
+      </div>
+      <div class="tab-pane" id="tab_bank_account" style="background-color: #ffffff;">
+        <app-funding-sources *ngIf="showBankAccounts" [objMerchant]="merchantObject"></app-funding-sources>
+      </div>
+      <div class="tab-pane" id="tab_transactions" style="background-color: #ffffff;">
+        <app-send-checks *ngIf="showListTransactions" [merchantObject]="merchantObject"></app-send-checks>     
+      </div>
+      <div class="tab-pane" id="tab_notes" style="background-color: #ffffff;">
+        <form  name="form" (ngSubmit)="f.form.valid && addNotes()" #f="ngForm">
+               <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 margin-vertical">
+            <div class="col-lg-10 col-md-10 col-sm-8 col-xs-12">
+              <pre *ngIf="merchantObject.note" id="wrapp_notes" style="max-height: 300px; overflow-y: scroll;white-space: pre-wrap;       /* Since CSS 2.1 */
+                white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */ white-space: -pre-wrap;      /* Opera 4-6 */
+                white-space: -o-pre-wrap;    /* Opera 7 */ word-wrap: break-word;" 
+                class="ng-pristine ng-untouched ng-valid ng-binding " [innerHTML]="merchantObject.note"></pre>
+              <textarea id="notes" class="form-control ng-valid  ng-dirty ng-valid-parse ng-touched" 
+                        style="min-height: 150px;" required name="textNote" [(ngModel)]="note.textNote" #type="ngModel">                          
+              </textarea>
+              <div *ngIf="!note.valid && (note.dirty || note.touched)" 
+                    class="help-block form-text with-errors form-control-feedback">Note is required</div>
+            </div>
+          </div>  
+          <br>
+          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 margin-vertical">
+            <div class="col-lg-10 col-md-10 col-sm-8 col-xs-12">
+              <button [disabled]="loading || !f.form.valid" class="btn btn-primary btn-rounded" type="submit">
+                Add Note
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="tab-pane" id="tab_events_logs">
+        <h6 class="element-header">Events and Logs</h6> 
+        <div class="table-responsive">
+          <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+            <div class="row">
+              <div class="col-sm-12">
+                <div id="dataTable1_filter" class="dataTables_filter">
+                  <label>
+                    Search:
+                    <input type="search" class="form-control form-control-sm" placeholder="Search" 
+                           [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel" 
+                           (search)="getEventAndLogs(null)" (keyup)="getEventAndLogs(null)">
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-12">
+                <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable sendChecks responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+                  <thead>
+                    <tr role="row">
+                      <th scope="col">Event</th>
+                      <th scope="col">IP</th>
+                      <th scope="col">Method</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">URI</th>
+                      <th scope="col">                      
+                        <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, getEventAndLogs(null))">Date</a>
+                        <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                        <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                      </th>
+                      <th scope="col">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr role="row" *ngFor="let objLog of objMerchantProfileComp.lstLogs" >
+                      <td data-title="Event">{{objLog.event}}</td>
+                      <td data-title="IP" scope="row">{{objLog.ip}}</td>
+                      <td data-title="Method">{{objLog.method}}</td>
+                      <td data-title="Status">{{objLog.status}}</td> 
+                      <td data-title="URI">{{objLog.uri}}</td>
+                      <td data-title="Created at">{{userService.getDateFormat(objLog.created_at)}}</td>
+                      <td data-title="Action">
+                        <button title="View Full Log" class="btn btn-primary btn-sm btn-rounded btn-rounded-margin" type="button" 
+                                (click)="viewFullLog(objLog, templateViewFullLog)">
+                          <i class="fa fa-eye"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+              </div>
+            </div>
+            <div *ngIf="!objMerchantProfileComp.lstLogs.length" class="ssg-nothing-found">
+              <div class="icon-w">
+                <i class="os-icon os-icon-eye-off"></i>
+              </div>
+              <span>No logs were found...</span>
+            </div>
+            <div class="row">
+              <div class="col-sm-12 col-md-12">
+                <div *ngIf="objMerchantProfileComp.lstLogs.length" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+                  <div class="showentries">Show entries</div>
+                  <ng-pagination 
+                    [position]="'left'" 
+                    [pageSize]="paginationService.pageSize"                     
+                    [itemsCount]="paginationService.itemsCount" 
+                    (getPageData)="getEventAndLogs($event)">                      
+                  </ng-pagination>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <br>
+        <br>
+        <!--  -----------History of Status changes------------------------>
+        <h6 class="element-header">History of Status changes</h6>
+        <div class="table-responsive">
+          <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+<!--            <div class="row">
+              <div class="col-sm-12">
+                <div id="dataTable1_filter" class="dataTables_filter">
+                  <label>
+                    Search:
+                    <input type="search" class="form-control form-control-sm" placeholder="Search" 
+                           [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel" 
+                           (search)="getStatusLogs(null)" (keyup)="getStatusLogs(null)">
+                  </label>
+                </div>
+              </div>
+            </div>-->
+            <div class="row">
+              <div class="col-sm-12">
+                <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable sendChecks responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+                  <thead>
+                    <tr role="row">
+                      <th scope="col">Current</th>
+                      <th scope="col">Previous</th>
+                      <th scope="col">Note</th>
+                      <th scope="col">                      
+                        <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, getStatusLogs(null))">Date</a>
+                        <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                        <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr role="row" *ngFor="let objLogStatus of objMerchantProfileComp.lstStatusLogs" >
+                      <td data-title="Current">{{objLogStatus.current}}</td>
+                      <td data-title="Previous" scope="row">{{objLogStatus.previous}}</td>
+                      <td data-title="Note">{{objLogStatus.note}}</td>
+                      <td data-title="Created at">{{userService.getDateFormat(objLogStatus.created_at)}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+              </div>
+            </div>
+            <div *ngIf="!objMerchantProfileComp.lstStatusLogs.length" class="ssg-nothing-found">
+              <div class="icon-w">
+                <i class="os-icon os-icon-eye-off"></i>
+              </div>
+              <span>No Status changes were found...</span>
+            </div>
+<!--            <div class="row">
+              <div class="col-sm-12 col-md-12">
+                <div *ngIf="objMerchantProfileComp.lstStatusLogs.length" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+                  <div class="showentries">Show entries</div>
+                  <ng-pagination 
+                    [position]="'left'" 
+                    [pageSize]="paginationService.pageSize"                     
+                    [itemsCount]="paginationService.itemsCount" 
+                    (getPageData)="getStatusLogs($event)">                      
+                  </ng-pagination>
+                </div>
+              </div>
+            </div>-->
+          </div>
+        </div>
+        <br>
+        <br>
+        <!--  -----------History of Labels changes------------------------>
+        <h6 class="element-header">History of Label changes</h6>
+        <div class="table-responsive">
+          <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+
+            <div class="row">
+              <div class="col-sm-12">
+                <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable sendChecks responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+                  <thead>
+                    <tr role="row">
+                      <th scope="col">Current</th>
+                      <th scope="col">Previous</th>
+                      <th scope="col">Note</th>
+                      <th scope="col">                      
+                        <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, getLabelLogs(null))">Date</a>
+                        <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                        <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr role="row" *ngFor="let objLogLabel of objMerchantProfileComp.lstLabelLogs" >
+                      <td data-title="Current">{{objLogLabel.current}}</td>
+                      <td data-title="Previous" scope="row">{{objLogLabel.previous}}</td>
+                      <td data-title="Note">{{objLogLabel.note}}</td>
+                      <td data-title="Created at">{{userService.getDateFormat(objLogLabel.created_at)}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+              </div>
+            </div>
+            <div *ngIf="!objMerchantProfileComp.lstLabelLogs.length" class="ssg-nothing-found">
+              <div class="icon-w">
+                <i class="os-icon os-icon-eye-off"></i>
+              </div>
+              <span>No Label changes were found...</span>
+            </div>
+<!--            <div class="row">
+              <div class="col-sm-12 col-md-12">
+                <div *ngIf="objMerchantProfileComp.lstLabelLogs.length" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+                  <div class="showentries">Show entries</div>
+                  <ng-pagination 
+                    [position]="'left'" 
+                    [pageSize]="paginationService.pageSize"                     
+                    [itemsCount]="paginationService.itemsCount" 
+                    (getPageData)="getLabelLogs($event)">                      
+                  </ng-pagination>
+                </div>
+              </div>
+            </div>-->
+          </div>
+        </div>
+        <br>
+        <br>
+        <!--  -----------History of Emails changes------------------------>
+        <h6 class="element-header">History of Email changes</h6>
+        <div class="table-responsive">
+          <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+
+            <div class="row">
+              <div class="col-sm-12">
+                <table id="dataTable1" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+                  <thead>
+                    <tr role="row">                  
+                      <th scope="col">Current</th>
+                      <th scope="col">Previous</th>
+                      <th scope="col">Note</th>
+                      <th scope="col">Updated At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!--<tr role="row">-->
+                    <tr role="row" *ngFor="let email of userEmailHistoryList">
+                      <td data-title="Current" scope="row">{{email.current}}</td>
+                      <td data-title="Previous">{{email.previous}}</td>
+                      <td data-title="Note">{{email.note}}</td>              
+                      <td data-title="Updated At">{{userService.getDateFormat(email.created_at)}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+              </div>
+            </div>
+            <div *ngIf="!userEmailHistoryList.length" class="ssg-nothing-found">
+              <div class="icon-w">
+                <i class="os-icon os-icon-eye-off"></i>
+              </div>
+              <span>No Email changes were found...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane" id="tab_failed_payments">
+        <app-failed-payment *ngIf="showListFailedPayments" [merchantObject]="merchantObject"></app-failed-payment>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<ng-template #templateViewFullLog let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">View Log</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <pre style="word-spacing: normal;word-break: break-all;white-space: pre-wrap;">{{objMerchantProfileComp.objViewFullLog | json}}</pre>
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #templateListSame let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Same {{typeSame}}</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <table width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+        <thead>
+          <tr role="row">
+            <th scope="col">Name / Email</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Role</th>
+            <th scope="col">Status</th>
+            <th scope="col">Created</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr role="row" *ngFor="let sameList of listSameInModal">
+            <td data-title="Name" scope="row">
+              {{sameList.name || '&nbsp;'}}<br>
+              {{sameList.email || '&nbsp;'}}
+            </td>
+            <td data-title="Phone"><span style="white-space: pre;">{{sameList.phone || '&nbsp;' | phone}}</span></td>
+            <td data-title="Role">{{sameList.role || '&nbsp;'}}</td>
+            <td data-title="Status">{{sameList.status || '&nbsp;'}}</td>
+            <td data-title="Created">
+              {{userService.getDateFormat(sameList.created_at)}}
+            </td>
+            <td data-title="Action">
+              <a href="javascript:void(0);" (click)="closeModal(); userService.ghostLogin(sameFingerprint.u_token)" title="Ghost Login" 
+                 class="action-gost-login" *ngIf="sameList.dwl_token">
+                <i class="os-icon os-icon-user-male-circle"></i>
+              </a>
+              <a href="/users/{{sameList.dwl_token}}/{{sameList.u_token}}" style="margin-left: 8px;" title="Edit" 
+                 class="action-edit-merchant" *ngIf="sameList.dwl_token">
+                <i class="picons-thin-icon-thin-0001_compose_write_pencil_new"></i>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #viewInvoiceDetail let-c="close" let-d="dismiss" let-create="addFundSources">
+  <div class="modal-header">
+    <h4 class="modal-title">View Invoice Details</h4>
+    <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+            <span aria-hidden="true">&times;</span>
+    </button>
+  </div> 
+  <div class="modal-body">     
+    <div class="modal-body">   
+
+      <div class="row" style="position: relative;">
+        <hr>
+        <div class="col-sm-12">
+          <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+            <thead>
+              <tr role="row">
+                <th scope="col">
+                  Status
+                </th>
+                <th scope="col">
+                  Type
+                </th>
+                <th scope="col">
+                  Amount
+                </th>
+                <th scope="col">
+                  Description
+                </th>
+                <th scope="col">
+                  Created
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr role="row" *ngFor="let billingInfo of listInvoiceDeatils">
+                  <td data-title="Status" scope="row">
+                  {{billingInfo.status || '&nbsp;'}}
+                </td>
+                <td data-title="Type">
+                  {{billingInfo.type || '&nbsp;'}}
+                </td>
+                <td data-title="Amount">
+                  {{billingInfo.amount | currency:'' :'symbol' || '&nbsp;'}}
+                </td>
+                <td data-title="Description">
+                  {{billingInfo.description || '&nbsp;'}}
+                </td>
+                <td data-title="Created">
+                  {{userService.getDateFormat(billingInfo.created_at)}}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="c('Close click')">Close</button>
+  </div>
+</ng-template>
+
+<ng-template #merchantObjectIpAddressInfo let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">IP Address Info</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">      
+      <table class="table table-striped table-hover update-company-remainings">
+        <tbody>
+          <tr>
+            <td><b>IP Risk</b></td>
+            <td>{{merchantObject.ip_risk}}%</td>
+          </tr>
+          <tr *ngIf="merchantObject.geo_ip.country">
+            <td><b>Country</b></td>
+            <td>{{merchantObject.geo_ip.country.names.en || '' }} ({{merchantObject.geo_ip.country.iso_code || ''}})</td>
+          </tr>
+          <tr *ngIf="merchantObject.geo_ip.city">
+            <td><b>City</b></td>
+            <td>{{merchantObject.geo_ip.city.names.en || ''}}</td>
+          </tr>
+          <tr>
+            <td><b>State</b></td>
+            <td>
+              <span *ngIf="merchantObject.geo_ip.subdivisions">
+                {{merchantObject.geo_ip.subdivisions['0'].names.en || ''}}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td><b>Zip</b></td>
+            <td>
+              <span *ngIf="merchantObject.geo_ip.postal">
+              {{merchantObject.geo_ip.postal.code || ''}}
+              </span>
+              <span *ngIf="!merchantObject.geo_ip.postal">N/A</span>
+            </td>
+          </tr>
+<!--                      <tr>
+            <td><b>As</b></td>
+            <td>{{merchantObject.geo_ip.as || ''}}</td>
+          </tr>-->
+          <tr>
+            <td><b>ISP</b></td>
+            <td>{{merchantObject.geo_ip.traits.isp || ''}}</td>
+          </tr>
+          <tr>
+            <td><b>Org</b></td>
+            <td>{{merchantObject.geo_ip.traits.organization || ''}}</td>
+          </tr>
+          <tr>
+            <td><b>Time Zone</b></td>
+            <td>{{merchantObject.geo_ip.location.time_zone || ''}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Close</button>
+    </div> 
+  </div>
+</ng-template>
+
+<ng-template #merchantObjectMinfraudInsightsInfo let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Minfraud Insights Info</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="row" *ngIf="merchantObject.dwl_customer.mf_insights.error">
+        {{merchantObject.dwl_customer.mf_insights.error}}
+      </div>
+      <div class="row" *ngIf="merchantObject.dwl_customer.mf_insights.ip_address">
+        <div class="col-sm-6 col-xs-12 col-md-6 col-lg-6">
+          <label class="text-center" style="width: 100%;font-size: 20px;color: black;">riskScore</label>
+          <round-progress [current]="merchantObject.dwl_customer.mf_insights.risk_score" [max]="100" [color]="'#e61f33'"
+            [background]="'#eaeaea'"
+            [radius]="125"
+            [stroke]="20"
+            [semicircle]="true"
+            [rounded]="true"
+            [clockwise]="true"
+            [responsive]="true"
+            [duration]="800"
+            [animation]="'easeInOutQuart'"
+            [animationDelay]="0">
+          </round-progress>
+          <label class="pull-left" style="font-size: 14px;position: relative;left: 10px;">0</label>
+          <label class="text-center" style="position: absolute; left: 0px; width: 100%;font-size: 30px;bottom: 10px;color: black;">
+            {{merchantObject.dwl_customer.mf_insights.risk_score}}
+          </label>
+          <label class="pull-right" style="font-size: 14px;position: relative;">100</label>
+        </div>
+        <div class="col-sm-6 col-xs-12 col-md-6 col-lg-6" style="margin-bottom: 20px">
+          <label class="text-center" style="width: 100%;font-size: 20px;color: black;">IP Risk Score</label>
+          <round-progress [current]="merchantObject.dwl_customer.mf_insights.ip_address.risk" [max]="100" [color]="'#ec9500'"
+            [background]="'#eaeaea'"
+            [radius]="125"
+            [stroke]="20"
+            [semicircle]="true"
+            [rounded]="true"
+            [clockwise]="true"
+            [responsive]="true"
+            [duration]="800"
+            [animation]="'easeInOutQuart'"
+            [animationDelay]="0">
+          </round-progress>
+          <label class="pull-left" style="font-size: 14px;position: relative;left: 10px;">0</label>
+          <label class="text-center" style="position: absolute; left: 0px; width: 100%;font-size: 30px;bottom: 10px;color: black;">
+            {{merchantObject.dwl_customer.mf_insights.ip_address.risk}}
+          </label>
+          <label class="pull-right" style="font-size: 14px;position: relative;">100</label>
+        </div>
+        <div class="clear-block"></div>
+        <hr style="width: 100%;border-top: 1px solid rgb(0, 0, 0);">
+        <div class="clear-block"></div>
+        <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6">
+          <div class="element-wrapper" style="padding-bottom: 10px;">
+            <h6 class="element-header">IP Address Cheks</h6>
+            <div class="element-box" style="padding: 0.5rem 0.5rem;">
+              <div class="table-responsive">
+                <table class="table table-lightborder">
+                  <tbody>
+                    <tr>
+                      <td>High risk country</td>
+                      <td>
+                        <i class="icon-feather-check-circle" style="color: #00d000;font-size: 25px;"
+                           *ngIf="merchantObject.dwl_customer.mf_insights.ip_address.country && !merchantObject.dwl_customer.mf_insights.ip_address.country.is_high_risk"></i>
+                        {{merchantObject.dwl_customer.mf_insights.ip_address.country && merchantObject.dwl_customer.mf_insights.ip_address.country.is_high_risk ? 'Yes' : 'No'}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Time zone</td>
+                      <td>
+                        <span *ngIf="merchantObject.dwl_customer.mf_insights.ip_address.location.time_zone">
+                          {{merchantObject.dwl_customer.mf_insights.ip_address.location.time_zone}}
+                        </span>
+                        <span *ngIf="!merchantObject.dwl_customer.mf_insights.ip_address.location.time_zone">N/A</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>City</td>
+                      <td>
+                        <span *ngIf="merchantObject.dwl_customer.mf_insights.ip_address.city">
+                          {{merchantObject.dwl_customer.mf_insights.ip_address.city.names.en}}
+                        </span>
+                        <span *ngIf="!merchantObject.dwl_customer.mf_insights.ip_address.city">N/A</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Country</td>
+                      <td>{{merchantObject.dwl_customer.mf_insights.ip_address.country.names.en}}</td>
+                    </tr>
+                    <tr>
+                      <td>User type</td>
+                      <td class="text-capitalize">{{merchantObject.dwl_customer.mf_insights.ip_address.traits.user_type}}</td>
+                    </tr>
+                    <tr>
+                      <td>Local date/time of IP address</td>
+                      <td>{{userService.getDateFormat(merchantObject.dwl_customer.mf_insights.ip_address.location.local_time)}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6" *ngIf="merchantObject.dwl_customer.mf_insights.billing_address">
+          <div class="element-wrapper" style="padding-bottom: 10px;">
+            <h6 class="element-header">Billing Address Checks</h6>
+            <div class="element-box" style="padding: 0.5rem 0.5rem;">
+              <div class="table-responsive">
+                <table class="table table-lightborder">
+                  <tbody>
+                    <tr>
+                      <td>Billing postal code is in the billing city</td>
+                      <td>
+                        <i class="icon-feather-check-circle" style="color: #00d000;font-size: 25px;"
+                           *ngIf="merchantObject.dwl_customer.mf_insights.billing_address.is_postal_in_city"></i>
+                        {{merchantObject.dwl_customer.mf_insights.billing_address.is_postal_in_city ? 'Yes' : 'No'}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Billing postal code longitude</td>
+                      <td>{{merchantObject.dwl_customer.mf_insights.billing_address.longitude}}</td>
+                    </tr>
+                    <tr>
+                      <td>Billing postal code latitude</td>
+                      <td>{{merchantObject.dwl_customer.mf_insights.billing_address.latitude}}</td>
+                    </tr>
+                    <tr>
+                      <td>Billing postal code to IP address distance</td>
+                      <td>{{merchantObject.dwl_customer.mf_insights.billing_address.distance_to_ip_location}} km</td>
+                    </tr>
+                    <tr>
+                      <td>Billing address is in IP country</td>
+                      <td class="text-capitalize">
+                        <i class="icon-feather-check-circle" style="color: #00d000;font-size: 25px;"
+                           *ngIf="merchantObject.dwl_customer.mf_insights.billing_address.is_in_ip_country"></i>
+                        {{merchantObject.dwl_customer.mf_insights.billing_address.is_in_ip_country ? 'Yes' : 'No'}}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6">
+          <div class="element-wrapper" style="padding-bottom: 10px;">
+            <h6 class="element-header">Email Checks</h6>
+            <div class="element-box" style="padding: 0.5rem 0.5rem;">
+              <div class="table-responsive">
+                <table class="table table-lightborder">
+                  <tbody>
+                    <tr>
+                      <td>Free email</td>
+                      <td>
+                        <i class="icon-feather-check-circle" style="color: #00d000;font-size: 25px;"
+                           *ngIf="!merchantObject.dwl_customer.mf_insights.email.is_free"></i>
+                        {{merchantObject.dwl_customer.mf_insights.email.is_free ? 'Yes' : 'No'}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Carder email</td>
+                      <td>
+                        <i class="icon-feather-check-circle" style="color: #00d000;font-size: 25px;"
+                           *ngIf="merchantObject.dwl_customer.mf_insights.email && !merchantObject.dwl_customer.mf_insights.email.is_high_risk"></i>
+                        {{merchantObject.dwl_customer.mf_insights.email && merchantObject.dwl_customer.mf_insights.email.is_high_risk ? 'Yes' : 'No'}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Email first seen</td>
+                      <td>{{userService.getDateFormat(merchantObject.dwl_customer.mf_insights.email.first_seen)}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--<pre>{{merchantObject.dwl_customer.mf_insights | json}}</pre>-->
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Close</button>
+    </div> 
+  </div>
+</ng-template>
+<ng-template #replacePrimaryPlan let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Replace Primary Plan</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <form name="form" #f="ngForm">
+      <div class="modal-body">
+        <select [(ngModel)]="newPrimaryPlan" name="newPrimaryPlanText" #newPrimaryPlanText="ngModel" class="form-control"
+          (change)="getPlanDetailsSettings()" style="width: inherit; min-width: 115px; display: inline-block;">
+          <option value="">Select Plan</option>
+          <option *ngFor="let viewPlan of listPlans" value="{{viewPlan.p_token}}">
+            {{viewPlan.name}} ({{viewPlan.amount | currency:'':'symbol'}})
+        </option>
+      </select>
+      <table class="table table-striped table-hover update-company-remainings">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr>
+            <td><b>Receive</b></td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td>Quantity:</td>
+            <td>
+              {{newPlanDetails.receive.num || 0 }}
+            </td>
+          </tr>
+          <tr>
+            <td>Free Qty:</td>
+            <td>
+              {{newPlanDetails.receive.num_free || 0}}
+            </td>
+          </tr>
+          <tr>
+            <td>Overage:</td>
+            <td>
+              <span *ngIf="newPlanDetails.receive.over_pct">{{newPlanDetails.receive.over || 0}}%</span>
+              <span *ngIf="!newPlanDetails.receive.over_pct">{{newPlanDetails.receive.over || 0 | currency:'':'symbol'}}</span><br>
+            </td>
+          </tr>
+          <tr>
+            <td>Request check fee:</td>
+            <td>
+              <span *ngIf="newPlanDetails.receive.verify_pct">{{newPlanDetails.receive.verify || 0}}%</span>
+              <span *ngIf="!newPlanDetails.receive.verify_pct">{{newPlanDetails.receive.verify || 0 | currency:'':'symbol'}}</span>
+            </td>
+          </tr>
+
+          <tr>
+            <td><b>Send</b></td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td>Quantity:</td>
+            <td>
+              {{newPlanDetails.send.num || 0 }}
+            </td>
+          </tr>
+          <tr>
+            <td>Free Qty:</td>
+            <td>
+              {{newPlanDetails.send.num_free || 0}}
+            </td>
+          </tr>
+          <tr>
+            <td>Overage:</td>
+            <td>
+              <span *ngIf="newPlanDetails.send.over_pct">{{newPlanDetails.send.over || 0}}%</span>
+              <span *ngIf="!newPlanDetails.send.over_pct">{{newPlanDetails.send.over || 0 | currency:'':'symbol'}}</span><br>
+            </td>
+          </tr>
+          <tr>
+            <td><b>Months</b></td>
+            <td>{{newPlanDetails.months || 0 }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')" [disabled]="isLoading">Cancel</button>
+      <button [disabled]="isLoading" class="slick-next slick-arrow" type="submit" (click)="updateMerchandPlan()">Update</button>
+    </div> 
+  </form>
+</div>
+</ng-template>
+
+<ng-template #editLimits let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Update Company Remaining</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form name="form" #f="ngForm">
+      <div class="modal-body">
+        <table class="table table-striped table-hover update-company-remainings">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Base</th>
+              <th>Remaining</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Receive</b></td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Free Qty:</td>
+              <td>
+                {{primarySubscription.base.receive.num_free || 0}}
+              </td>
+              <td>
+                <input class="form-control" type="text" [(ngModel)]="primarySubscription.remaining.receive.num_free" name="receive_num_free" #num_free="ngModel">
+              </td>
+            </tr>
+            <tr>
+              <td>Rate</td>
+              <td>
+                {{primarySubscription.base.receive.verify_pct == 0 ? '$': ''}}
+                {{primarySubscription.base.receive.verify || 0 }}
+                {{primarySubscription.base.receive.verify_pct == 1 ? '%': ''}}
+              </td>
+              <td>
+                <input class="form-control" type="text" [(ngModel)]="primarySubscription.remaining.receive.verify" 
+                       name="receive_verify" #verify="ngModel">
+              </td>
+            </tr>
+            <tr>
+              <td>Monthly fee</td>
+              <td>
+                {{primarySubscription.base.amount || 0 | currency:'':'symbol' }}
+              </td>
+              <td>
+                <input class="form-control" type="text" [(ngModel)]="primarySubscription.remaining.amount" 
+                       name="amount" #amount="ngModel">
+              </td>
+            </tr>
+            <tr>
+              <td><b>Send</b></td>
+              <td>&nbsp;</td>
+              <td>&nbsp;</td>
+            </tr>
+            <tr>
+              <td>Quantity:</td>
+              <td>
+                {{primarySubscription.base.send.num || 0 }}
+              </td>
+              <td>
+                <input class="form-control" type="text" [(ngModel)]="primarySubscription.remaining.send.num" name="send_num" #num="ngModel">
+              </td>
+            </tr>
+            <tr>
+              <td>Free Qty:</td>
+              <td>
+                {{primarySubscription.base.send.num_free || 0}}
+              </td>
+              <td>
+                <input class="form-control" type="text" [(ngModel)]="primarySubscription.remaining.send.num_free" name="send_num_free" #num_free="ngModel">
+              </td>
+            </tr>
+            <tr>
+              <td><b>Next Day Funding</b></td>
+              <td><input type="checkbox" [(ngModel)]="primarySubscription.remaining.next_day" name="next_day" #next_day="ngModel"></td>
+              <td>
+                <span *ngIf="!primarySubscription.remaining.next_day">Disable</span>
+                <span *ngIf="primarySubscription.remaining.next_day">Enable</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Cancel</button>
+        <button [disabled]="loading || !f.form.valid" class="slick-next slick-arrow" type="submit" (click)="updateLimits()">Update</button> 
+      </div> 
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #editLimitsProfile let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Update Merchant</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form name="form" #f="ngForm">
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6">
+            <h5>Limits</h5>
+            <table class="table table-striped table-hover update-company-remainings">
+              <thead>
+              <tr>
+                <th>Type</th>
+                <th>Total</th>
+                <th>Limit</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><b>Receive</b></td>
+                <td><input type="checkbox" [(ngModel)]="merchantObject.settings.receive_limit.Enabled" name="receive_limit_enabled" #enabled="ngModel"></td>
+                <td>
+                  <span *ngIf="!merchantObject.settings.receive_limit.Enabled"><b>Disable</b></span>
+                  <span *ngIf="merchantObject.settings.receive_limit.Enabled"><b>Enable</b></span>
+                </td>
+              </tr>
+              <tr>
+                <td>Funding:</td>
+                <td class="form-inline">
+                  <select class="form-control form-control-sm rounded mb-2 mr-sm-2 mb-sm-0" (ngModelChange)="updateReceiveFundingType( $event )"
+                          [(ngModel)]="merchantObject.settings.receive_limit.funding_type" name="funding_type" #funding_type="ngModel">
+                    <option value="delay">Delay</option>
+                    <option value="standard">Standard</option>
+                    <option value="next_day">Next Day</option>
+                  </select>
+                  <select [(ngModel)]="merchantObject.settings.receive_limit.delayed" name="receive_limit_delayed" #delayed="ngModel"
+                         class="form-control form-control-sm rounded  mb-2 mr-sm-2 mb-sm-0" style="max-width: 70px;"
+                          *ngIf="merchantObject.settings.receive_limit.funding_type == 'delay' || merchantObject.settings.receive_limit.delayed > 0">
+                    <option *ngFor="let number of [1,2,3,4,5]" value="{{number}}">{{number}}</option>
+                  </select>
+<!--                  <button class="btn btn-primary btn-rounded" (click)="updateReceiveFundingType()">-->
+<!--                  <span *ngIf="merchantObject.settings.receive_limit.next_day == 1">-->
+<!--                    Standard-->
+<!--                  </span>-->
+<!--                    <span *ngIf="!merchantObject.settings.receive_limit.next_day || merchantObject.settings.receive_limit.next_day == 0">-->
+<!--                    Next Day-->
+<!--                  </span>-->
+<!--                  </button>-->
+                </td>
+                <td>
+                  <span *ngIf="!merchantObject.settings.receive_limit.delayed || merchantObject.settings.receive_limit.delayed == 0">
+                    {{merchantObject.settings.receive_limit.next_day == 1 ? 'Next Day' : 'Standard' }}
+                  </span>
+                  <span *ngIf="merchantObject.settings.receive_limit.delayed > 0">
+                    {{merchantObject.settings.receive_limit.delayed}} day delay
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td>Daily:</td>
+                <td>
+                  {{merchantObject.settings.receive_limit.Daily || 0 | currency:'':'symbol'}}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.receive_limit.Daily" name="receive_limit_daily" #daily="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td>Monthly:</td>
+                <td>
+                  {{merchantObject.settings.receive_limit.Monthly || 0 | currency:'':'symbol'}}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.receive_limit.Monthly" name="receive_limit_monthly" #monthly="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td>Invoices:</td>
+                <td>
+                  {{merchantObject.settings.receive_limit.Invoices || 0 | currency:'':'symbol'}}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.receive_limit.Invoices" name="receive_limit_invoices" #invoices="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td><b>Send</b></td>
+                <td><input type="checkbox" [(ngModel)]="merchantObject.settings.send_limit.Enabled" name="send_limit_enabled" #enabled="ngModel"></td>
+                <td>
+                  <span *ngIf="!merchantObject.settings.send_limit.Enabled"><b>Disable</b></span>
+                  <span *ngIf="merchantObject.settings.send_limit.Enabled"><b>Enable</b></span>
+                </td>
+              </tr>
+              <tr>
+                <td>Funding:</td>
+                <td class="form-inline">
+                  <select class="form-control form-control-sm rounded mb-2 mr-sm-2 mb-sm-0" (ngModelChange)="updateSendFundingType( $event )"
+                          [(ngModel)]="merchantObject.settings.send_limit.funding_type" name="funding_type" #funding_type="ngModel">
+                    <option value="delay">Delay</option>
+                    <option value="standard">Standard</option>
+                    <option value="next_day">Next Day</option>
+                  </select>
+                  <select [(ngModel)]="merchantObject.settings.send_limit.delayed" name="send_limit_delayed" #delayed="ngModel"
+                          class="form-control form-control-sm rounded  mb-2 mr-sm-2 mb-sm-0" style="max-width: 70px;"
+                          *ngIf="merchantObject.settings.send_limit.funding_type == 'delay' || merchantObject.settings.send_limit.delayed > 0">
+                    <option *ngFor="let number of [1,2,3,4,5]" value="{{number}}">{{number}}</option>
+                  </select>
+<!--                  <button class="btn btn-primary btn-rounded" (click)="updateSendFundingType()">-->
+<!--                  <span *ngIf="merchantObject.settings.send_limit.next_day == 1">-->
+<!--                    Standard-->
+<!--                  </span>-->
+<!--                    <span *ngIf="!merchantObject.settings.send_limit.next_day || merchantObject.settings.send_limit.next_day == 0">-->
+<!--                    Next Day-->
+<!--                  </span>-->
+<!--                  </button>-->
+                </td>
+                <td>
+<!--                  {{merchantObject.settings.send_limit.next_day == 1 ? 'Next Day' : 'Standard' }}-->
+                  <span *ngIf="!merchantObject.settings.send_limit.delayed || merchantObject.settings.send_limit.delayed == 0">
+                    {{merchantObject.settings.send_limit.next_day == 1 ? 'Next Day' : 'Standard' }}
+                  </span>
+                  <span *ngIf="merchantObject.settings.send_limit.delayed > 0">
+                    {{merchantObject.settings.send_limit.delayed}} day delay
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td>Daily:</td>
+                <td>
+                  {{merchantObject.settings.send_limit.Daily || 0 | currency:'':'symbol'}}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.send_limit.Daily" name="send_limit_daily" #daily="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td>Monthly:</td>
+                <td>
+                  {{merchantObject.settings.send_limit.Monthly || 0 | currency:'':'symbol'}}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.send_limit.Monthly" name="send_limit_monthly" #monthly="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td>Checks:</td>
+                <td>
+                  {{merchantObject.settings.send_limit.Checks || 0 | currency:'':'symbol'}}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.send_limit.Checks" name="send_limit_checks" #checks="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td><b>Payment Page</b></td>
+                <td><input type="checkbox" [(ngModel)]="merchantObject.settings.billing_link" name="billing_link" #billing_link="ngModel"></td>
+                <td>
+                  <span *ngIf="!merchantObject.settings.billing_link"><b>Disable</b></span>
+                  <span *ngIf="merchantObject.settings.billing_link"><b>Enable</b></span>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-sm-12 col-xs-12 col-md-6 col-lg-6">
+            <h5>Remainings</h5>
+            <table class="table table-striped table-hover update-company-remainings" *ngIf="!subscriptionList.length">
+              <thead>
+              <tr>
+                <th>Type</th>
+                <th>Base</th>
+                <th>Remaining</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><b>Receive</b></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td>Free Checks:</td>
+                <td>
+                  {{merchantObject.settings.free_receive || 0}}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.free_receive" name="free_receive" #free_receive="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td><b>Send</b></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td>Free Checks:</td>
+                <td>
+                  {{merchantObject.settings.free_checks || 0}}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.free_checks" name="free_checks" #free_checks="ngModel">
+                </td>
+              </tr>
+              <!--              <tr>
+                              <td><b>Next Day Funding</b></td>
+                              <td><input type="checkbox" [(ngModel)]="merchantObject.settings.next_day" name="next_day" #next_day="ngModel"></td>
+                              <td>
+                                <span *ngIf="!merchantObject.settings.next_day">Disable</span>
+                                <span *ngIf="merchantObject.settings.next_day">Enable</span>
+                              </td>
+                            </tr>-->
+              </tbody>
+            </table>
+            <table class="table table-striped table-hover update-company-remainings" *ngIf="subscriptionList.length">
+              <thead>
+              <tr>
+                <th>Type</th>
+                <th>Base</th>
+                <th>Remaining</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td><b>Receive</b></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td>Free Qty:</td>
+                <td>
+                  {{merchantObject.settings.free_receive || 0}}
+                </td>
+                <td>
+                  <!--<input class="form-control" type="text" [(ngModel)]="primarySubscription.remaining.receive.num_free" name="receive_num_free" #num_free="ngModel">-->
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.free_receive" name="free_receive" #free_receive="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td>Rate</td>
+                <td>
+                  {{primarySubscription.base.receive.verify_pct == 0 ? '$': ''}}
+                  {{primarySubscription.base.receive.verify || 0 }}
+                  {{primarySubscription.base.receive.verify_pct == 1 ? '%': ''}}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="primarySubscription.remaining.receive.verify"
+                         name="receive_verify" #verify="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td>Transaction Fee</td>
+                <td>
+                  {{merchantObject.settings.receive_limit.transaction_fee || 0 | currency:'':'symbol'}}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.receive_limit.transaction_fee"
+                         name="transaction_fee" #transaction_fee="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td>Failed Payment Fee</td>
+                <td>
+                  {{merchantObject.settings.receive_limit.failed_fee || 10 | currency:'':'symbol'}}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.receive_limit.failed_fee"
+                         name="failed_fee" #failed_fee="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td>Monthly fee</td>
+                <td>
+                  {{primarySubscription.base.amount || 0 | currency:'':'symbol' }}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="primarySubscription.remaining.amount"
+                         name="amount" #amount="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td><b>Send</b></td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td>Quantity:</td>
+                <td>
+                  {{primarySubscription.base.send.num || 0 }}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="primarySubscription.remaining.send.num" name="send_num" #num="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td>Overage:</td>
+                <td>
+                  {{primarySubscription.base.send.over || 0 }}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="primarySubscription.remaining.send.over" name="send_over" #num="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td>Failed Payment Fee</td>
+                <td>
+                  {{merchantObject.settings.send_limit.failed_fee || 10 | currency:'':'symbol'}}
+                </td>
+                <td>
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.send_limit.failed_fee"
+                         name="failed_fee2" #failed_fee="ngModel">
+                </td>
+              </tr>
+              <tr>
+                <td>Free Qty:</td>
+                <td>
+                  <!--{{primarySubscription.base.send.num_free || 0}}-->
+                  {{merchantObject.settings.free_checks || 0}}
+                </td>
+                <td>
+                  <!--<input class="form-control" type="text" [(ngModel)]="primarySubscription.remaining.send.num_free" name="send_num_free" #num_free="ngModel">-->
+                  <input class="form-control" type="text" [(ngModel)]="merchantObject.settings.free_checks" name="free_checks" #free_checks="ngModel">
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Cancel</button>
+        <button [disabled]="loading || !f.form.valid" class="slick-next slick-arrow" type="submit" (click)="updateMerchantObject()">Update</button>
+
+      </div> 
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #editContactInfo let-c="close" let-d="dismiss" let-create="editContactInfo">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Update Profile Info</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!--<div class="modal-body">-->
+      <form name="form" #f="ngForm">
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !first_name.valid && (first_name.dirty || first_name.touched)}">
+                 <label for="">First Name</label>
+              <input class="form-control" placeholder="First Name" type="text" [(ngModel)]="modelUpdateInfo.first_name" 
+                     name="first_name" required #first_name="ngModel" [disabled]="!isUnver">
+                     <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!first_name.valid && (first_name.dirty || first_name.touched)">
+                     <span *ngIf="first_name.errors.required">
+                  First Namel is required
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !last_name.valid && (last_name.dirty || last_name.touched)}">
+                 <label for="">Last Name</label>
+              <input class="form-control" placeholder="Last Name" type="text" [(ngModel)]="modelUpdateInfo.last_name" 
+                     name="update_last_name" required #last_name="ngModel" [disabled]="!isUnver">
+                     <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!last_name.valid && (last_name.dirty || last_name.touched)">
+                     <span *ngIf="last_name.errors.required">
+                  Last Name is required
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !email.valid && (email.dirty || email.touched)}">
+                 <label for="">Email</label>
+              <input class="form-control" placeholder="Email" type="text" [(ngModel)]="modelUpdateInfo.email" 
+                     name="update_email" required #email="ngModel" [disabled]="true">
+                     <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!email.valid && (email.dirty || email.touched)">
+                     <span *ngIf="email.errors.required">
+                  Email is required
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !phone.valid && (phone.dirty || phone.touched)}">
+                 <label for="">Phone</label>
+              <input appNumbers class="form-control" placeholder="Phone" type="text" required name="updatePhone"
+                     [(ngModel)]="modelUpdateInfo.phone" 
+                     #phone="ngModel" [disabled]="true">
+              <div class="help-block form-text text-muted form-control-feedback" 
+                   *ngIf="!phone.valid && (phone.dirty || phone.touched)">
+                   <span *ngIf="phone.errors.required">
+                  Phone is required
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !address1.valid && (address1.dirty || address1.touched)}">
+                 <label for="">Address 1</label>
+              <input class="form-control" placeholder="Address 1" type="text" [(ngModel)]="modelUpdateInfo.address1" 
+                     name="update_adress" required #address1="ngModel">
+                     <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!address1.valid && (address1.dirty || address1.touched)">
+                     <span *ngIf="address1.errors.required">
+                  Adress is required
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !address2.valid && (address2.dirty || address2.touched)}">
+                 <label for="">Address 2</label>
+              <input class="form-control" placeholder="Address 2" type="text" [(ngModel)]="modelUpdateInfo.address2" 
+                     name="update_adress2" #address2="ngModel">
+            </div>
+          </div>            
+        </div>      
+
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !state.valid && (state.dirty || state.touched)}">
+                 <label for="">State</label>
+              <select style="width: 100%" id="state" [(ngModel)]="modelUpdateInfo.state" #state="ngModel"
+                      class="form-control" name="state">
+                <option *ngFor="let stateProvince of _stateService.arrStates" [value]="stateProvince.abbreviation">{{ stateProvince.name }}</option>
+              </select>
+              <div class="help-block form-text text-muted form-control-feedback" 
+                   *ngIf="state.errors && (state.dirty || state.touched)">
+                   <span *ngIf="state.errors.required">
+                  State is required
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !city.valid && (city.dirty || city.touched)}">
+                 <label for="">City</label>
+              <input appNumbers class="form-control" placeholder="City" type="text" 
+                     name="update_city" required [(ngModel)]="modelUpdateInfo.city" 
+                     #city="ngModel" [disabled]="isVer">
+                     <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!city.valid && (city.dirty || city.touched)">
+                     <span *ngIf="city.errors.required">
+                  City is required
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !postal_code.valid && (postal_code.dirty || postal_code.touched)}">
+                 <label for="">Zip</label>
+              <input appNumbers name="postal_code" class="form-control" placeholder="Zip" type="text" required
+                     [(ngModel)]="modelUpdateInfo.postal_code" 
+                     #postal_code="ngModel" [disabled]="isVer">
+                     <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!postal_code.valid && (postal_code.dirty || postal_code.touched)">
+                     <span *ngIf="postal_code.errors.required">
+                  ZIP is required
+                </span>
+              </div>
+            </div>        
+          </div>        
+        </div>  
+
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !business_name.valid && (business_name.dirty || business_name.touched)}" 
+                 *ngIf="modelUpdateInfo.type == 'business'">
+                 <label for="">Business Name</label>
+              <input appNumbers class="form-control" placeholder="Business Name" type="text" required name="updateBusinessName"
+                     [(ngModel)]="modelUpdateInfo.business_name" 
+                     #business_name="ngModel" [disabled]="true">
+              <div class="help-block form-text text-muted form-control-feedback" 
+                   *ngIf="!business_name.valid && (business_name.dirty || business_name.touched)">
+                   <span *ngIf="business_name.errors.required">
+                  Business Name is required
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !website.valid && (website.dirty || website.touched)}" 
+                 *ngIf="modelUpdateInfo.type == 'business'">
+                 <label for="">Website</label>
+              <input appNumbers class="form-control" placeholder="Website" type="text" name="updateWebsite"
+                     [(ngModel)]="modelUpdateInfo.website" #website="ngModel" >
+            </div>
+          </div>
+        </div>
+      </form>
+      <!--</div>-->
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+      <button [disabled]="isLoading || !f.form.valid" class="slick-next slick-arrow" type="submit" (click)="updateMerchantInfo()">Update</button>
+    </div>
+  </div>
+</ng-template>
+<ng-template #updateEmail let-c="close" let-d="dismiss" let-create="editContactInfo">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Update Email</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form name="form" #f="ngForm">
+        <div class="form-group" [ngClass]="{'has-error has-danger': !email.valid && (email.dirty || email.touched)}">
+          <label for="">Email</label>
+          <input class="form-control" placeholder="Email" type="text" [(ngModel)]="modelUpdateInfo.email" 
+                 name="update_email" required #email="ngModel">
+                 <div class="help-block form-text text-muted form-control-feedback" 
+                 *ngIf="!email.valid && (email.dirty || email.touched)">
+                 <span *ngIf="email.errors.required">
+              Email is required
+            </span>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+      <button [disabled]="isLoading || !f.form.valid" class="slick-next slick-arrow" type="submit" (click)="updateEmailMerchant()">Update</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #showFilePreview let-c="close" let-d="dismiss" let-create="editContactInfo">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">View File</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body text-center" style="margin-bottom: 30px;">
+      <!--<a [href]="objPreviewDocument" download="" *ngIf="isPreviewDocumentPDF">Download PDF</a>-->
+      <img [src]="objPreviewDocument" style="max-width: 815px;" *ngIf="!isPreviewDocumentPDF">
+      <object [data]="objPreviewDocument" type="application/pdf" width="100%" height="100%" *ngIf="isPreviewDocumentPDF"
+        frameborder="0" style="min-height: 600px;max-height: 1000px;"></object>
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Close</button>
+    </div>
+  </div>
+</ng-template>

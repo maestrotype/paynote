@@ -1,0 +1,171 @@
+
+<div class="element-wrapper"  *ngIf="userService.isMerchant() || userService.isCustomer()">
+  <h6 class="element-header">Billing</h6>
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+  <div class="element-box" *ngIf="isInvoice && subscriptionInfo">
+    <div class="pt-avatar-w subImg" style="border-radius: 0px;display: inline-block;margin-bottom: 10px;">
+      <i class="picons-thin-icon-thin-0100_to_do_list_reminder_done"></i>
+    </div>
+    <div class="form-desc" style="display: inline-block;">
+      <h3 class="post-title">{{subscriptionInfo.p_name}}</h3>
+      <div class="plan-price text-primary">
+        <span class="plan-price-symbol">$</span> 
+        <span class="plan-price-value ng-binding">{{subscriptionInfo.base.amount}}</span> 
+        <span class="plan-price-period">/month</span>
+      </div>
+      <p class="text-mutedd">Send Your First Paynote Free!</p>
+    </div>
+    <div class="controls-above-table settingsLimits">
+      <div class="row">
+        <div class="col-sm-6">
+          <label  style="font-size: 20px;" for="">Receive</label>
+          <div>
+            <ul>
+              <li>Receive <b>{{subscriptionInfo.base.receive.num}}</b> Paynotes/Month</li>
+              <li>
+                <span *ngIf="subscriptionInfo.base.receive.over_pct == 0">$</span>
+                <span *ngIf="subscriptionInfo.base.receive.over_pct == 1">%</span>
+                <span class="planOver">{{subscriptionInfo.base.receive.over}}</span>/check over
+              </li>
+              <li>
+                Request check fee <span class="planVerify">{{subscriptionInfo.base.receive.verify}}</span>
+                <span *ngIf="subscriptionInfo.base.receive.verify_pct == 0">$</span>
+                <span *ngIf="subscriptionInfo.base.receive.verify_pct == 1">%</span>
+              </li>
+              <li>
+                {{subscriptionInfo.base.receive.num_free}} Paynote Free
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <label style="font-size: 20px;">Send</label>
+          <div>
+            <ul>
+              <li>Send <b>{{subscriptionInfo.base.send.num}}</b> Paynotes/Month</li>
+              <li>      
+                <span *ngIf="subscriptionInfo.base.send.over_pct == 0">$</span>
+                <span *ngIf="subscriptionInfo.base.send.over_pct == 1">%</span>
+                <span class="planOver">{{subscriptionInfo.base.send.over}}</span>/check over
+              </li>
+              <li>
+                {{subscriptionInfo.base.receive.num_free}} Paynote Free
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="element-wrapper"  *ngIf="userService.isAdmin() || userService.isSuperAdmin()">
+     <h6 class="element-header">Invoices</h6>
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-3">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search invoice" 
+                       [(ngModel)]="paginationService.searchQuery" (search)="getListPlansAdmin(null)" (keyup)="getListPlansAdmin(null)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="position: relative;margin-top: 40px;">
+          <div class="col-sm-12">
+            <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    <!--Name-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('status', paginationService.sortDir, getListPlansAdmin())">Status</a>
+                    <i *ngIf="paginationService.sortField == 'status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    Amount
+                  </th>
+                  <th scope="col">
+                    Description
+                  </th>
+                  <th scope="col">
+                    Name
+                  </th>
+                  <th scope="col">
+                    Email
+                  </th>
+                  <th scope="col">
+                    <!--Status-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('payment_at', paginationService.sortDir, getListPlansAdmin())">Payment date</a>
+                    <i *ngIf="paginationService.sortField == 'payment_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'payment_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Created-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, getListPlansAdmin())">Created</a>
+                    <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let invoiceAdmin of listInvoiceAdmin">
+                  <td data-title="Status" scope="row">
+                    {{invoiceAdmin.status || '&nbsp;'}}
+                  </td>
+                  <td data-title="Amount">
+                    {{invoiceAdmin.amount | currency:'':'symbol' || '&nbsp;'}}
+                  </td>
+                  <td data-title="Description">
+                    {{invoiceAdmin.description || '&nbsp;'}}
+                  </td>
+                  <td data-title="Name">
+                    {{invoiceAdmin.u_name || '&nbsp;'}}
+                  </td>
+                  <td data-title="Email">
+                    {{invoiceAdmin.u_email || '&nbsp;'}}
+                  </td>
+                  <td data-title="Payment Date">
+                    {{userService.getDateFormat(invoiceAdmin.payment_at)}}
+                  </td>
+                  <td data-title="Created">
+                    {{userService.getDateFormat(invoiceAdmin.created_at)}}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No invoice were found. Try changing your query...</span>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="getListPlansAdmin($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,29 @@
+version: 0.0
+os: linux
+files:
+ - source: ./
+   destination: /var/www/html/paynote-client
+   overwrite: true
+ #- source: dist
+ #  destination: /var/www/html/paynote-client/dist
+ #  overwrite: true
+ #- source: dist-sandbox
+ #  destination: /var/www/html/paynote-client-sandbox/dist/schex-dwolla
+ #  overwrite: true
+ #- source: src
+ #  destination: /var/www/html/paynote-client/src
+ #  overwrite: true
+ #- source: src
+ #  destination: /var/www/html/paynote-client-sandbox/src
+ #  overwrite: true
+ #- source: apidocs
+ #  destination: /var/www/html/portal.schex/seamlesschex3.0/apidocs
+hooks:
+ BeforeInstall:
+   - location: .deployment/init.sh
+     runas: root
+ AfterInstall:
+   - location: .deployment/build.sh
+ ApplicationStart:
+   - location: .deployment/restart.sh
+     runas: root

@@ -1,0 +1,43 @@
+<div class="element-wrapper" *ngIf="visibleTrands">
+  <!--<h6 class="element-header">Unique Visitors Graph</h6>-->
+  <div class="element-box">
+    <div class="os-tabs-w">
+      <div class="os-tabs-controls" id="trends">
+        <ul class="nav nav-tabs smaller">
+          <li class="nav-item" *ngFor="let graphic of graphicDataObj">
+              <a class="nav-link" [ngClass]="{ 'active': graphic.tabActive }" data-toggle="tab" href="#{{graphic.tabLink}}" (click)="getTrendsData(graphic.key)">{{graphic.tabTitle}}</a>
+          </li>
+        </ul>
+        <ul class="nav nav-pills smaller d-none d-xl-flex">
+          <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#" (click)="setFilter(7)">7 Days</a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#" (click)="setFilter(14)">14 Days</a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#" (click)="setFilter(30)">Last Month</a></li>          
+        </ul>
+      </div>
+      <div class="tab-content">
+        <div class="tab-pane"  *ngFor="let graphic of graphicDataObj" [ngClass]="{ 'active': graphic.tabActive }" id="{{graphic.tabLink}}">
+           <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>                  
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>                  
+              </div>                
+            </div>
+            <canvas baseChart
+                    [datasets]="barChartData"
+                    [labels]="barChartLabelsw"
+                    [options]="barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="graphic.barChartLegend"
+                    [chartType]="graphic.barChartType"
+                    (chartHover)="chartHovered($event)"
+                    (chartClick)="chartClicked($event)">
+            </canvas>
+          </div>
+        </div>
+      </div>        
+    </div>      
+  </div>    
+</div>

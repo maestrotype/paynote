@@ -1,0 +1,19 @@
+{
+  "elements": {
+    "ng-progress": {}
+  },
+  "attributes": {
+    "[(ngmodel)]": {
+      "context": "input"
+    },
+    "[ngmodeloptions]": {
+      "context": "input"
+    },
+    "*ngif": {},
+    "(click)": {},
+    "(ngsubmit)": {},
+    "[hidden]": {},
+    "[disabled]": {},
+    "[ngclass]": {}
+  }
+}

@@ -1,0 +1,156 @@
+select.ng-untouched {
+  width: 100%;
+}
+.plan-stripe .small-box {
+  background-color: #fff!important;
+  text-align: center;
+}
+.selected_start_plan {
+  background-color: #ecf0f5!important;
+  border: 1px solid #e4e4e4;
+  /*cursor: not-allowed;*/
+  color: #000!important;
+  padding: 35px 25px;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                        supported by Chrome and Opera */
+}
+.selected_start_planDisabled {
+  /*background-color: #eaeaea !important;*/
+  /*border: 1px solid #bdbdbd;*/
+  cursor: not-allowed;
+  /*color: #bdbdbd!important;*/
+  /*padding: 35px 25px;*/
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+.selected_start_planDisabled h4, .selected_start_planDisabled .plan-title, .selected_start_planDisabled .plan-price{
+  /*color: #bdbdbd!important;*/
+}
+.pricing-plan.with-hover-effect.selected_start_planDisabled:hover .plan-name,
+.pricing-plan.with-hover-effect.selected_start_planDisabled .plan-name{
+  /*color: #bdbdbd !important;*/
+}
+.pricing-plan.with-hover-effect.selected_start_planDisabled:hover .plan-price-w .price-value, .pricing-plan.highlight .plan-price-w .price-value {
+  /*color: #bdbdbd !important;*/
+}
+.plan-stripe{
+  margin:0 auto;
+}
+.plan-stripe:hover .selected_start_plan{
+  border: 1px solid #bfbfbf;
+}
+.plan-stripe .plan-title {
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.plan-stripe .plan-price {
+  font-size: 2.5rem;
+  font-weight: 900;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.plan-stripe .plan-price-symbol {
+  font-size: .6em;
+  vertical-align: super;
+}
+.plan-stripe .plan-price {
+  font-size: 2.5rem;
+  font-weight: 900;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.plan-stripe .plan-price-period {
+  font-size: .7em;
+  display: inline-block;
+  padding: 0;
+  opacity: .7;
+}
+.plan-stripe .small-box {
+  background-color: #fff!important;
+  text-align: center;
+}
+.plan-stripe .text-muted {
+  color: #b3b3b3!important;
+}
+.sendNumber{
+  font-size: 21px;
+}
+.planVerify{
+  font-size: 16px;
+  font-weight: bold;
+}
+.planOver{
+  font-size: 14px;
+  font-weight: bold;
+}
+.disabledBtn{
+  background: #989898;
+  border-color: #989898;
+  cursor: not-allowed;
+}
+
+.pricing-plan .plan-name{
+  min-height: 80px;
+}
+.fsmargin{
+  margin-right: 15px;
+}
+@media (max-width: 575px){
+
+  .pricing-plan .plan-name{
+    min-height: 80px;
+    padding-bottom: 0px;
+  }
+
+  .pricing-plan .plan-price-w {
+    padding-top: 25px;
+    margin-bottom: 25px;
+  }
+  .fsmargin{
+    margin-right: 0px !important;
+  }
+
+}
+
+fieldset{
+  border: 1px solid #e8e8e8;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  padding: 0 20px;
+}
+
+@media (min-width: 990px){
+  fieldset.col-sm-6{
+    max-width: 49% !important;
+    flex: 0 0 49% !important;
+  }
+}
+
+
+fieldset legend{
+  font-size: 15px;
+}
+.col-xs-6{
+  width: 50%;
+}
+@media (min-width: 576px) and (max-width: 990px){
+  fieldset.col-sm-6{
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+}

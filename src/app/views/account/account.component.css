@@ -1,0 +1,188 @@
+.my-drop-zone { border: dotted 3px lightgray; }
+.nv-file-over { border: dotted 3px red; } /* Default class applied to drop zones on over */
+.another-file-over-class { border: dotted 3px green; }
+#tab_documents button:focus{
+  box-shadow: none;
+}
+/*h4.modal-title{
+  margin-left: 20px;
+}*/
+.subImg i{
+  font-size: 10em;
+}
+
+.sendPaynote{
+  text-transform: uppercase;
+}
+.plan-price {
+  font-size: 2.5rem;
+  font-weight: 900;
+  position: relative;
+}
+.plan-price-symbol {
+  font-size: .6em;
+  vertical-align: super;
+}
+.plan-price-period {
+  font-size: .7em;
+  display: inline-block;
+  padding: 0;
+  opacity: .7;
+}
+.sendNumber{
+  font-size: 21px;
+}
+.planVerify{
+  font-size: 16px;
+  font-weight: bold;
+}
+.planOver{
+  font-size: 14px;
+  font-weight: bold;
+}
+div.dataTables_wrapper div.dataTables_filter {
+  text-align: left !important;
+}
+.settingsLimits ul{
+  list-style: none;
+  padding: 15px 0px;
+}
+.settingsLimits li{
+  margin-bottom: 9px;
+}
+.btnUpgrade{
+  text-transform: uppercase;
+  font-size: 12px;
+}
+.text-initial i{
+  color: #4494f3;
+}
+.vfs-text{
+  font-size: 14px;
+  color: #000;
+}
+.ex-style{
+  margin-top: 7px;
+  display: block;
+  color: #85a0bf;
+}
+
+/*/////////////////////////////////////////////*/
+.manual-verification{
+  border-radius: 4px;
+  background-color: #f5f7fd;
+  box-shadow: 0 20px 39px 0 rgba(19, 21, 23, 0.5);
+}
+.manual-verification-title{
+  text-align: center;
+}
+.manual-verification-title h4{
+  font-size: 24px; 
+  /* font-weight: 600; */
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: normal;
+  /* text-align: center; */
+  color: rgba(26, 110, 238, 0.92);
+  margin-bottom: 20px;
+}
+.manual-verification p.mf-text{
+  text-align: center;
+}
+.slick-next, 
+.slick-prev{
+  border: none;
+  background-color: transparent;
+  font-weight: 500;
+  font-size: .9rem;
+  color: #046fdf;
+  bottom: 25px;
+  position: absolute;
+  z-index: 999;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+.slick-next:hover, 
+.slick-prev:hover{
+  text-decoration: underline;
+}
+.slick-next:before, 
+.slick-prev:before {
+  font-family: 'osfont' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 15px;
+  color: #047bf8;
+  position: absolute;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+.slick-prev:before {
+  content: "\e987";
+  left: -20px;
+}
+.slick-prev {
+  left: 50px;
+}
+.slick-next {
+  right: 50px;
+}
+.manual-verification label{
+  text-transform: uppercase;
+  font-size: 10px;
+  color: #b7bac1;
+}
+.slick-next:before {
+  content: "\e986";
+  right: -20px;
+}
+.slick-next:disabled{
+  color: #92beec;
+}
+.slick-next:disabled:before{
+  color: #92beec;
+}
+.slick-next:disabled:hover{
+  text-decoration: none;
+}
+.mv-bankName{
+  padding-top: 9px;
+}
+
+/*/////////////////////////////*/
+
+.addFundingSourceBox {
+  padding: 35px 17px 40px;
+  background-image: url(/assets/img/onboarding-gradient-hor.png);
+  background-size: 100% auto;
+  background-position: top center;
+  background-repeat: no-repeat;
+  text-align: center;
+}
+.onboarding-media {
+  padding-top: 20px;
+  text-align: center;
+  padding-bottom: 30px;
+}
+.onboarding-content h4{
+  color: rgba(26, 110, 238, 0.92);
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+.onboarding-content p{
+  color: rgba(110, 117, 128, 0.92);
+  font-size: 15px;
+  margin-bottom: 40px;
+  padding: 0 10%;
+}
+.onboarding-content label{
+  font-size: 12px;
+}

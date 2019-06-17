@@ -1,0 +1,329 @@
+
+<div class="element-wrapper">
+  <h6 class="element-header">Admins</h6>
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-3">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search admin" 
+                       [(ngModel)]="paginationService.searchQuery" (search)="getListAdmins(null)" (keyup)="getListAdmins(null)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="position: relative;margin-top: 40px;">
+          <hr>
+          <button class="btn btn-primary btn-rounded" type="button" title="Add"
+                  style="position: absolute;padding: 15px;font-weight: bold;font-size: 20px;right: 0px;top: -70px;"
+                  (click)="openModalAddAdmin(AddAdmin)">+</button>
+          <div class="col-sm-12">
+            <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('name', paginationService.sortDir, getListAdmins(null))">Name</a>
+                    <i *ngIf="paginationService.sortField == 'name' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'name' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Name-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('email', paginationService.sortDir, getListAdmins(null))">Email</a>
+                    <i *ngIf="paginationService.sortField == 'email' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'email' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Email-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('phone', paginationService.sortDir, getListAdmins(null))">Phone</a>
+                    <i *ngIf="paginationService.sortField == 'phone' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'phone' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('role', paginationService.sortDir, getListAdmins(null))">Access</a>
+                    <i *ngIf="paginationService.sortField == 'role' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'role' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('status', paginationService.sortDir, getListAdmins(null))">Status</a>
+                    <i *ngIf="paginationService.sortField == 'status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, getListAdmins(null))">Created</a>
+                    <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let admins of listAdmins">
+                    <td data-title="Name" scope="row">
+                    {{admins.name || '&nbsp;'}}
+                  </td>
+                  <td data-title="Email">
+                    {{admins.email || '&nbsp;'}}
+                  </td>
+                  <td data-title="Phone">
+                    {{admins.phone || '&nbsp;'}}
+                  </td>
+                  <td data-title="Access">
+                    {{admins.role || '&nbsp;'}}
+                  </td>
+                  <td data-title="Status">                  
+              <mat-slide-toggle
+                title="{{admins.status || '&nbsp;'}}"
+                class="adminStatus example-margin"                      
+                color="primary"
+                (change)="onToggleAdminStatus($event, admins)"
+                [(ngModel)]= "admins.statusBoolean"
+                [ngModelOptions]="{standalone: true}">
+            </mat-slide-toggle>
+            &nbsp;
+            <a title="View Change History" (click)= "openModal(viewChangeAdminHistory, admins)" class="editPlan" href="javascript:void(0)">
+               <i class="picons-thin-icon-thin-0065_bullet_list_view"></i>
+            </a>
+            </td>                 
+            <td data-title="Created">
+              {{admins.created_at || '&nbsp;'}}
+            </td>  
+            </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+        <div class="icon-w">
+          <i class="os-icon os-icon-eye-off"></i>
+        </div>
+        <span>No admins were found.</span>
+      </div>
+      <div class="row">          
+        <div class="col-sm-12 col-md-12">
+          <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+            <div class="showentries">Show entries</div>
+            <ng-pagination 
+              [position]="'left'" 
+              [pageSize]="paginationService.pageSize"                     
+              [itemsCount]="paginationService.itemsCount" 
+              (getPageData)="getListAdmins($event)">                      
+            </ng-pagination>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<ng-template #viewChangeAdminHistory let-c="close" let-d="dismiss" let-create="addFundSources">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">View Change Data</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <div class="modal-body">     
+      <div class="modal-body">   
+
+        <div class="row" style="position: relative;margin-top: 0px;">
+          <hr>
+          <div class="col-sm-12">
+            <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    Current
+                  </th>
+                  <th scope="col">
+                    Previous
+                  </th>
+                  <th scope="col">
+                    Note
+                  </th>
+                  <th scope="col">
+                    Created
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let history of listHistory">
+                    <td data-title="Current" scope="row">
+                    {{history.current || '&nbsp;'}}
+                  </td>
+                  <td data-title="Previous">
+                    {{history.previous || '&nbsp;'}}
+                  </td>
+                  <td data-title="Note">
+                    {{history.note || '&nbsp;'}}
+                  </td>
+                  <td data-title="Created">
+                    {{history.created_at || '&nbsp;'}}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div *ngIf="isEmptyHistory" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No history admin data were found.</span>
+        </div>
+
+        <!--      <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+                <div class="icon-w">
+                  <i class="os-icon os-icon-eye-off"></i>
+                </div>
+                <span>No history data were found.</span>
+              </div>
+              <div class="row">          
+                <div class="col-sm-12 col-md-12">
+                  <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+                    <div class="showentries">Show entries</div>
+                    <ng-pagination 
+                      [position]="'left'" 
+                      [pageSize]="paginationService.pageSize"                     
+                      [itemsCount]="paginationService.itemsCount" 
+                      (getPageData)="viewChangeHistoryAdmin($event)">                      
+                    </ng-pagination>
+                  </div>
+                </div>
+              </div>-->
+
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #AddAdmin let-c="close" let-d="dismiss" let-create="addAdmin">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Add Admin</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form  name="form" (ngSubmit)="f.form.valid && AddAdministrator()" #f="ngForm">
+           <div class="modal-body">
+
+        <div class="modal-body"> 
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !name.valid && (name.dirty || name.touched)}">
+                   <label for="">Full Name</label>
+                <input id="addAdminFullName" class="form-control" placeholder="Full Name" type="text" [(ngModel)]="modelNewAdmin.name" 
+                       name="name" required #name="ngModel">
+                       <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="!name.valid && (name.dirty || name.touched)">
+                       <span *ngIf="name.errors.required">
+                    Full Name is required
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Role</label>
+                <select id="addAdminRole" style="width: 100%;" class="form-control col-sm-12" placeholder="Role" name="role" required
+                        [(ngModel)]="modelNewAdmin.role" #role="ngModel">
+                        <option value="SuperAdmin">SuperAdmin</option>
+                  <option value="Admin">Admin</option>
+                </select>
+                <div *ngIf="!role.valid && (role.dirty || role.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Role is required</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">          
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !email.valid && (email.dirty || email.touched)}">
+                   <label for="">Email</label>
+                <input id="addAdminEmail" class="form-control" placeholder="Email" type="text" [(ngModel)]="modelNewAdmin.email" 
+                       name="email" required #email="ngModel">
+                       <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="!email.valid && (email.dirty || email.touched)">
+                       <span *ngIf="email.errors.required">
+                    Email is required
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !phone.valid && (phone.dirty || phone.touched)}">
+                   <label for="">Phone</label>
+                <input id="addAdminPhone" class="form-control" placeholder="Phone" type="text" [(ngModel)]="modelNewAdmin.phone" 
+                       name="phone" required #phone="ngModel" [textMask]="{mask:utility.maskPhone}">
+                       <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="!phone.valid && (phone.dirty || phone.touched)">
+                       <span *ngIf="phone.errors.required">
+                    Phone is required
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">          
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !password.valid && (password.dirty || password.touched)}">
+                   <label for="">Password</label>
+                <input id="addAdminPassword" class="form-control" placeholder="Password" type="password" [(ngModel)]="modelNewAdmin.password" 
+                       name="password" required #password="ngModel">
+                       <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="!password.valid && (password.dirty || password.touched)">
+                       <span *ngIf="password.errors.required">
+                    Password is required
+                  </span>
+                </div>
+              </div>
+              <ng2-password-strength-bar
+                [passwordToCheck]="modelNewAdmin.password"
+                [barLabel]="barLabel"
+                [barColors]="myColors">
+              </ng2-password-strength-bar>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !cpassword.valid && (cpassword.dirty || cpassword.touched)}">
+                   <label for="">Confirm Password</label>
+                <input id="addAdminConfirmPassword" class="form-control" placeholder="Confirm Password" type="password" [(ngModel)]="modelNewAdmin.cpassword" 
+                       name="cpassword" required #cpassword="ngModel">
+                       <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="!cpassword.valid && (cpassword.dirty || cpassword.touched)">
+                       <span *ngIf="cpassword.errors.required">
+                    Confirm Password is required
+                  </span>
+                </div>
+              </div>              
+            </div>
+          </div>
+
+          <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+        </div>
+      </div>
+      <br>
+      <div class="modal-footer">
+        <button id="addAdminCancelButton" class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+        <button id="addAdminButton" class="slick-next slick-arrow" type="submit" [disabled]="isLoading || !f.form.valid">Add</button>
+
+        <!--        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+                <button type='submit' [disabled]="isLoading || !f.form.valid" class="btn btn-primary">Add</button>-->
+      </div>
+    </form>
+  </div>
+</ng-template>

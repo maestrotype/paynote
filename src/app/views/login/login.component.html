@@ -1,0 +1,96 @@
+<!-- Google Tag Manager (noscript) -->
+<noscript>
+  <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W7RK4F" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+<!-- End Google Tag Manager (noscript) -->
+<ng-progress color="purple"  [thick]="true"></ng-progress>
+<div class="all-wrapper menu-side with-pattern">
+  <div class="auth-box-w" *ngIf="isVisibleLoginForm">
+    <div class="logo-w">
+      <a href="/"><img alt="" src="assets/img/Paynote_-_New_Blue.svg"></a>
+    </div>
+    <div [hidden]="!showLoginForm">
+      <h4 class="auth-header">
+        Login
+      </h4>
+      <form name="form" (ngSubmit)="f.form.valid && login()" #f="ngForm" class="form-validation">
+        <div class="form-group" [ngClass]="{ 'has-error has-danger': !username.valid && (username.dirty || username.touched) }">
+          <label for="">Email</label>
+          <input name="username" class="form-control" placeholder="Enter your email" type="text" 
+                 [(ngModel)]="model.username" #username="ngModel" required>
+          <div class="pre-icon os-icon os-icon-user-male-circle"></div>
+          <div *ngIf="!username.valid && (username.dirty || username.touched)" 
+              class="help-block form-text with-errors form-control-feedback">Email is required</div>
+        </div>
+        <div class="form-group" [ngClass]="{ 'has-error has-danger': !password.valid && (password.dirty || password.touched) }">
+          <label for="">Password</label>
+          <input name="password" class="form-control" placeholder="Enter your password" type="password" [(ngModel)]="model.password" #password="ngModel" required>
+          <div class="pre-icon os-icon os-icon-fingerprint"></div>
+          <div *ngIf="!password.valid && (password.dirty || password.touched)" 
+              class="help-block form-text with-errors form-control-feedback">Password is required</div>
+        </div>
+        <div class="buttons-w">
+          <button [disabled]="loading || !f.form.valid" class="btn btn-primary btn-rounded btn-rounded-margin">Login</button>
+          <button class="btn btn-default pull-right btn-rounded btn-rounded-margin" routerLink="/sign-up">Sign Up</button>
+          <br><br>
+          <a href="reset-password" class="btn btn-link" style="padding: 0px;">Reset Password</a>
+          <a href="create-password" class="btn btn-link pull-right" style="padding: 0px;">Create Password</a>
+        </div>
+        <br>
+        <div [hidden]="!isSuccessLogin" class="alert alert-success" role="alert" [innerHTML]=successMessageLogin></div>
+        <div *ngIf="isErrorLogin" class="alert alert-danger" role="alert" [innerHTML]=errorMessageLogin></div>
+      </form>
+    </div>
+    <div [hidden]="!show2FAForm">
+      <h4 class="auth-header">
+        Multi-factor Authentication
+      </h4>
+      <form name="form2FA" (ngSubmit)="f2FA.form.valid && login2FA()" #f2FA="ngForm" autocomplete="off">
+        <div *ngIf="isSuccess2FA" class="alert alert-info" role="alert">{{successMessage2FA}}</div>
+        <!--<label style="font-size: 12px;">Please enter an MFA code to complete sign-in.</label>-->
+        <div class="form-group" [ngClass]="{ 'has-error has-danger': !pinCode.valid && (pinCode.dirty || pinCode.touched) }">
+          <label for="">Verification Code</label>
+          <input name="pinCode" class="form-control" placeholder="Enter MFA Code" type="text" 
+                 [(ngModel)]="model.pinCode" #pinCode="ngModel" required>
+          <div class="pre-icon">
+            <i class="icon-feather-hash"></i>
+          </div>
+          <div *ngIf="!pinCode.valid && (pinCode.dirty || pinCode.touched)" 
+            class="help-block form-text with-errors form-control-feedback">Verification Code is required</div>
+        </div>
+        <div class="buttons-w">
+          <button [disabled]="loading || !f2FA.form.valid" class="btn btn-primary btn-rounded btn-rounded-margin">Submit</button>
+          <button [disabled]="loading" class="btn btn-default pull-right btn-rounded btn-rounded-margin" (click)="login()">Resend Code</button>
+          <br><br>
+          <a (click)="backToLogin()" class="strong" href="javascript:void(0)">Cancel</a>
+        </div>
+        <br>
+        <div [hidden]="!isError2FA" class="alert alert-danger" role="alert" [innerHTML]=errorMessage2FA></div>
+      </form>
+    </div>
+    
+    <div [hidden]="!showResetPassword">
+      <h4 class="auth-header">
+        Reset Password
+      </h4>
+      <form name="form2FA" (ngSubmit)="fResetPas.form.valid && resetPassword()" #fResetPas="ngForm" autocomplete="off">
+        <div *ngIf="isSuccessResetPas" class="alert alert-info" role="alert">{{successMessageResetPas}}</div>
+        <div class="form-group" [ngClass]="{ 'has-error has-danger': !emailPassword.valid && (emailPassword.dirty || emailPassword.touched) }">
+          <label for="">Email</label>
+          <input name="pinCode" class="form-control" placeholder="Please enter email" type="email" 
+                 [(ngModel)]="model.emailPassword" #emailPassword="ngModel" required>
+          <div class="pre-icon os-icon os-icon-email-2-at"></div>
+          <div *ngIf="!emailPassword.valid && (emailPassword.dirty || emailPassword.touched)" 
+            class="help-block form-text with-errors form-control-feedback">Email is required</div>
+        </div>
+        <div class="buttons-w">
+          <button [disabled]="loading || !fResetPas.form.valid" class="btn btn-primary">Submit</button>
+          <br><br>
+          <a (click)="backToLogin()" class="strong" href="javascript:void(0)">Cancel</a>
+        </div>
+        <br>
+        <div [hidden]="!isErrorResetPas" class="alert alert-danger" role="alert" [innerHTML]=errorMessageResetPas></div>
+      </form>
+    </div>
+  </div>
+</div>

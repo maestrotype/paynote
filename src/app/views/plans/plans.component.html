@@ -1,0 +1,568 @@
+
+<div class="element-wrapper">
+  <h6 class="element-header">Plans</h6>
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+  <div  *ngIf="userService.isAdmin() || userService.isSuperAdmin()" class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-3">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search plan" 
+                       [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel" 
+                       (search)="getListPlans(null)" (keyup)="getListPlans(null)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="position: relative;margin-top: 40px;">
+          <hr>
+          <button class="btn btn-primary btn-rounded" type="button" title="Add"
+                  style="position: absolute;padding: 15px;font-weight: bold;font-size: 20px;right: 0px;top: -70px;"
+                  (click)="prepareAddPlan(addEditCustomersPlanDialog); ">+</button>
+          <div class="col-sm-12">
+            <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    <!--Name-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('name', paginationService.sortDir, getListPlans())">Name</a>
+                    <i *ngIf="paginationService.sortField == 'name' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'name' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Price-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('amount', paginationService.sortDir, getListPlans())">Price</a>
+                    <i *ngIf="paginationService.sortField == 'amount' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'amount' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    Months
+                  </th>
+                  <!--                  <th scope="col">
+                                      Features
+                                    </th>-->
+                  <th scope="col">
+                    Receive
+                  </th>
+                  <th scope="col">
+                    Send
+                  </th>                  
+                  <th scope="col">
+                    <!--Type-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('type', paginationService.sortDir, getListPlans())">Type</a>
+                    <i *ngIf="paginationService.sortField == 'type' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'type' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Status-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('status', paginationService.sortDir, getListPlans())">Status</a>
+                    <i *ngIf="paginationService.sortField == 'status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    Next Day Funding                    
+                  </th>
+                  <th scope="col">
+                    Payment Page
+                  </th>
+                  <th scope="col">
+                    Use
+                  </th>
+                  <th scope="col">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let plan of listPlans">
+                    <td data-title="Name" scope="row">
+                    {{plan.name}}
+                  </td>
+                  <td data-title="Price">
+                    {{plan.amount | currency:'':'symbol'}}
+                  </td>
+                  <td data-title="Months">
+                    {{plan.months}}
+                  </td>
+                  <!--                  <td data-title="Features">
+                                      {{plan.num}} Checks {{plan.send_receive}} (Free {{plan.num_free}})
+                                    </td>-->
+                  <td data-title="Receive">
+<!--                    Quantity: {{plan.receive.num || 0}}<br>
+                    Free Qty: {{plan.receive.num_free || 0}}<br>-->
+                    Overage: 
+                    <span *ngIf="plan.receive.over_pct == 1">{{plan.receive.over || 0}}%</span>
+                    <span *ngIf="plan.receive.over_pct == 0">{{plan.receive.over || 0 | currency:'':'symbol'}}</span><br>
+                    Request check fee: 
+                    <span *ngIf="plan.receive.verify_pct == 1">{{plan.receive.verify || 0}}%</span>
+                    <span *ngIf="plan.receive.verify_pct == 0">{{plan.receive.verify || 0 | currency:'':'symbol'}}</span>
+                    <br>
+                    Daily: {{plan.receive.limit.Daily || 0 | currency:'':'symbol'}}<br>
+                    Monthly: {{plan.receive.limit.Monthly || 0 | currency:'':'symbol'}}<br>
+                    Invoices: {{plan.receive.limit.Invoices || 0 | currency:'':'symbol'}}<br>
+                  </td>
+
+                  <td data-title="Send">
+                    Quantity: {{plan.send.num || 0}}<br>
+                    <!--Free Qty: {{plan.send.num_free || 0}}<br>-->
+                    Overage: 
+                    <span *ngIf="plan.send.over_pct == 1">{{plan.send.over || 0}}%</span>
+                    <span *ngIf="plan.send.over_pct == 0">{{plan.send.over || 0 | currency:'':'symbol'}}</span>
+                    <br>
+                    Daily: {{plan.send.limit.Daily || 0 | currency:'':'symbol'}}<br>
+                    Monthly: {{plan.send.limit.Monthly || 0 | currency:'':'symbol'}}<br>
+                    Checks: {{plan.send.limit.Checks || 0 | currency:'':'symbol'}}<br>
+                  </td>
+
+                  <td data-title="Type">
+                    {{plan.type}}
+                  </td>
+                  <td data-title="Status">
+                    {{plan.status}}
+                  </td>
+                  <td data-title="Next Day Funding">
+                    <span *ngIf="plan.next_day">Enabled</span>
+                    <span *ngIf="!plan.next_day">Disabled</span>
+                  </td>                  
+                  <td data-title="Payment Page">
+                    <span *ngIf="plan.billing_link">Enabled</span>
+                    <span *ngIf="!plan.billing_link">Disabled</span>
+                  </td>                  
+                  <td data-title="Use">
+                    {{plan.used}}
+                  </td>
+                  <td data-title="Action">
+                    <a title="Edit Plan" (click)= "prepareEditPlan( addEditCustomersPlanDialog, plan.p_token)" class="editPlan" href="javascript:void(0)"><i class="picons-thin-icon-thin-0001_compose_write_pencil_new"></i></a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No plan were found...</span>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="getListPlans($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<!--************************************************* Add/Edit Plan Dialog *********************************************************-->
+
+<ng-template #addEditCustomersPlanDialog let-c="close" let-d="dismiss" let-create="addFundSources">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title" *ngIf="action == 'add'">Add a Plan</h4>
+      <h4 class="modal-title" *ngIf="action == 'edit'">Edit a Plan</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form name="form" (ngSubmit)="f.form.valid && updatePlan()" #f="ngForm">
+          <div class="modal-body">     
+        <div class="modal-body"> 
+
+          <div class="row">
+            <div class="col-sm-3">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !name.valid && (name.dirty || name.touched)}">
+                   <label for="">Plan name</label>
+                <input class="form-control" placeholder="Plan name" type="text" [(ngModel)]="modelPlan.name" 
+                       name="name" required #name="ngModel">
+                       <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="!name.valid && (name.dirty || name.touched)">
+                       <span *ngIf="name.errors.required">
+                    Plan name is required
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-3 col-xs-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !amount.valid && (amount.dirty || amount.touched)}">
+                   <label for="">Price</label>
+                <input class="form-control" placeholder="Price" type="number" min="0" [(ngModel)]="modelPlan.amount" 
+                       name="amount" required #amount="ngModel">
+                       <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="!amount.valid && (amount.dirty || amount.touched)">
+                       <span *ngIf="amount.errors.required">
+                    Price is required
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-3 col-xs-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !months.valid && (months.dirty || months.touched)}">
+                   <label for="">Months</label>
+                <select class="form-control col-sm-12" placeholder="Months" name="months" required
+                        [(ngModel)]="modelPlan.months" #months="ngModel">
+                        <option value="1" selected="true">One month</option>
+                  <option value="2">Two months</option>
+                  <option value="3">Three months</option>
+                </select>
+                <div *ngIf="!months.valid && (months.dirty || months.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Months is required</div>
+              </div>
+            </div>          
+            <div class="col-sm-3 col-xs-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !next_day.valid && (next_day.dirty || next_day.touched)}">
+                   <label for="">Next Day Funding</label>
+                <select class="form-control col-sm-12" placeholder="Next Day Funding" name="next_day" required
+                        [(ngModel)]="modelPlan.next_day" #next_day="ngModel">
+                        <option value="0">Disable</option>
+                  <option value="1">Enable</option>
+                </select>
+                <div *ngIf="!months.valid && (next_day.dirty || next_day.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Next Day Funding is required</div>
+              </div>
+            </div>          
+          </div>
+
+
+          <div class="row">
+
+            <div class="col-sm-3 col-xs-6">
+              <div class="form-group">
+                <label for="">Type</label>
+                <select class="form-control col-sm-12" placeholder="Type" name="type" required
+                        [(ngModel)]="modelPlan.type" #type="ngModel">
+                        <option value="Public">Public</option>
+                  <option value="Private">Private</option>
+                </select>
+                <div *ngIf="!type.valid && (type.dirty || type.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Type is required</div>
+              </div>
+            </div>
+
+            <div class="col-sm-3 col-xs-6">
+              <div class="form-group">
+                <label for="">Status</label>
+                <select class="form-control col-sm-12" placeholder="Status" name="status" required
+                        [(ngModel)]="modelPlan.status" #status="ngModel">
+                        <option value="Enabled">Enabled</option>
+                  <option value="Disabled">Disabled</option>
+                </select>
+                <div *ngIf="!status.valid && (status.dirty || status.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Status is required</div>
+              </div>
+            </div>
+
+            <div class="col-sm-3 col-xs-6">
+              <div class="form-group">
+                <label for="">Send receive</label>
+                <select class="form-control col-sm-12" placeholder="Send receive" name="send_receive" required
+                        [(ngModel)]="modelPlan.send_receive" #send_receive="ngModel">
+                        <option value="Send" selected="selected">Send</option>
+                  <option value="Receive">Receive</option>
+                  <option value="Send/Receive">Send/Receive</option>
+                </select>
+                <div *ngIf="!send_receive.valid && (send_receive.dirty || send_receive.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Send receive is required</div>
+              </div>
+            </div>
+            <div class="col-sm-3 col-xs-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !rate.valid && (rate.dirty || rate.touched)}">
+                   <label for="">Priority</label>
+                <input class="form-control" placeholder="Priority" type="text" [(ngModel)]="modelPlan.rate" 
+                       name="rate" required #rate="ngModel">
+                       <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="!rate.valid && (rate.dirty || rate.touched)">
+                       <span *ngIf="rate.errors.required">
+                    Priority is required
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="row">
+            <div class="col-sm-3 col-xs-6">
+              <div class="form-group">
+                <label for="">Payment Page</label>
+                <select class="form-control col-sm-12" placeholder="Payment Page" name="billing_link" required
+                        [(ngModel)]="modelPlan.billing_link" #billing_link="ngModel">
+                        <option value="1">Enabled</option>
+                  <option value="0">Disabled</option>
+                </select>
+                <div *ngIf="!billing_link.valid && (billing_link.dirty || billing_link.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Payment Page is required</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row" style="margin: 0;">
+            <fieldset class="col-sm-6 col-xs-12 fsmargin element-wrapper">
+              <legend><span>Receive</span></legend>
+              <!--                <div class="row">
+                                <div class="col-sm-6 col-xs-6">
+                                  <div class="form-group" [ngClass]="{'has-error has-danger': !num.valid && (num.dirty || num.touched)}">
+                                       <label for="">Quantity</label>
+                                    <input class="form-control" placeholder="Quantity" type="text" [(ngModel)]="modelPlan.receive.num" 
+                                           name="receive_num" required #modelPlan.receive.num="ngModel">
+                                           <div class="help-block form-text text-muted form-control-feedback" 
+                                           *ngIf="!num.valid && (num.dirty || num.touched)">
+                                           <span *ngIf="num.errors.required">
+                                        Quantity is required
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-sm-6 col-xs-6">
+                                  <div class="form-group" [ngClass]="{'has-error has-danger': !num_free.valid && (num_free.dirty || num_free.touched)}">
+                                       <label for="">Free qty</label>
+                                    <input class="form-control" placeholder="Free qty" type="text" [(ngModel)]="modelPlan.receive.num_free" 
+                                           name="receive_num_free" required #num_free="ngModel">
+                                           <div class="help-block form-text text-muted form-control-feedback" 
+                                           *ngIf="!num_free.valid && (num_free.dirty || num_free.touched)">
+                                           <span *ngIf="num_free.errors.required">
+                                        Free qty is required
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>-->
+
+              <div class="row">
+                <div class="col-sm-6 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !over.valid && (over.dirty || over.touched)}">
+                       <label for="">Overage</label>
+                    <input class="form-control" placeholder="Overage" type="number" min="0" [(ngModel)]="modelPlan.receive.over" 
+                           name="receive_over" required #over="ngModel">
+                           <div class="help-block form-text text-muted form-control-feedback" 
+                           *ngIf="!over.valid && (over.dirty || over.touched)">
+                           <span *ngIf="over.errors.required">
+                        Overage is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-4 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !over_pct.valid && (over_pct.dirty || over_pct.touched)}">
+                       <label for="">$ / pct</label>
+                    <select class="form-control col-sm-12" name="receive_over_pct" 
+                            [(ngModel)]="modelPlan.receive.over_pct" #over_pct="ngModel">
+                      <option value="0" selected="selected">$</option>
+                      <option value="1">%</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-sm-6 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !verify.valid && (verify.dirty || verify.touched)}">
+                       <label for="">Request check fee</label>
+                    <input class="form-control" placeholder="Request check fee" type="number" min="0" [(ngModel)]="modelPlan.receive.verify" 
+                           name="receive_verify" required #verify="ngModel">
+                           <div class="help-block form-text text-muted form-control-feedback" 
+                           *ngIf="!verify.valid && (verify.dirty || verify.touched)">
+                           <span *ngIf="verify.errors.required">
+                        Request check fee is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-4 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !verify_pct.valid && (verify_pct.dirty || verify_pct.touched)}">
+                       <label for="">$ / pct</label>
+                    <select class="form-control col-sm-12" name="receive_verify_pct" 
+                            [(ngModel)]="modelPlan.receive.verify_pct" #verify_pct="ngModel">
+                      <option value="0" selected="selected">$</option>
+                      <option value="1">%</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <br>
+              <h6 class="element-header" style="font-size: 15px;color: #1a7bf8;">Limits</h6>
+
+              <div class="row">
+                <div class="col-sm-6 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !Daily.valid && (Daily.dirty || Daily.touched)}">
+                       <label for="">Daily ($)</label>
+                    <input class="form-control" placeholder="Daily" type="text" [(ngModel)]="modelPlan.receive.limit.Daily" 
+                           name="receive_daily" required #Daily="ngModel">
+                           <div class="help-block form-text text-muted form-control-feedback" 
+                           *ngIf="!Daily.valid && (Daily.dirty || Daily.touched)">
+                           <span *ngIf="Daily.errors.required">
+                        Daily is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !Monthly.valid && (Monthly.dirty || Monthly.touched)}">
+                       <label for="">Monthly ($)</label>
+                    <input class="form-control" placeholder="Monthly" type="text" [(ngModel)]="modelPlan.receive.limit.Monthly" 
+                           name="receive_monthly" required #Monthly="ngModel">
+                           <div class="help-block form-text text-muted form-control-feedback" 
+                           *ngIf="!Monthly.valid && (Monthly.dirty || Monthly.touched)">
+                           <span *ngIf="Monthly.errors.required">
+                        Monthly is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-sm-6 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !Invoices.valid && (Invoices.dirty || Invoices.touched)}">
+                       <label for="">Invoices ($)</label>
+                    <input class="form-control" placeholder="Invoices" type="text" [(ngModel)]="modelPlan.receive.limit.Invoices" 
+                           name="receive_invoices" required #Invoices="ngModel">
+                           <div class="help-block form-text text-muted form-control-feedback" 
+                           *ngIf="!Invoices.valid && (Invoices.dirty || Invoices.touched)">
+                           <span *ngIf="Invoices.errors.required">
+                        Invoices is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <br>
+
+            </fieldset>
+
+            <fieldset class="col-sm-6 col-xs-12 element-wrapper">
+              <legend><span>Send</span></legend>
+              <div class="row">
+                <div class="col-sm-6 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !over.valid && (over.dirty || over.touched)}">
+                       <label for="">Overage</label>
+                    <input class="form-control" placeholder="Overage" type="number" min="0" [(ngModel)]="modelPlan.send.over" 
+                           name="send_over" required #over="ngModel">
+                           <div class="help-block form-text text-muted form-control-feedback" 
+                           *ngIf="!over.valid && (over.dirty || over.touched)">
+                           <span *ngIf="over.errors.required">
+                        Overage is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-4 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !over_pct.valid && (over_pct.dirty || over_pct.touched)}">
+                       <label for="">$ / pct</label>
+                    <select class="form-control col-sm-12" name="send_over_pct" 
+                            [(ngModel)]="modelPlan.send.over_pct" #over_pct="ngModel">
+                      <option value="0" selected="selected">$</option>
+                      <option value="1">%</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-6 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !num.valid && (num.dirty || num.touched)}">
+                       <label for="">Quantity</label>
+                    <input class="form-control" placeholder="Quantity" type="text" [(ngModel)]="modelPlan.send.num" 
+                           name="send_num" required #num="ngModel">
+                           <div class="help-block form-text text-muted form-control-feedback" 
+                           *ngIf="!num.valid && (num.dirty || num.touched)">
+                           <span *ngIf="num.errors.required">
+                        Quantity is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <!--                  <div class="col-sm-6 col-xs-6">
+                                    <div class="form-group" [ngClass]="{'has-error has-danger': !num_free.valid && (num_free.dirty || num_free.touched)}">
+                                         <label for="">Free qty</label>
+                                      <input class="form-control" placeholder="Free qty" type="text" [(ngModel)]="modelPlan.send.num_free" 
+                                             name="send_num_free" required #num_free="ngModel">
+                                             <div class="help-block form-text text-muted form-control-feedback" 
+                                             *ngIf="!num_free.valid && (num_free.dirty || num_free.touched)">
+                                             <span *ngIf="num_free.errors.required">
+                                          Free qty is required
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>-->
+              </div>
+              <br>
+              <h6 class="element-header" style="font-size: 15px;color: #1a7bf8;">Limits</h6>
+
+              <div class="row">
+                <div class="col-sm-6 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !Daily.valid && (Daily.dirty || Daily.touched)}">
+                       <label for="">Daily ($)</label>
+                    <input class="form-control" placeholder="Daily" type="text" [(ngModel)]="modelPlan.send.limit.Daily" 
+                           name="send_daily" required #Daily="ngModel">
+                           <div class="help-block form-text text-muted form-control-feedback" 
+                           *ngIf="!Daily.valid && (Daily.dirty || Daily.touched)">
+                           <span *ngIf="Daily.errors.required">
+                        Daily is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !Monthly.valid && (Monthly.dirty || Monthly.touched)}">
+                       <label for="">Monthly ($)</label>
+                    <input class="form-control" placeholder="Monthly" type="text" [(ngModel)]="modelPlan.send.limit.Monthly" 
+                           name="send_monthly" required #Monthly="ngModel">
+                           <div class="help-block form-text text-muted form-control-feedback" 
+                           *ngIf="!Monthly.valid && (Monthly.dirty || Monthly.touched)">
+                           <span *ngIf="Monthly.errors.required">
+                        Monthly is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-sm-6 col-xs-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !Checks.valid && (Checks.dirty || Checks.touched)}">
+                       <label for="">Checks ($)</label>
+                    <input class="form-control" placeholder="Checks" type="text" [(ngModel)]="modelPlan.send.limit.Checks" 
+                           name="send_check" required #Checks="ngModel">
+                           <div class="help-block form-text text-muted form-control-feedback" 
+                           *ngIf="!Checks.valid && (Checks.dirty || Checks.touched)">
+                           <span *ngIf="Checks.errors.required">
+                        Checks is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <br>
+
+            </fieldset>
+          </div>
+
+
+          <div class="form-group">
+            <label for="">Note</label>
+            <textarea rows="7" class="form-control" placeholder="Note" [(ngModel)]="modelPlan.note" 
+                      name="note" #note="ngModel"></textarea>
+          </div>
+          <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+        <button class="slick-next slick-arrow" type="submit" *ngIf="action == 'add'" [disabled]="isLoading || !f.form.valid">Add</button>
+        <button class="slick-next slick-arrow" type="submit" *ngIf="action == 'edit'" [disabled]="isLoading || !f.form.valid">Save</button>
+      </div>
+    </form>
+  </div>
+</ng-template>

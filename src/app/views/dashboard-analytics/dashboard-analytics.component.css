@@ -1,0 +1,38 @@
+.element-box{
+  padding: 0;
+  margin-bottom: 1rem;
+  border-radius: 0;
+  border: 1px solid #e5e5e5;
+}
+.chartjsTopStyle{
+  text-transform: uppercase;
+  text-align: left;
+  font-weight: 600;
+  padding: 13px 20px;
+  color: #a6a6a6;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 1em;
+}
+.el-chart-w canvas {
+  padding: 10px;
+}
+.chartjsBottomStyle{
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 13px 20px;
+  color: rgb(47, 126, 141);
+  border-top: 1px solid #e5e5e5;
+  font-size: 12px;
+  background: rgb(249, 250, 250);
+  text-align: center;
+}
+.chartjsBottomStyle a{
+  color: rgb(47, 126, 141);
+}
+.graphAmount{
+  color: rgb(33, 50, 59);
+  font-size: 30px;
+  position: absolute;
+  top: 0;
+  right: 21px;
+}

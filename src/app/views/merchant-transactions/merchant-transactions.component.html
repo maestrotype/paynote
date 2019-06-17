@@ -1,0 +1,109 @@
+<div class="content-box">
+  <div class="element-wrapper">
+    <h6 class="element-header">Transaction</h6>
+    <div class="element-box">
+      <!--<h5 class="form-header">Powerful Datatables</h5>-->
+<!--      <div class="form-desc">
+        DataTables is a plug-in for the jQuery Javascript library. It is a highly flexible tool, based upon the foundations of progressive enhancement, and will add advanced interaction controls to any HTML table.. 
+        <a href="https://www.datatables.net/" target="_blank">Learn More about DataTables</a>
+      </div>-->
+      <div class="table-responsive">
+        <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+          <div class="row">
+            <div class="col-sm-12 col-md-6">
+              <div class="dataTables_length" id="dataTable1_length">
+                <label>
+                  Show 
+                  <select name="dataTable1_length" aria-controls="dataTable1" class="form-control form-control-sm">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                  </select> entries</label>
+              </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+              <div id="dataTable1_filter" class="dataTables_filter">
+                <label>
+                  Search:
+                  <input type="search" class="form-control form-control-sm" placeholder="" aria-controls="dataTable1">
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <table id="dataTable1" width="100%" class="table table-striped table-lightfont dataTable" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+                <thead>
+                  <tr role="row">
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th class="text-right">Amount</th>
+<!--                    <th class="sorting" tabindex="0" aria-controls="dataTable1" rowspan="1" colspan="1" 
+                        aria-label="Age: activate to sort column ascending" style="width: 71px;">Amount</th>-->
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    <th rowspan="1" colspan="1">Name</th>
+                    <th rowspan="1" colspan="1">Date</th>
+                    <th rowspan="1" colspan="1">Status</th>
+                    <th class="text-right" rowspan="1" colspan="1">Amount</th>
+                  </tr>
+                </tfoot>
+                <tbody>
+                  <tr role="row" *ngFor="let transaction of listTransactions">
+                    <td>{{transaction.destination.name || '&nbsp;'}}</td>
+                    <td>{{userService.getDateFormat(transaction.created)}}</td>
+                    <td>{{transaction.status || '&nbsp;'}}</td>
+                    <td  class="text-right">
+                      {{transaction.amount.value | currency:transaction.amount.currency:'symbol' || '&nbsp;'}}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+<!--          <div class="row">
+            <div class="col-sm-12 col-md-5">
+              <div class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+                Showing 1 to 10 of 57 entries
+              </div>
+            </div>
+            <div class="col-sm-12 col-md-7">
+              <div class="dataTables_paginate paging_simple_numbers" id="dataTable1_paginate">
+                <ul class="pagination">
+                  <li class="paginate_button page-item previous disabled" id="dataTable1_previous">
+                    <a href="#" aria-controls="dataTable1" data-dt-idx="0" tabindex="0" class="page-link">Previous</a>
+                  </li>
+                  <li class="paginate_button page-item active">
+                    <a href="#" aria-controls="dataTable1" data-dt-idx="1" tabindex="0" class="page-link">1</a>
+                  </li>
+                  <li class="paginate_button page-item ">
+                    <a href="#" aria-controls="dataTable1" data-dt-idx="2" tabindex="0" class="page-link">2</a>
+                  </li>
+                  <li class="paginate_button page-item ">
+                    <a href="#" aria-controls="dataTable1" data-dt-idx="3" tabindex="0" class="page-link">3</a>
+                  </li>
+                  <li class="paginate_button page-item ">
+                    <a href="#" aria-controls="dataTable1" data-dt-idx="4" tabindex="0" class="page-link">4</a>
+                  </li>
+                  <li class="paginate_button page-item ">
+                    <a href="#" aria-controls="dataTable1" data-dt-idx="5" tabindex="0" class="page-link">5</a>
+                  </li>
+                  <li class="paginate_button page-item ">
+                    <a href="#" aria-controls="dataTable1" data-dt-idx="6" tabindex="0" class="page-link">6</a>
+                  </li>
+                  <li class="paginate_button page-item next" id="dataTable1_next">
+                    <a href="#" aria-controls="dataTable1" data-dt-idx="7" tabindex="0" class="page-link">Next</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>-->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

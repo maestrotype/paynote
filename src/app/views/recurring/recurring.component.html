@@ -1,0 +1,214 @@
+<div class="element-wrapper">
+  <h6 class="element-header">Recurring Checks</h6>
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-3">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search recurring" 
+                       [(ngModel)]="paginationService.searchQuery" (search)="getListRecurring(null)"
+                       #searchQuery="ngModel" (keyup)="getListRecurring(null)">
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="row" style="position: relative;margin-top: 40px;">
+          <hr>
+          <div class="col-sm-12">
+            <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col"></th>
+                  <th scope="col">Customer</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Billing cycle</th>
+                  <th scope="col">Product</th>
+                  <th scope="col">Start</th>
+                  <th scope="col">Next billing</th>                  
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let recurring of listRecurring">
+                  <td data-title="Type" class="recuring-type" scope="row">
+                    <span *ngIf="getType(recurring) == 'Receive'">
+                      <img class="np_image ng-star-inserted" src="assets/img/np-send-money-950868-000001.svg" style="width: 30px;height: 30px;">
+                    </span>
+                    <span *ngIf="getType(recurring) == 'Send'">
+                      <img class="np_image ng-star-inserted" src="assets/img/np-send-money-950868-000000.svg" style="width: 30px;height: 30px;">
+                    </span>
+                  </td>
+                  <td data-title="Customer" [innerHTML]="getNameFrom(recurring)"></td>
+                  <td data-title="Status" class="text-capitalize" [innerHTML]="getStatus(recurring)"></td>
+                  <td data-title="Billing Cycle" class="text-capitalize">{{getBillingCycle(recurring.billing_cycle)}}</td>                 
+                  <td data-title="Product" class="text-capitalize">{{recurring.description || '&nbsp;'}}</td>
+                  <td data-title="Start">
+                    <span *ngIf="recurring.start_cycle">{{userService.getDateFormat( recurring.start_cycle )}}</span>
+                    <span *ngIf="!recurring.start_cycle">&nbsp;</span>
+                  </td>                 
+                  <td data-title="Next Billing">
+                    <span *ngIf="recurring.recur_at">{{userService.getDateFormat( recurring.recur_at )}}</span>
+                    <span *ngIf="!recurring.recur_at">&nbsp;</span>
+                  </td>
+                  <td data-title="Action" class="actions">
+                    <a href="javascript:void(0)" title="View Details" style="margin-right: 10px;"
+                       (click)= "getRequiringDetails( templateRequringDetails, recurring )" >
+                      <i class="fa fa-search"></i>
+                    </a>
+                    <a title="Cancel" href="javascript:void(0)" (click)="toggleStatusReccuring(recurring)" style="margin-right: 10px; color: red;"
+                       *ngIf="recurring.disabled == 0 && recurring.finished == 0 && userService.getToken() == recurring.u_token">
+                      <i class="fa fa-trash-o"></i>
+                    </a>
+                  </td> 
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No recurring were found.</span>
+        </div>
+        <div class="row">          
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="getListRecurring($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #templateRequringDetails let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Recurring Check</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <div class="modal-body" style="overflow: overlay;margin-bottom: 40px;">
+      <div class="element-box" style="padding: 1.0rem 1rem;margin-bottom: 0px;">
+        <h6 style="border-bottom: 1px solid rgba(0,0,0,0.05);padding-bottom: 1rem;">Details</h6>
+        <div class="row" style="line-height: 20px;">
+          <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="row">
+              <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12">
+                <label>Created</label>
+              </div>
+              <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12">
+                {{userService.getDateFormat(objCurentRecuring.created_at)}}
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="row">
+              <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12">
+                <label>Next billing</label>
+              </div>
+              <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12">
+                <span *ngIf="objCurentRecuring.recur_at">{{userService.getDateFormat(objCurentRecuring.recur_at)}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="row">
+              <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12">
+                <label>Status</label>
+              </div>
+              <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12 text-capitalize" [innerHTML]="getStatus(objCurentRecuring)"></div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="row">
+              <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12">
+                <label>Customer</label>
+              </div>
+              <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12 text-capitalize">
+                {{getNameFrom(objCurentRecuring, true)}}
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="row">
+              <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12">
+                <label>Product</label>
+              </div>
+              <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12">
+                {{objCurentRecuring.description}}
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="row">
+              <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12">
+                <label>Billing Cycle</label>
+              </div>
+              <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12">
+                {{getBillingCycle(objCurentRecuring.billing_cycle)}}
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="row">
+              <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12">
+                <label>Installments #</label>
+              </div>
+              <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12">
+                <span *ngIf="objCurentRecuring.num_of_payments && objCurentRecuring.num_of_payments > 0">
+                  {{objCurentRecuring.num_of_paid}}&nbsp;/&nbsp;{{objCurentRecuring.num_of_payments}}
+                </span>
+                <span style="font-size: 30px;line-height: 15px;" *ngIf="!objCurentRecuring.num_of_payments">&infin;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="element-box" style="padding: 1.0rem 1rem;margin-bottom: 0px;">
+        <h6 style="border-bottom: 1px solid rgba(0,0,0,0.05);padding-bottom: 1rem;">Checks</h6>
+        <table width="100%" class="table table-striped table-lightfont dataTable responsive-table" 
+               role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+          <thead>
+            <tr role="row">
+              <th scope="col">Number</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Status</th>
+              <th scope="col">Customer</th>
+              <th scope="col">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr role="row" *ngFor="let requringDetail of listRecurringDetails">
+              <td data-title="Number" scope="row">{{requringDetail.number || '&nbsp;'}}</td>
+              <td data-title="Amount">{{transService.getAmountString(requringDetail || '&nbsp;')}}</td> 
+              <td data-title="Status" class="text-capitalize" [innerHTML]="transService.getStatus(requringDetail)"></td>
+              <td data-title="Customer" [innerHTML]="getNameFrom(requringDetail)"></td>
+              <td data-title="Date">{{userService.getDateFormat(requringDetail.created_at)}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="element-box" style="padding: 1.0rem 1rem;margin-bottom: 0px;">
+        <h6 style="border-bottom: 1px solid rgba(0,0,0,0.05);padding-bottom: 1rem;">Logs</h6>
+      </div>
+      <div class="element-box" style="padding: 1.0rem 1rem;margin-bottom: 0px;">
+        <h6 style="border-bottom: 1px solid rgba(0,0,0,0.05);padding-bottom: 1rem;">Events</h6>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Close</button>
+    </div>
+  </div>
+</ng-template>

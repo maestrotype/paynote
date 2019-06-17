@@ -1,0 +1,191 @@
+# PHP CircleCI 2.0 configuration file for Laravel 5.5 and Laravel Dusk by Wes Mahler 
+# Author wesmahler.com
+#
+# Check https://circleci.com/docs/2.0/language-php/ for more details 
+#
+version: 2
+jobs:
+  build:
+    docker:    
+#      - image: circleci/php:7.1.14
+#      - image: circleci/mysql:8.0.3
+       - image: circleci/node:10-browsers
+#        environment:
+#          - MYSQL_ROOT_PASSWORD=ubuntu
+#          - MYSQL_DATABASE=paynote_dwolla
+#        command: mysql -uroot -p ubuntu -D paynote_test < /home/circleci/paynote/api/database/structure/Schemas.sql
+          
+    working_directory: ~/paynote
+    steps:
+      - checkout
+      # Leave this for future use if php-zip is ever  required 
+      # If you remove the flag 'composer install --ignore-platform-reqs`
+      # composer will require php-zip to be installed. It appers that
+      # this isn't currently needed, so we are removing this from CircleCI
+      # to save 30 seconds of build time. The php-zip package isn't currently
+      # used by anything. If it ever dserveoes need to be used again, this  can be
+      # uncommented.
+      
+      # Log the current branch
+      - run:
+          name: Show current branch
+          command: echo ${CIRCLE_BRANCH}
+      
+         
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: npm install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+          
+      - run:
+          name: Install Angular CLI
+          command: sudo npm install -g @angular/cli@7.0.4
+#      - run:
+#          name: Disable project-specific usage analytics.
+#          command: ng analytics project off
+      # run tests!
+#      - run: yarn test
+      - run:
+          name: Building 
+          command: |
+              if [ "${CIRCLE_BRANCH}" == "master" ]; then
+                  ng build --prod
+                  ng build --configuration=sandbox
+              elif [ "${CIRCLE_BRANCH}" == "dev" ]; then
+                  ng build --configuration=dev
+                  ng build --configuration=dev-sandbox
+              elif [ "${CIRCLE_BRANCH}" == "demo" ]; then
+                  ng build --configuration=demo
+                  ng build --configuration=demo-sandbox
+              fi
+              
+      # Cache the dist folder for the deploy job
+      - save_cache:
+          key: v1-dist-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+              - dist
+      - save_cache:
+          key: v1-dist-sandbox-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+              - dist-sandbox
+      # Restore cache from the build job which contains the
+      # dist folder that needs to be deployed
+#      - restore_cache:
+#          key: v1-dist-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+      # Install AWS cli
+#      - run:
+#          name: Install aws cli
+#          command:
+#              sudo apt-get -y -qq install awscli
+      # Set the signature version for the S3 auth
+#      - run:
+#          name: Setting Signature Version 4 for S3 Request Authentication
+#          command: aws configure set default.s3.signature_version s3v4
+      # Deploy to the S3 bucket corresponding to the current branch
+#      - run:
+#          name: Deploy to S3
+#          command: |
+#              if [ "${CIRCLE_BRANCH}" == "develop" ]; then
+#                  aws --region eu-west-2 s3 sync dist s3://project-dev/ --delete
+#              elif [ "${CIRCLE_BRANCH}" == "staging" ]; then
+#                  aws --region eu-west-2 s3 sync dist s3://project-qa/ --delete
+#              elif [ "${CIRCLE_BRANCH}" == "master" ]; then
+#                  aws --region eu-west-2 s3 sync dist s3://project/ --delete
+#              fi
+  deploy_prod:
+     machine:
+       image: circleci/classic:latest
+     working_directory: ~/paynote
+     steps:
+       - checkout
+       - restore_cache:
+          key: v1-dist-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+              - dist
+       - restore_cache:
+          key: v1-dist-sandbox-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+              - dist-sandbox
+          
+       - run:
+           name: Deploy Production!
+           command: |
+             zip -r ./paynote-system.zip ./dist ./dist-sandbox ./e2e ./.deployment ./src ./angular.json ./package.json ./tsconfig.json ./tslint.json ./appspec.yml
+             aws s3 --region us-east-1 cp ./paynote-system.zip s3://paynote-deploy-live/paynote-system.zip
+             export ETAG=$(aws s3api head-object --region us-east-1 --bucket paynote-deploy-live --key paynote-system.zip | grep -Po '(?<=\"ETag\": "\\")[^",^\\]*');
+             aws deploy create-deployment --region us-east-1 --application-name prod-paynote --s3-location bucket=paynote-deploy-live,bundleType=zip,eTag=$ETAG,key=paynote-system.zip --deployment-group-name prod-paynote --deployment-config-name CodeDeployDefault.OneAtATime --description "PayNote System production"
+  deploy_dev:
+     machine:
+       image: circleci/classic:latest
+     working_directory: ~/paynote
+     steps:
+       - checkout
+       - restore_cache:
+          key: v1-dist-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+              - dist
+       - restore_cache:
+          key: v1-dist-sandbox-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+              - dist-sandbox
+              
+       - run:
+           name: Deploy Dev!
+           command: |
+             zip -r ./paynote-system.zip ./dist ./dist-sandbox ./e2e ./.deployment ./src ./angular.json ./package.json ./tsconfig.json ./tslint.json ./appspec.yml
+             aws s3 --region us-east-1 cp ./paynote-system.zip s3://paynote-deploy-dev/paynote-system.zip
+             export ETAG=$(aws s3api head-object --region us-east-1 --bucket paynote-deploy-dev --key paynote-system.zip | grep -Po '(?<=\"ETag\": "\\")[^",^\\]*');
+             aws deploy create-deployment --region us-east-1 --application-name dev-paynote --s3-location bucket=paynote-deploy-dev,bundleType=zip,eTag=$ETAG,key=paynote-system.zip --deployment-group-name dev-paynote-client --deployment-config-name CodeDeployDefault.OneAtATime --description "PayNote System Dev"
+  deploy_demo:
+     machine:
+       image: circleci/classic:latest
+     working_directory: ~/paynote
+     steps:
+       - checkout
+       - restore_cache:
+          key: v1-dist-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+              - dist
+       - restore_cache:
+          key: v1-dist-sandbox-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+              - dist-sandbox
+       - run:
+           name: Deploy Demo!
+           command: |
+             zip -r ./paynote-system.zip ./dist ./dist-sandbox ./e2e ./.deployment ./src ./angular.json ./package.json ./tsconfig.json ./tslint.json ./appspec.yml
+             aws s3 --region us-east-1 cp ./paynote-system.zip s3://paynote-deploy-demo/paynote-system.zip
+             export ETAG=$(aws s3api head-object --region us-east-1 --bucket paynote-deploy-demo --key paynote-system.zip | grep -Po '(?<=\"ETag\": "\\")[^",^\\]*');
+             aws deploy create-deployment --region us-east-1 --application-name demo-paynote --s3-location bucket=paynote-deploy-demo,bundleType=zip,eTag=$ETAG,key=paynote-system.zip --deployment-group-name demo-paynote --deployment-config-name CodeDeployDefault.OneAtATime --description "PayNote System Demo"
+
+workflows:
+ version: 2
+ build_and_deploy:
+   jobs:
+     - build
+     - deploy_prod:
+         requires:
+           - build
+         filters:
+           branches:
+             only: master
+     - deploy_dev:
+         requires:
+           - build
+         filters:
+           branches:
+             only: dev
+     - deploy_demo:
+         requires:
+           - build
+         filters:
+           branches:
+             only: demo

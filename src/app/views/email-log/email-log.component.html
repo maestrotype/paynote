@@ -1,0 +1,130 @@
+<div class="element-wrapper">
+  <div class="element-actions">
+    <form class="form-inline justify-content-sm-end">
+      <label>Select Status&nbsp;</label>
+      <select name="period" class="form-control form-control-sm rounded" [(ngModel)]="transactionPeriod.status" #period="ngModel" (change)="getListMailLog()">
+        <option value="Send">Send</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Error">Error</option>
+      </select>
+    </form>
+  </div>
+  <div class="element-actions">
+    &nbsp;&nbsp;&nbsp;
+  </div>  
+  <div class="element-actions">
+    <form class="form-inline justify-content-sm-end">
+      <label>Select Period:&nbsp;</label>
+      <select name="period" class="form-control form-control-sm rounded" [(ngModel)]="transactionPeriod.period" #period="ngModel" (change)="getListMailLog()">
+        <option value="1">Today</option>
+        <option value="7">Last Week </option>
+        <option value="30">Last 30 Days</option>
+        <option value="">All</option>
+      </select>
+    </form>
+  </div>
+  <h6 class="element-header">Email Log</h6>
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-3">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search email" 
+                       [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel" 
+                       (search)="getListMailLog()" (keyup)="getListMailLog(null)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="position: relative;margin-top: 40px;">
+          <div class="col-sm-12 table-responsive">
+            <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    <!--Subject-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('subject', paginationService.sortDir, getListMailLog())">Subject</a>
+                    <i *ngIf="paginationService.sortField == 'subject' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'subject' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--From-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('from', paginationService.sortDir, getListMailLog())">From</a>
+                    <i *ngIf="paginationService.sortField == 'from' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'from' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--To-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('to', paginationService.sortDir, getListMailLog())">To</a>
+                    <i *ngIf="paginationService.sortField == 'to' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'to' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Status-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('status', paginationService.sortDir, getListMailLog())">Status</a>
+                    <i *ngIf="paginationService.sortField == 'status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Created-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, getListMailLog())">Created</a>
+                    <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let mailLog of mailLogList">
+                    <td data-title="Subject" scope="row">
+                    {{mailLog.subject || '&nbsp;'}}
+                  </td>
+                  <td data-title="From">
+                    {{mailLog.from || '&nbsp;'}}<br>
+                    {{mailLog.from_name || '&nbsp;'}}
+                  </td>
+                  <td data-title="To">
+                    {{mailLog.to || '&nbsp;'}}<br>
+                    {{mailLog.to_name || '&nbsp;'}}
+                  </td>
+                  <td data-title="Status">
+                    {{mailLog.status || '&nbsp;'}}
+                  </td>
+                  <td data-title="Created">
+                    {{userService.getDateFormat(mailLog.created_at)}}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No email log were found...</span>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="getListMailLog($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+

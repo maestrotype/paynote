@@ -1,0 +1,76 @@
+<div class="element-wrapper">
+  <div class="row">
+    <div class="table-responsive">
+      <div class="pricing-plans row no-gutters">
+        <div class="pricing-plan with-hover-effect"  *ngFor="let viewPlan of listViewOurPlan" 
+             [ngClass]="{'selected_start_planDisabled' : isBlockSelectedPlan(viewPlan.p_token), 
+             'col-md-6 col-sm-6 col-lg-3': userService.isIndividualAccount(), 
+             'col-md-6 col-sm-6 col-lg-4': !userService.isIndividualAccount() }"> 
+          <div class="plan-head">
+            <div class="plan-name" style="">
+              {{viewPlan.name}}
+            </div>            
+          </div>
+          <div class="plan-body">
+            <div class="plan-price-w">
+              <div class="price-value" style="font-size: 1.5rem;">
+                <span *ngIf="viewPlan.amount != '0.00'">
+                  <span *ngIf="subPTocken == viewPlan.p_token">
+                    <i class="icon-feather-check" style="font-size: 20px;"></i>
+                  </span>
+                  {{viewPlan.amount | currency:'':'symbol'}}
+                  <div class="price-label" style="text-transform: lowercase;border-top: none;">per month</div>
+                </span>
+                <span *ngIf="viewPlan.amount == '0.00'">
+                  Free forever
+                  <div class="price-label" style="text-transform: lowercase;border-top: none;">&nbsp;</div>
+                </span>
+              </div>
+              <div class="price-label" style="text-transform: inherit;">
+                Send {{viewPlan.send.num}} Checks/mo included
+              </div>              
+            </div>
+          </div>
+          <div class="plan-description">
+            <p style="min-height: 44px;">{{viewPlan.note}}</p>
+            <ul>
+              <li *ngIf="viewPlan.amount == '0.00'">
+                Send Additional Checks for {{viewPlan.send.over | currency:'':'symbol'}}
+              </li>
+              <li *ngIf="viewPlan.amount != '0.00'">
+                Send Additional Digital Checks for {{viewPlan.send.over | currency:'':'symbol'}}
+              </li>
+              
+              <li *ngIf="viewPlan.amount == '0.00'">
+                Request Digital Checks/Invoices For {{viewPlan.receive.verify}} %
+              </li>
+              <li *ngIf="viewPlan.amount != '0.00'">
+                Request Digital Checks For {{viewPlan.receive.verify}} %
+              </li>
+              
+              <li>
+                Real Time Check Tracking
+              </li>
+              
+              <li *ngIf="viewPlan.next_day == 0">
+                Standard Transfers
+              </li>
+              <li *ngIf="viewPlan.next_day == 1">
+                Next Day Transfers
+              </li>
+            </ul>
+          </div>
+          <div class="plan-btn-w">
+            <button (click)="addMerchandPlan(viewPlan.p_token)" class="btn btn-primary btn-block"
+                [disabled]="isDisableSelectPlan(viewPlan.p_token)" 
+                style="max-width: 95%;margin: auto;padding-top: 10px; padding-bottom: 10px;">
+              {{getButtonTitleBuyPlan( viewPlan )}}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div (click)="getListViewOurPlans()" id="initListViewOurPlans" style="display: none;">&nbsp;</div>

@@ -1,0 +1,195 @@
+<div class="element-wrapper">
+  <!--<h6 class="element-header">Customers</h6>-->
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">        
+
+        <div class="row" style="position: relative;margin-top: 40px;border-bottom: none;">
+          <hr>
+          <button class="btn btn-primary btn-rounded" type="button" title="Add"
+                  style="position: absolute;padding: 15px;font-weight: bold;font-size: 20px;right: 0px;top: -30px;"
+                  (click)= "openModalAdd(addWebhookDialog)">+</button>
+          <div class="col-sm-12">
+            <table id="dataTable1" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%; margin-top: 25px !important;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    Webhook url
+                  </th>
+                  <th scope="col">
+                    Unpaused / Paused
+                  </th>
+                  <th scope="col">
+                    Created
+                  </th>
+                  <th scope="col">
+                    Delete
+                  </th>
+
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let webhook of dataWebhooks" (click)= "toggleViewWebhookList(webhook)">
+                  <td data-title="Webhook url" scope="row" style="white-space: normal; word-break: break-all; text-align: left;">
+                    {{webhook.url}}
+                  </td>
+                  <td data-title="Unpaused / Paused">
+                  <mat-slide-toggle
+                    class="example-margin"                      
+                    color="primary"
+                    (change)="onToggleWebhook($event, webhook.id)"
+                    [(ngModel)]="webhook.paused" [ngModelOptions]="{standalone: true}">
+                    <!--(change)="onChangeReccuring($event)"-->
+                    <!--Billing cycle-->
+                  </mat-slide-toggle>
+                  <!--{{webhook.paused}}-->
+                  </td>
+                  <td data-title="Created">
+                    <i class="picons-thin-icon-thin-0026_time_watch_clock"></i> {{userService.getDateFormat(webhook.created)}}
+                  </td>
+                  <td data-title="Delete">
+                    <button class="btn btn-primary btn-rounded btn-rounded-margin" (click)= "deleteWebhookModal(webhook.id)" style="margin: 7px 0;">Delete</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="element-wrapper">
+  <h6 class="element-header">Webhooks List</h6>
+  <!--<div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div>--> 
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-12">
+            <label>webhook url : <b>{{webhookListID.url}}</b></label>
+          </div>
+        </div>
+        <div class="row" style="position: relative;margin-top: 40px;">
+          <hr>
+          <div class="col-sm-12">
+            <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th role="row">
+                    ID
+                  </th>
+                  <th role="row">
+                    Event
+                  </th>
+                  <th role="row">
+                    View
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let list of listWebhookData">
+                    <td data-title="ID" scope="row">
+                    {{list.id}}
+                  </td>
+                  <td data-title="Event">
+                    {{list.topic}}
+                  </td>
+                  <td data-title="View">
+                    <a title="View webhook" (click)= "openModal( viewWebhookDialog, list )" class="viewWebhook" href="javascript:void(0)">
+                       <i class="picons-thin-icon-thin-0043_eye_visibility_show_visible"></i>
+                    </a>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No webhooks were found.</span>
+        </div>
+        <div class="row">          
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="listWebhook($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<ng-template #addWebhookDialog let-c="close" let-d="dismiss" let-create="addWebhook">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Add Webhook</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form name="form" (ngSubmit)="f.form.valid && addNewWebhook()" #f="ngForm">
+          <div class="modal-body">   
+        <div class="modal-body">     
+          <div class="col-sm-12">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !url.valid && (url.dirty || url.touched)}">
+                 <label for="">Webhook url</label>
+              <input class="form-control" placeholder="Webhook" type="text" [(ngModel)]="addWebhook.url" 
+                     name="url" required #url="ngModel">
+                     <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!url.valid && (url.dirty || url.touched)">
+                     <span *ngIf="url.errors.required">
+                  Webhook url is required
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button [disabled]="isLoading" class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+          <button [disabled]="loading || !f.form.valid" class="slick-next slick-arrow" type="submit">Add</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+
+<ng-template #viewWebhookDialog let-c="close" let-d="dismiss" let-create="viewWebhook">
+  <div class="modal-blue-bg onboarding-content">
+  <div class="modal-header">
+    <h4 class="modal-title">View Webhook</h4>
+    <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+            <span aria-hidden="true">&times;</span>
+    </button>
+  </div> 
+  <!--<form name="form" (ngSubmit)="f.form.valid" #f="ngForm">-->
+  <div class="modal-body">   
+
+    <div class="modal-body">     
+      <pre style="word-spacing: normal;word-break: break-all;white-space: pre-wrap;">{{objParam | json}}</pre>
+    </div>
+
+    <!--</div>-->
+  </div>
+  <div class="modal-footer">
+    <button [disabled]="isLoading" class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+    <!--<button type="button" class="btn btn-primary">Yes</button>-->
+  </div>
+  <!--</form>-->
+  </div>
+</ng-template>

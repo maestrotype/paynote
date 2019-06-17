@@ -1,0 +1,867 @@
+<!--<div *ngIf="userService.isSandBoxMode() && !userService.isDemoUser()" role="alert" style="margin: 20px 20px 0px 20px;" 
+  class="text-center alert alert-info">
+  You are in <strong>Sandbox</strong> Environment
+</div>
+<div *ngIf="userService.isSandBoxMode() && userService.isDemoUser()" role="alert" style="margin: 20px 20px 0px 20px;" 
+  class="text-center alert alert-warning">
+  You are in <strong>Demo</strong> Environment
+</div>-->
+
+<div *ngIf="userService.warningMessages.length" id="verifyMicroDeposit">
+  <div *ngFor="let objWarMessage of userService.warningMessages">
+    <div id="{{objWarMessage.action}}" role="alert" (click)="callAction( objWarMessage )" class="text-center infoMessage">
+       {{objWarMessage.message}}
+       <a href="javascript:void(0)" style="color: wheat;"
+        (click)="openDialogPlaid()" *ngIf="objWarMessage.action == 'verify_funding_source'">add your bank instantly</a>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!userService.isAdmin() && !userService.isSuperAdmin()">
+  <div id="setupYouProfile" class="wrap-user-messages-in-blue-block"
+       *ngIf="userService.isMerchant() && userService.isPasswordSet() && !userService.isFilledInfoForDwolla()"
+       (click)="jqueryService.showModal('.onboarding-in-dwolla-modal', {backdrop: 'static', keyboard: false})">
+    <span>
+      Your account information is incomplete. Setup your profile &nbsp;<i class="fa fa-long-arrow-right"></i>
+    </span>
+  </div>
+  <div id="setupPassword" class="wrap-user-messages-in-blue-block" *ngIf="userService.isCustomer() && !userService.isPasswordSet()"
+       (click)="jqueryService.showModal('.password-setup-modal', {backdrop: 'static', keyboard: false})">
+    <span>
+      Secure you Account. Create a password, enter your mobile phone number.
+    </span>
+  </div>
+
+  <div id="accountRetryStatus" class="wrap-user-messages-in-blue-block" *ngIf="userService.isDwollaRetry()"
+       (click)="jqueryService.showModal('.onboarding-in-dwolla-modal', {backdrop: 'static', keyboard: false})">
+    <span>
+      <span [innerHTML]="messages.get('ACCOUNT_HAS_RETRY_STATUS')"></span> &nbsp;<i class="fa fa-long-arrow-right"></i>
+    </span>
+  </div>
+
+  <div id="accountDownloadStatus" class="wrap-user-messages-in-blue-block" 
+       *ngIf="userService.isDwollaDocument() && !userService.isHaveDocumentInPending()"
+       (click)="openDialogModal(addDocumentDialog)">
+    <span>
+      <span [innerHTML]="messages.get('ACCOUNT_HAS_DOWNLOAD_STATUS')"></span> &nbsp;<i class="fa fa-long-arrow-right"></i>
+    </span>
+  </div>
+  
+  <div id="accountDownloadStatus" class="wrap-user-messages-in-blue-block" 
+       *ngIf="userService.isDwollaDocument() && userService.isHaveDocumentInPending()"
+       (click)="userService.redirectJustSimple('/account', true, {tab_name: 'documents'})">
+    <span>
+      <span [innerHTML]="messages.get('ACCOUNT_HAS_DOWNLOAD_PENDING_STATUS')"></span> &nbsp;<i class="fa fa-long-arrow-right"></i>
+    </span>
+  </div>
+  
+  <div id="accountSuspendedStatus" class="wrap-user-messages-in-blue-block" *ngIf="userService.isDwollaSuspended()">
+    <span>
+      <span [innerHTML]="messages.get('ACCOUNT_HAS_SUSPENDED_STATUS')"></span>
+    </span>
+  </div>
+  <!--temporarily tern off-->
+<!--  <div id="ADDITIONAL_VERIFICATION_IS_REQUIRED" class="wrap-user-messages-in-blue-block" *ngIf="isShowAdditionalVerificationCode()"
+       (click)="callAction({action:'verify_voice_code'})">
+    <span>
+      <span [innerHTML]="messages.get('ADDITIONAL_VERIFICATION_IS_REQUIRED')"></span>
+    </span>
+  </div>-->
+
+  <div id="accountUnverifiedStatus" style="cursor: warning;" class="wrap-user-messages-in-blue-block" 
+       *ngIf="!userService.isEmailConfirmation()">
+    <span>
+      <span [innerHTML]="messages.get('ACCOUNT_HAS_UNVERIFIED_EMAIL')"></span>&nbsp;
+      <span class="resendEmail" (click)="profileInfoVerifyEmail()">Resend</span>
+    </span>
+  </div>
+
+  <div id="addBeneficialOwner" class="wrap-user-messages-in-blue-block" *ngIf="userService.isFilledInfoForDwolla() 
+       && !userService.isDwollaRetry() && !userService.isDwollaDocument() && !userService.isDwollaSuspended() 
+       && userService.isRequestAddBeneficialOwner"
+       (click)="openDialogModal(addBeneficialOwner)">
+       <!--(click)="userService.redirectJustSimple('/account', true, {tab_name: 'profile'})">-->
+    <span>
+      <span [innerHTML]="messages.get('NOTIFICATION_ADD_BENEFICIAL_OWNER')"></span>
+    </span>
+  </div>
+  <div  id="sertifyBeneficialOwner" class="wrap-user-messages-in-blue-block" *ngIf="userService.isFilledInfoForDwolla() && userService.isRequestCertifyBeneficialOwner
+       && !userService.isRequestVerifydBeneficialOwner && !userService.isRequestAddBeneficialOwner && !userService.isDwollaDocument()"
+       (click)="userService.redirectJustSimple('/account', true, {tab_name: 'profile'})">
+    <span>
+      <span [innerHTML]="messages.get('NOTIFICATION_CERTIFY_BENEFICIAL_OWNER')"></span>
+    </span>
+  </div>
+  <div id="verifyBeneficialOwner" class="wrap-user-messages-in-blue-block" *ngIf="userService.isFilledInfoForDwolla() && !userService.isRequestCertifyBeneficialOwner
+       && userService.isRequestVerifydBeneficialOwner && !userService.isRequestAddBeneficialOwner && !userService.isDwollaDocument()"
+       (click)="userService.redirectJustSimple('/account', true, {tab_name: 'profile'})">
+    <span>
+      <span [innerHTML]="messages.get('NOTIFICATION_VERIFY_BENEFICIAL_OWNER')"></span>
+    </span>
+  </div>
+  
+  <div  id="isPlanPaymentFailed" class="wrap-user-messages-in-red-block" *ngIf="userService.isPlanPaymentFailed()"
+       (click)="userService.redirectJustSimple('/account/funding_sources/add')">
+    <span>
+      <span [innerHTML]="messages.get('NOTIFICATION_PLAN_PAYMENT_FAILED')"></span>
+    </span>
+  </div>
+
+  <div  id="isHavePersonalSignupLock" class="wrap-user-messages-in-red-block" *ngIf="userService.isHavePersonalSignupLock()">
+    <span>
+      <span [innerHTML]="messages.get('NOTIFICATION_HAVE_PERSONALSIGNUP_LOCK')"></span>
+    </span>
+  </div>
+
+  <div  id="isHaveReachedLimits" class="wrap-user-messages-in-red-block" *ngIf="userService.isHaveReachedLimits()">
+    <span>
+      <span [innerHTML]="userService.objPlanLimits.alarmMessage"></span>
+    </span>
+  </div>
+</div>
+
+<div *ngIf="!userService.isAdmin() && !userService.isSuperAdmin()">
+  <div aria-hidden="true" class="plansDialog onboarding-modal onboarding-purchase-plan-modal modal fade animated" role="dialog" tabindex="-1">
+    <div role="document" class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class=" with-gradient-ver">
+          <div class="modal-header">      
+            <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-center">
+            <h4 class="modal-title" *ngIf="!userService.isHavePlan()">Change your Paynote plan</h4>
+            <h4 class="modal-title" *ngIf="userService.isHavePlan()">Change Plan</h4>
+            <div class="modal-body">
+              <app-purchase-plan></app-purchase-plan>
+            </div>
+          </div>
+          <div class="modal-footer">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div aria-hidden="true" class="alert-process-beneficiar-modal modal fade animated" role="dialog">
+  <div role="document" class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Please go through the steps the verification process</h4>
+      <button type="button" class="close" aria-label="Close" (click)="jqueryService.closeModal('.alert-process-beneficiar-modal')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <span *ngIf="userService.isRequestAddBeneficialOwner">Add a beneficial owner(s) and check the status of your beneficial owner</span>
+      <br>
+      <span *ngIf="userService.isRequestVerifydBeneficialOwner">Verify beneficial owner(s) information</span>
+      <br>
+      <span *ngIf="userService.isRequestCertifyBeneficialOwner">Certify beneficial owner(s) information</span>
+    </div>
+    <br><br>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="jqueryService.closeModal('.alert-process-beneficiar-modal')">
+        Close
+      </button>
+    </div>
+  </div>
+  </div>
+</div>
+
+
+
+<!--     -----------------------         Modal Popup Templates         --------------    -->
+
+<ng-template #addDocumentDialog let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Upload Document</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <form name="form" (ngSubmit)="f.form.valid && onFileChange()" #f="ngForm">
+      <div class="modal-body">
+        <span class="text-capitalize" *ngIf="userService.isDwollaNeedUploadBusDoc()">
+          Action needed:
+          <span class="badge badge-warning" 
+                *ngIf="userService.isDwollaNeedControllerId() || userService.isDwollaNeedControllerIdAndBusinessDoc()">
+                CONTROLLER ID
+          </span>&nbsp;
+          <span class="badge badge-warning" 
+                *ngIf="userService.isDwollaNeedBusinessDoc() || userService.isDwollaNeedControllerIdAndBusinessDoc()">
+                BUSINESS DOC
+          </span>&nbsp;
+          | 
+          <button (click)="eventClickMoreInfo()" class="mr-2 mb-2 btn btn-link" 
+            style="margin: 0; padding-bottom: 0" type="button">
+            <span *ngIf="!objUserActionsComp.showMoreText">Show More</span>
+            <span *ngIf="objUserActionsComp.showMoreText">Show Less</span>
+          </button>
+        </span>
+        <div class="element-box" id="wrapp_info_need">
+          <span *ngIf="userService.isDwollaNeedControllerId() || userService.isDwollaNeedControllerIdAndBusinessDoc()">
+            <p style="padding: 0;font-weight: bold;margin-bottom: 5px;" class="text-left">Controller Documentation
+              <span class="badge badge-warning" style="float: right;font-weight: normal;" >CONTROLLER ID</span>
+            </p>
+            <p style="padding: 0;margin-bottom: 5px;" class="text-left">A scanned photo of the Controller's identifying document can be one of the following:</p>
+            <ul>
+              <li>passport</li>
+              <li>state issued driver's license</li>
+            </ul>
+          </span>
+          <span *ngIf="userService.isDwollaNeedBusinessDoc() || userService.isDwollaNeedControllerIdAndBusinessDoc()">
+            <p style="padding: 0;font-weight: bold;margin-bottom: 5px;" class="text-left">Business Documentation
+              <span class="badge badge-warning" style="float: right;font-weight: normal;" >BUSINESS DOC</span>
+            </p>
+            <p style="padding: 0;margin-bottom: 5px;" class="text-left">
+              Documents that are used to help identify a business can include the following:
+            </p>
+            <ul>
+              <li><em>Partnership, General Partnership:</em> EIN Letter (IRS-issued SS4 confirmation letter).</li>
+              <li><em>Limited Liability Corporation (LLC), Corporation:</em> EIN Letter (IRS-issued SS4 confirmation letter).</li>
+              <li><em>Sole Proprietorship:</em> One or more of the following, as applicable to your sole proprietorship: 
+                Fictitious Business Name Statement; Certificate of Assumed Name; Business License; Sales/Use Tax License; 
+                Registration of Trade Name; EIN documentation (IRS-issued SS4 confirmation letter); 
+                Color copy of a valid government-issued photo ID (e.g. a passport or driver's license).</li>
+            </ul>
+            <p class="text-left">Other business documents that are applicable includes any US government entity (federal, state, local) 
+              issued business formation or licensing exhibiting the name of the business enrolling with Dwolla, or; 
+              Any business formation documents exhibiting the name of the business entity in addition to being filed and stamped by a 
+              US government entity. Examples include:</p>
+            <ul>
+              <li>Filed and stamped Articles of Organization or Incorporation</li>
+              <li>Sales/Use Tax License</li>
+              <li>Business License</li>
+              <li>Certificate of Good Standing</li>
+            </ul>
+          </span>
+        </div>
+        <br>
+        The file must be either a <i>.jpg</i>, <i>.jpeg</i>, <i>.png</i>, <i>.tif</i>, or <i>.pdf</i> up to 10MB in size.
+        <div class="profile-tile">
+          <span class="profile-tile-box">
+            <div class="pt-avatar-w" style="border-radius: 0px;">
+              <i style="color: #aab7c8; font-size: 5em;" class="icon-feather-file-text"></i>
+            </div>
+          </span>
+          <div class="profile-tile-meta">
+            <ul>
+              <li>
+                <div class="row">
+                  <div class="col-sm-12 col-lg-12 col-md-12 col-xs-12">
+                    <div class="form-group" [ngClass]="{ 'has-error has-danger': !type.valid && (type.dirty || type.touched) }">
+                      <label for="">Select Document Type</label>
+                      <select name="merchantDocumentType" class="form-control" placeholder="Select Document Type" 
+                              required style="width: 100%"
+                              [(ngModel)]="formDataDocument.type" #type="ngModel" >
+                        <option value="passport">Passport</option>                     
+                        <option value="license">License</option>                     
+                        <option value="idCard">IdCard</option>                     
+                        <option value="other">Tax ID/EIN Letter/SS4</option>
+                        <option value="other">Filed and stamped Articles of Organization or Incorporation</option>
+                        <option value="other">Sales/Use Tax License</option>
+                        <option value="other">Business License</option>
+                        <option value="other">Certificate of Good Standing</option>
+                        <option value="other">Other</option>
+                      </select>
+                      <div *ngIf="!type.valid && (type.dirty || type.touched)" 
+                        class="help-block form-text with-errors form-control-feedback">
+                        <span *ngIf="type.errors.required">
+                          Document type is required
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </li>
+              <li>
+                <div class="row">
+                  <div class="col-sm-12">
+                    <label for=""><i class="icon-feather-download"></i> Upload Document</label>
+                    <input type="file"  class="form-control" name="payNoteDocUpload" id="payNoteDocUpload" accept="application/pdf, image/*"
+                           [ngClass]="{ 'errorFileType': errorFileType || errorFileSize}" type="file" (change)="onImageChangeFromFile($event)"
+                           [(ngModel)]="formDataDocument.payNoteDocUpload" #payNoteDocUpload="ngModel" required>
+                  </div>                
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Cancel</button>
+        <button [disabled]="loading || !f.form.valid || errorFileSize" class="slick-next slick-arrow">Upload</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+
+<div aria-hidden="true" class="alert-verify-email-modal modal fade animated" role="dialog">
+  <div role="document" class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Please confirm your email</h4>
+      <button type="button" class="close" aria-label="Close" (click)="jqueryService.closeModal('.alert-verify-email-modal')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <span [innerHTML]="messages.get('ACCOUNT_HAS_UNVERIFIED_EMAIL')"></span>&nbsp;
+      <span class="resendEmail" (click)="profileInfoVerifyEmail()">Resend</span>
+    </div>
+    <br><br>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="jqueryService.closeModal('.alert-verify-email-modal')">
+        Close
+      </button>
+    </div>
+  </div>
+  </div>
+</div>
+
+<div aria-hidden="true" class="alert-relogin-modal modal fade animated" role="dialog" [ngClass]="{ 'show-relogin': objReloginPopup.showloginAlert }" style="z-index: 99999">
+  <div role="document" class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Do you want to continue?</h4>
+    </div>
+    <div class="modal-body">
+      <p>Your session is about to expire and you’ll be automatically logged out. Press continue to extend your session.</p>
+      <p class="text-center" style="font-weight: bold; font-size: 18px;">{{objReloginPopup.log_sec}} seconds</p>
+    </div>
+    <br><br>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="refreshUser()">
+        Continue
+      </button>
+      <button class="slick-next slick-arrow" type="button" (click)="authenticationService.logout()">
+        Logout
+      </button>
+    </div>
+  </div>
+  </div>
+</div>
+
+<ng-template #foundingSourcesVerifiedDialog let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Please verify your account</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <form name="form" (ngSubmit)="f.form.valid && verifyFundingSourcesBank()" #f="ngForm">
+          <div class="modal-body">
+        <div class="profile-tile">
+          <div class="profile-tile-meta" style="padding-left: 0px;">
+            <ul>
+              <li>
+                <span class="text-initial vfs-text">
+                  Please enter the two micro-deposit amounts made to your <i>{{modelVerifyFundSource.data.bank}}</i> ending in 
+                  <i>{{modelVerifyFundSource.data.number}}</i> on or around <i>{{userService.getDateFormat(modelVerifyFundSource.data.date.date)}}</i>
+                </span>
+              </li>
+              <li>
+                <br>
+              </li>
+              <li>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group" [ngClass]="{ 'has-error has-danger': !amount1.valid && (amount1.dirty || amount1.touched) }">
+                      <label for="">Amount 1</label>
+                      <input id="Amount1" name="amount1" class="form-control" placeholder="$0.__" type="text" required 
+                             [(ngModel)]="modelVerifyFundSource.amount1" #amount1="ngModel" [textMask]="{mask: utility.maskMicroDeposit}">
+                             <div *ngIf="!amount1.valid && (amount1.dirty || amount1.touched)" 
+                             class="help-block form-text with-errors form-control-feedback">
+                             <span *ngIf="amount1.errors.required">
+                          Amount 1 is required
+                        </span>
+                      </div>
+                      <span class="text-initial ex-style">ex. $0.07</span>     
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group" [ngClass]="{ 'has-error has-danger': !amount2.valid && (amount2.dirty || amount2.touched) }">
+                         <label for="">Amount 2</label>
+                      <input id="Amount2" name="amount2" class="form-control" placeholder="$0.__" type="text" required
+                             [(ngModel)]="modelVerifyFundSource.amount2" #amount2="ngModel" [textMask]="{mask: utility.maskMicroDeposit}">
+                             <div *ngIf="!amount2.valid && (amount2.dirty || amount2.touched)" 
+                             class="help-block form-text with-errors form-control-feedback">
+                             <span *ngIf="amount2.errors.required">
+                          Amount 2 is required
+                        </span>                -->
+                      </div>
+                      <span class="text-initial ex-style">ex. $0.15</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="alert alert-danger" role="alert" *ngIf="errorService.isError" [innerHTML]=errorService.errorMessage></div>
+      </div>      
+      <div class="modal-footer">
+        <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+        <button [disabled]="loading || !f.form.valid" class="slick-next slick-arrow" type="submit">Verify</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #verifyVoiceCodeDialog let-c="close" let-d="dismiss" let-create="addFundSources">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Additional verification</h4>
+<!--      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>-->
+    </div>
+    <div class="modal-body">
+      <form name="form2FA" (ngSubmit)="f2FA.form.valid && verifyVoiceCode()" #f2FA="ngForm" autocomplete="off" [formGroup]="verifyPhoneForm">
+        <div class="form-group" [ngClass]="{ 'has-error has-danger': verifyPhoneForm.get('phone_pin').errors 
+             && (verifyPhoneForm.get('phone_pin').dirty || verifyPhoneForm.get('phone_pin').touched) }">
+          <label for="phone_pin">Voice Code</label>
+          <input name="phone_pin" class="form-control" placeholder="Code" type="text" maxlength="4" appNumbers
+                 formControlName="phone_pin" required id="phone_pin">
+          <div *ngIf="verifyPhoneForm.get('phone_pin').errors &&
+            (verifyPhoneForm.get('phone_pin').dirty || verifyPhoneForm.get('phone_pin').touched)" 
+            class="help-block form-text with-errors form-control-feedback">
+            <span *ngIf="verifyPhoneForm.get('phone_pin').errors.required">
+              Code is required
+            </span>
+            <span *ngIf="verifyPhoneForm.get('phone_pin').errors.minlength">
+              Code must be at least 4 digits long.
+            </span>
+          </div>
+        </div>
+        <div class="alert alert-success" role="alert" *ngIf="errorService.isSuccess" [innerHTML]=errorService.successMessage></div>
+        <button style="padding-left: 0;" [disabled]="loading" class="btn btn-link" (click)="callAction({action:'verify_voice_code'})">Resend Voice Code</button>
+        <button type="submit" [disabled]="loading || !verifyPhoneForm.valid" class="btn btn-primary btn-rounded pull-right">Submit & Verify</button> 
+      </form>
+    </div>
+    <div class="modal-footer">
+      
+    </div>
+  </div>
+</ng-template>
+
+<div aria-hidden="true" class="funding-source-setup-modal modal fade animated" role="dialog" tabindex="-1" 
+     [ngClass]="{ 'show-on-load': isShowFundingSourceSetupOnLoad() }">
+  <div class="modal-dialog modal-centered" role="document">
+    <div class="modal-content onboarding-content">
+      <div class="modal-header">    
+        <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="onboarding-media">
+        <img src="assets/img/undraw-vault-9-cmw.png" 
+             srcset="assets/img/undraw-vault-9-cmw@2x.png 2x, assets/img/undraw-vault-9-cmw@3x.png 3x" 
+             class="addFundingSourceImg">
+      </div>  
+      <div class="modal-body addFundingSourceBox">    
+        <div class="modal-body">
+          <div class="onboarding-content with-gradient">
+            <h4 class="modal-title">{{messages.get('TITLE_ADD_FUNDING_SOURCE')}}</h4>
+            <p>{{messages.get('SELECT_VERIFICATION_METHOD')}}</p>
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <button id="instantVerificationBtn" class="btn btn-primary btn-rounded" title="Instant Verification" [disabled]="loading"
+                          type="button" (click)="openDialogPlaid()">
+                    Instant Verification
+                  </button>
+                </div>
+                <div class="form-group">
+                  <label>
+                    {{messages.get('INSTANT_VERIFICATION')}}
+                  </label>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <button id="manualVerificationBtn" class="btn btn-primary btn-rounded" type="button" [disabled]="loading"
+                          (click)="closePopupForAddFoundSources(true); openDialog(contentAddFundSource);" title="Manual Verification">
+                          Manual Verification
+                </button>
+              </div>
+              <div class="form-group">
+                <label>
+                  {{messages.get('MANUAL_VERIFICATION')}}
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-danger" role="alert" *ngIf="errorService.isError" [innerHTML]=errorService.errorMessage></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--**********************************************MANUALLY_VERIFY_YOUR_BANK_ACCOUNT************************************************-->
+
+<ng-template #contentAddFundSource let-c="close" let-d="dismiss">
+  <div class="manual-verification">
+    <div class="modal-header">      
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="manual-verification-title">
+        <h4 class="modal-title">{{messages.get('MANUALLY_VERIFY_YOUR_BANK_ACCOUNT')}}</h4>
+      </div>
+      <div class="modal-body">
+        <p class="mf-text">{{messages.get('ENTER_YOUR_BANK_DETAILS_BELOW_AND_SUBMIT')}}</p>
+        <p class="mf-text">{{messages.get('TO_VERIFY_YOUR_BANK_ACCOUNT_MANUALLY')}}</p>
+        <p class="mf-text">{{messages.get('TO_AVOID_ANY_OVERDRAFT_OR_OTHER_BANK')}}</p>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <form name="form" #f="ngForm" class="form-validation" autocomplete="nope">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !routingNumber.valid && (routingNumber.dirty || routingNumber.touched)}">
+                   <label for="">Routing Number</label>
+                <input appNumbers class="form-control" placeholder="Routing Number" type="text" 
+                       name="routingNumber" required  minlength="9" autocomplete="off"
+                       [(ngModel)]="modelNewFundSource.routingNumber" 
+                       #routingNumber="ngModel" (change)="getBankRouting()">
+                <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!routingNumber.valid && (routingNumber.dirty || routingNumber.touched)">
+                     <span *ngIf="routingNumber.errors.required">
+                    Routing Number is required
+                  </span>
+                  <span *ngIf="routingNumber.errors.minlength">
+                    Routing Number must be at least 9 digits long.
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Bank Name</label>
+                <div *ngIf="modelNewFundSource.name" class="mv-bankName">{{modelNewFundSource.name}}</div>
+              </div>
+              <div class="form-group" style="display: none;">
+                <label for="">Account Type</label>
+                <select id="account-type" name="accountType" class="form-control" [(ngModel)]="modelNewFundSource.bankAccountType" name="bankAccountType">
+                  <option value="checking">Checking</option>
+                  <option value="savings">Savings</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !accountNumber.valid && (accountNumber.dirty || accountNumber.touched)}">
+                   <label for="">Account Number</label>
+                <input appNumbers class="form-control" placeholder="e.g. 489729074589" type="text" 
+                       name="accountNumber" minlength="4" maxlength="17" required autocomplete="off"
+                       [(ngModel)]="modelNewFundSource.accountNumber"
+                       #accountNumber="ngModel">
+                <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!accountNumber.valid && (accountNumber.dirty || accountNumber.touched)">
+                     <span *ngIf="accountNumber.errors.required">
+                    Account Number is required
+                  </span>
+                  <span *ngIf="accountNumber.errors.minlength">
+                    Account Number must be at least 4 digits long.
+                  </span>
+                  <span *ngIf="accountNumber.errors.maxlength">
+                    Account Number must be at max 17 digits long.
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group"  [ngClass]="{'has-error has-danger': !re_account_number.valid && (re_account_number.dirty || re_account_number.touched)}">
+                   <label for="">Confirm Account Number</label>
+                <input appNumbers class="form-control" placeholder="e.g. 489729074589" type="text" required 
+                       name="re_account_number" autocomplete="off"
+                       [(ngModel)]="modelNewFundSource.re_account_number" 
+                       #re_account_number="ngModel">
+                <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!re_account_number.valid && (re_account_number.dirty || re_account_number.touched)">
+                     <span *ngIf="re_account_number.errors.required">
+                    Confirm Account Number is required
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="form-group">
+                <img style="width: 100%;" class="brnumber-img" src="assets/img/us-bank-routing-numbers.png">
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-danger" role="alert" *ngIf="errorService.isError" [innerHTML]=errorService.errorMessage></div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="closeModal(); jqueryService.showModal('.funding-source-setup-modal.modal', {backdrop: 'static', keyboard: false, showClose: true})">Cancel</button>
+      <button [disabled]="loading || !f.form.valid" class="slick-next slick-arrow" type="submit" (click)="addFundSources()">Submit & Verify</button>
+    </div>
+  </div>
+</ng-template>
+
+<!--*************************************** ADD BENFICIAL OWNER POPUP *********************************************************-->
+
+<ng-template #addBeneficialOwner let-c="close" let-d="dismiss" let-create="addFundSources">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Add a Beneficial Owner</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <form name="form" autocomplete="nope" (ngSubmit)="addNewBeneficialOwner()" [formGroup]="addBeneficialFormGroup" 
+          class="form-validation">
+          <div class="modal-body">
+        <div class="modal-body">
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('firstName').errors 
+                   && (addBeneficialFormGroup.get('firstName').dirty || addBeneficialFormGroup.get('firstName').touched)}">
+                   <label for="">First Name</label>
+                <input class="form-control" placeholder="First Name" type="text" 
+                       name="firstName" formControlName="firstName" required>
+                <div class="help-block form-text with-errors text-muted form-control-feedback" 
+                     *ngIf="addBeneficialFormGroup.get('firstName').errors 
+                     && (addBeneficialFormGroup.get('firstName').dirty || addBeneficialFormGroup.get('firstName').touched)">
+                     <span *ngIf="addBeneficialFormGroup.get('firstName').errors.required">
+                    First Name is required
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('lastName').errors 
+                   && (addBeneficialFormGroup.get('lastName').dirty || addBeneficialFormGroup.get('lastName').touched)}">
+                   <label for="">Last Name</label>
+                <input class="form-control" placeholder="Last Name" type="text"
+                       name="lastName" formControlName="lastName" required>
+                <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="addBeneficialFormGroup.get('lastName').errors 
+                     && (addBeneficialFormGroup.get('lastName').dirty || addBeneficialFormGroup.get('lastName').touched)">
+                     <span *ngIf="addBeneficialFormGroup.get('lastName').errors.required">
+                    Last Name is required
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group dobirth" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('dateOfBirth').errors 
+                   && (addBeneficialFormGroup.get('dateOfBirth').dirty || addBeneficialFormGroup.get('dateOfBirth').touched)}">
+                   <label for="">Date of birth</label>
+                <div style="display: inline-flex;">
+                  <input matInput  [min]="minDate" [matDatepicker]="controllerDatepicker"  formControlName="dateOfBirth"
+                         placeholder="Date Of Birth" required autocomplete="off" >
+                         <mat-datepicker-toggle matSuffix [for]="controllerDatepicker"></mat-datepicker-toggle>
+                  <mat-datepicker #controllerDatepicker></mat-datepicker>
+                </div>
+                <mat-error *ngIf="addBeneficialFormGroup.get('dateOfBirth').errors &&
+                  addBeneficialFormGroup.get('dateOfBirth').dirty &&
+                  addBeneficialFormGroup.get('dateOfBirth').errors.validBirthDate">
+                  Must be 18 years or older
+              </mat-error>
+              <mat-hint align="end">MM/DD/YYYY</mat-hint>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('postalCode').errors 
+                 && (addBeneficialFormGroup.get('postalCode').dirty || addBeneficialFormGroup.get('postalCode').touched)}">
+                 <label for="">Zip</label>
+              <input class="form-control" placeholder="Zip" type="text" name="postalCode" required formControlName="postalCode">
+              <div class="help-block form-text text-muted form-control-feedback" 
+                   *ngIf="addBeneficialFormGroup.get('postalCode').errors
+                   && (addBeneficialFormGroup.get('postalCode').dirty || addBeneficialFormGroup.get('postalCode').touched)">
+                   <span *ngIf="addBeneficialFormGroup.get('postalCode').errors.required">
+                  Postal Code is required
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('address1').errors 
+                 && (addBeneficialFormGroup.get('address1').dirty || addBeneficialFormGroup.get('address1').touched)}">
+                 <label for="">Address 1</label>
+              <input class="form-control" placeholder="Address 1" type="text" name="address1" formControlName="address1" required>
+              <div class="help-block form-text text-muted form-control-feedback" 
+                   *ngIf="addBeneficialFormGroup.get('address1').errors
+                   && (addBeneficialFormGroup.get('address1').dirty || addBeneficialFormGroup.get('address1').touched)">
+                   <span *ngIf="addBeneficialFormGroup.get('address1').errors.required">
+                  Address 1 is required
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('address2').errors 
+                 && (addBeneficialFormGroup.get('address2').dirty || addBeneficialFormGroup.get('address2').touched)}">
+                 <label for="">Address 2</label>
+              <input class="form-control" placeholder="Address 2" type="text" formControlName="address2" name="address2">                 
+            </div>
+          </div>
+        </div>
+
+
+        <div class="row">
+
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('country').errors 
+                 && (addBeneficialFormGroup.get('country').dirty || addBeneficialFormGroup.get('country').touched)}">
+                 <label for="">Country</label>
+              <select style="width: 100%" id="country" required class="form-control" name="country" 
+                      formControlName="country" (ngModelChange)="changeBeneficialCountry($event)">
+                <option *ngFor="let country of arrCountries" [value]="country.code">{{ country.name }}</option>
+              </select>
+              <div class="help-block form-text text-muted form-control-feedback" 
+                   *ngIf="addBeneficialFormGroup.get('country').errors
+                   && (addBeneficialFormGroup.get('country').dirty || addBeneficialFormGroup.get('country').touched)">
+                   <span *ngIf="addBeneficialFormGroup.get('country').errors.required">
+                  Country is required
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div *ngIf="isUSA" class="form-group" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('stateProvinceRegion').errors 
+              && (addBeneficialFormGroup.get('stateProvinceRegion').dirty || addBeneficialFormGroup.get('stateProvinceRegion').touched)}">
+              <label for="">State Province Region</label>
+              <select style="width: 100%" id="stateProvinceRegion" required 
+                      class="form-control" name="stateProvinceRegion" formControlName="stateProvinceRegion">
+                <option *ngFor="let state of arrStates" [value]="state.abbreviation">{{ state.name }}</option>
+              </select>
+              <div class="help-block form-text text-muted form-control-feedback" 
+                   *ngIf="addBeneficialFormGroup.get('stateProvinceRegion').errors
+                   && (addBeneficialFormGroup.get('stateProvinceRegion').dirty || addBeneficialFormGroup.get('stateProvinceRegion').touched)">
+                   <span *ngIf="addBeneficialFormGroup.get('stateProvinceRegion').errors.required">
+                  State Province Region is required
+                </span>
+              </div>
+            </div>
+            <div *ngIf="!isUSA" class="form-group" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('stateProvinceRegionNotUS').errors 
+              && (addBeneficialFormGroup.get('stateProvinceRegionNotUS').dirty || addBeneficialFormGroup.get('stateProvinceRegionNotUS').touched)}">
+              <label for="">State Province Region <i class="fa fa-question-circle" [matTooltipPosition]="'above'" [matTooltipShowDelay]="100"
+                                                   matTooltip="{{messages.get('TOOLTIP_STATE_PROVINCE_REGION')}}"></i></label>
+              <!--              <select style="width: 100%" id="stateProvinceRegionNotUS" required 
+                                    class="form-control" name="stateProvinceRegionNotUS" formControlName="stateProvinceRegionNotUS">
+                              
+                              <option *ngFor="let state of arrStates" [value]="state.abbreviation">{{ state.name }}</option>
+                            </select>-->
+              <input class="form-control" id="stateProvinceRegionNotUS" placeholder="State Province Region" type="text" 
+                     name="stateProvinceRegionNotUS" required formControlName="stateProvinceRegionNotUS">
+              <div class="help-block form-text text-muted form-control-feedback" 
+                   *ngIf="addBeneficialFormGroup.get('stateProvinceRegionNotUS').errors
+                   && (addBeneficialFormGroup.get('stateProvinceRegionNotUS').dirty || addBeneficialFormGroup.get('stateProvinceRegionNotUS').touched)">
+                   <span *ngIf="addBeneficialFormGroup.get('stateProvinceRegionNotUS').errors.required">
+                  State Province Region is required
+                </span>
+              </div>
+            </div>
+          </div>
+          <!--        </div>
+          
+                  <div class="row">-->
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('city').errors 
+                 && (addBeneficialFormGroup.get('city').dirty || addBeneficialFormGroup.get('city').touched)}">
+                 <label for="">City</label>
+              <input class="form-control" placeholder="City" type="text" name="city" required formControlName="city">
+              <div class="help-block form-text text-muted form-control-feedback" 
+                   *ngIf="addBeneficialFormGroup.get('city').errors
+                   && (addBeneficialFormGroup.get('city').dirty || addBeneficialFormGroup.get('city').touched)">
+                   <span *ngIf="addBeneficialFormGroup.get('city').errors.required">
+                  City is required
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div  *ngIf="isUSA" class="form-group" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('ssn').errors 
+              && (addBeneficialFormGroup.get('ssn').dirty || addBeneficialFormGroup.get('ssn').touched)}">
+              <label for="">Ssn</label>
+              <input class="form-control" placeholder="Ssn" type="text" 
+                     name="ssn" formControlName="ssn" required [textMask]="{mask: utility.maskFullSsn}">
+                     <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="addBeneficialFormGroup.get('ssn').errors
+                     && (addBeneficialFormGroup.get('ssn').dirty || addBeneficialFormGroup.get('ssn').touched)">
+                     <span *ngIf="addBeneficialFormGroup.get('ssn').errors.required">
+                  Ssn is required
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row" *ngIf="!isUSA">
+          <fieldset class="col-sm-12 col-xs-12 fsmargin">
+            <legend><span>Beneficial passport</span></legend>
+            <div class="row">
+              <div class="col-sm-6">
+                <div   class="form-group" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('number').errors 
+                       && (addBeneficialFormGroup.get('number').dirty || addBeneficialFormGroup.get('number').touched)}">
+                       <label for="">Passport number</label>
+                  <input class="form-control" placeholder="Passport number" type="text" 
+                         name="number" formControlName="number" required>
+                  <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="addBeneficialFormGroup.get('number').errors
+                       && (addBeneficialFormGroup.get('number').dirty || addBeneficialFormGroup.get('number').touched)">
+                       <span *ngIf="addBeneficialFormGroup.get('number').errors.required">
+                      Passport number is required
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group" [ngClass]="{'has-error has-danger': addBeneficialFormGroup.get('countryPassport').errors 
+                     && (addBeneficialFormGroup.get('countryPassport').dirty || addBeneficialFormGroup.get('countryPassport').touched)}">
+                     <label for="">Passport country</label>
+                  <select style="width: 100%" id="countryPassport" required class="form-control" name="countryPassport" formControlName="countryPassport">
+                    <option *ngFor="let country of arrCountriesPassport" [value]="country.code">{{ country.name }}</option>
+                  </select>
+                  <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="addBeneficialFormGroup.get('countryPassport').errors
+                       && (addBeneficialFormGroup.get('countryPassport').dirty || addBeneficialFormGroup.get('countryPassport').touched)">
+                       <span *ngIf="addBeneficialFormGroup.get('countryPassport').errors.required">
+                      Country is required
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+
+        <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Cancel</button>
+      <button [disabled]="isLoading || !addBeneficialFormGroup.valid" class="slick-next slick-arrow">Confirm & Create</button>
+    </div>
+  </form>
+</div>
+</ng-template>

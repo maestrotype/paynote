@@ -1,0 +1,848 @@
+<app-trends *ngIf="userService.isMerchant()" [graphicDataObj]="graphicsObj" [visibleTrands]="visibleTrands"></app-trends>
+<div class="element-wrapper">
+  <div class="element-actions">
+    <select class="form-control form-control-sm rounded transaction-fast-filter-select" [(ngModel)]="objFilter.interval" #interval="ngModel"
+    (ngModelChange)="callFastFilter()">
+      <option value="today">Today</option>
+      <option value="this_month">This Month</option>
+      <option value="last_month">Last Month</option>
+      <option value="this_quarter">This Quarter</option>
+      <option value="this_year">This Year</option>
+      <option value="all">All</option>
+    </select>
+    <ul class="nav nav-pills smaller d-none d-md-flex transaction-fast-filter-button">
+      <li class="nav-item">
+        <a class="nav-link" [ngClass]="{ 'active': objFilter.interval == 'today'}" data-toggle="tab" href="javascript:void(0)" (click)="callFastFilter('today')">Today</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [ngClass]="{ 'active': objFilter.interval == 'this_month'}" href="javascript:void(0)" (click)="callFastFilter('this_month')">This Month</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [ngClass]="{ 'active': objFilter.interval == 'last_month'}" href="javascript:void(0)" (click)="callFastFilter('last_month')">Last Month</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [ngClass]="{ 'active': objFilter.interval == 'this_quarter'}" href="javascript:void(0)" (click)="callFastFilter('this_quarter')">This Quarter</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [ngClass]="{ 'active': objFilter.interval == 'this_year'}" href="javascript:void(0)" (click)="callFastFilter('this_year')">This Year</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [ngClass]="{ 'active': objFilter.interval == 'all'}" href="javascript:void(0)" (click)="callFastFilter('all')">All</a>
+      </li>
+    </ul>
+  </div>
+<!--  interval= today,this_month,last_month,this_quarter,this_year-->
+  <h6 class="element-header">
+    <span *ngIf="userService.isMerchant() || userService.isCustomer()">Dashboard</span>
+    <span *ngIf="userService.isAdmin() || userService.isSuperAdmin()">Transactions</span>&nbsp;&nbsp;&nbsp;
+    <a href="javascript:void(0)" title="Trends" style="font-size: 20px;" 
+       (click)="visibleTrands = !visibleTrands" *ngIf="userService.isMerchant()">
+      <i class="picons-thin-icon-thin-0382_graph_columns_statistics"></i>
+    </a>
+
+  </h6>
+  <div class="element-content element-content-widgets" *ngIf="userService.isSubscriptionPaid() ">
+    <div class="row">
+      <div class="col-sm-6 col-xxxl-3 col-md-6 col-lg-3">
+        <div class="element-box el-tablo" href="#">
+          <div class="label">Paynotes Sent</div>
+          <div class="value">{{dashboardTrendsInfo.count_send || '0'}}</div>
+          <p style="margin-bottom: 0px;">&nbsp;</p>
+          <div class="label">Funds Sent</div>
+          <div class="value">{{dashboardTrendsInfo.sum_send | currency:'':'symbol' || '$0.00'}}</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xxxl-3 col-md-6 col-lg-3">
+        <div class="element-box el-tablo" href="#">
+          <div class="label">Paynotes Received</div>
+          <div class="value">{{dashboardTrendsInfo.count_rec || '0'}}</div>
+          <p style="margin-bottom: 0px;">&nbsp;</p>
+          <div class="label">Funds Received</div>
+          <div class="value">{{dashboardTrendsInfo.sum_rec | currency:'':'symbol' || '$0.00'}}</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xxxl-3 col-md-6 col-lg-3" *ngIf="userService.getSettings() && userService.objPlanLimits.limits">
+        <a class="element-box el-tablo" href="/account/plan">
+          <div class="label">
+            Send Limit
+            <span *ngIf="!userService.getSettings().send_limit.Enabled"> | <b>Disabled</b>&nbsp;</span>
+          </div>
+          <div class="value" style="width: 100%;">
+            <ul [ngClass]="{ 'enabledColor': !userService.getSettings().send_limit.Enabled}">
+              <li style="margin-bottom: 0px;"
+                  [innerHTML]="domSanitizer.bypassSecurityTrustHtml(utility.renderLimitProgressBar('Daily', userService.objPlanLimits.limits.send_daily || 0, userService.objPlanLimits.limits.send_limit_daily, true))">
+              </li>
+              <li style="margin-bottom: 0px;"
+                  [innerHTML]="domSanitizer.bypassSecurityTrustHtml(utility.renderLimitProgressBar('Monthly', userService.objPlanLimits.limits.send_monthly || 0, userService.objPlanLimits.limits.send_limit_monthly, true))">
+              </li>
+            </ul>
+          </div>
+        </a>
+      </div>
+      <div class="col-sm-6 col-xxxl-3 col-md-6 col-lg-3" *ngIf="userService.getSettings() && userService.objPlanLimits.limits">
+        <a class="element-box el-tablo" href="/account/plan">
+          <div class="label">
+            Receive Limit
+            <span *ngIf="!userService.getSettings().receive_limit.Enabled"> | <b>Disabled</b>&nbsp;</span>
+          </div>
+          <div class="value" style="width: 100%;">
+            <ul [ngClass]="{ 'enabledColor': !userService.getSettings().send_limit.Enabled}">
+              <li style="margin-bottom: 0px;"
+                  [innerHTML]="domSanitizer.bypassSecurityTrustHtml(utility.renderLimitProgressBar('Daily', userService.objPlanLimits.limits.receive_daily || 0, userService.objPlanLimits.limits.receive_limit_daily, true))">
+              </li>
+              <li style="margin-bottom: 0px;"
+                  [innerHTML]="domSanitizer.bypassSecurityTrustHtml(utility.renderLimitProgressBar('Monthly', userService.objPlanLimits.limits.receive_monthly || 0, userService.objPlanLimits.limits.receive_limit_monthly, true))">
+              </li>
+            </ul>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="element-content element-content-widgets" *ngIf="(userService.isAdmin() || userService.isSuperAdmin() && !isPayments)">
+    <div class="row">
+      <div class="col-sm-6 col-xxxl-3 col-md-3 col-lg-3 col-12">
+        <div class="element-box el-tablo" href="#">
+          <div class="label">Paynotes Sent</div>
+          <div class="value">{{dashboardTrendsInfo.count_send || '0'}}</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xxxl-3 col-md-3 col-lg-3 col-12">
+        <div class="element-box el-tablo" href="#">
+          <div class="label">Funds Sent</div>
+          <div class="value">{{dashboardTrendsInfo.sum_send | currency:'':'symbol' || '$0.00'}}</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xxxl-3 col-md-3 col-lg-3 col-12">
+        <div class="element-box el-tablo" href="#">
+          <div class="label">Paynotes Received</div>
+          <div class="value">{{dashboardTrendsInfo.count_rec || '0'}}</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xxxl-3 col-md-3 col-lg-3 col-12">
+        <div class="element-box el-tablo" href="#">
+          <div class="label">Funds Received</div>
+          <div class="value">{{dashboardTrendsInfo.sum_rec | currency:'':'symbol' || '$0.00'}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="element-box element-box-custom" *ngIf="userService.isMerchant() || userService.isCustomer()">
+    <div class="row wrap-filters" style="border-bottom: 1px solid gainsboro;">
+      <div class="col-12 col-sm-6 col-md-6 col-lg-3 daterpicer" style="position: relative;max-width: 250px;">
+        <i class="fa fa-calendar" (click)="jqueryService.onClick('#date_piker_range')" style="cursor: pointer"></i>
+        <input type="text" id="date_piker_range"
+               style="line-height: 1.1;width: 90%; border: none; display: inline-block"
+               placeholder="{{strDataRangePlaseHolder}}"
+               class="form-control"
+               bsDaterangepicker
+               [bsConfig]="{containerClass: 'theme-dark-blue'}"
+               [(ngModel)]="daterangepickerModel"
+               (bsValueChange)="onValueRangeDate($event)">
+        <i class="fa fa-angle-down hidden-md-down" (click)="jqueryService.onClick('#date_piker_range')" style="cursor: pointer"></i>
+      </div>
+      <div class="col-12 col-sm-6 col-md-6 col-lg-3 ">
+        <div id="dataTable1_filter">
+            <input type="search" class="form-control form-control-sm" placeholder="Search" [ngModelOptions]="{standalone: true}"
+                   [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel"
+                   (search)="listSendChecksTransactions(null)" (keyup)="listSendChecksTransactions(null, true)">
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-md-6 col-lg-3 text-center" style="max-width: 230px;">
+        <a href="javascript:void(0)" *ngIf="lstSendChecks.length" download="test" style="margin-top: 5px;position: relative;display: inline-block;"
+           (click)="listSendChecksTransactions(null, false, true)">
+          <i class="fa fa-file-text-o"></i>&nbsp;
+          <span class="hidden-md-down">Download to Excel CSV</span>
+        </a>
+      </div>
+      <!--****************************  FILTER *********************************-->
+      <div class="col-12 col-sm-6 col-md-6 col-lg-3 buttonsFilterAndClear" style="position: relative; text-align: right;">
+        <div class="btn-primary btn-sm button-filters btn-rounded btn">
+          <i class="fa fa-filter"></i>
+          <span class="visible-md-inline-block visible-lg-inline-block hidden-mobile"> Filters</span>
+        </div>
+        <button type="button" class="btn-default btn-sm btn-rounded btn pull-right" (click)="resetFilter()">
+          <i class="icon-feather-x"></i>
+          <span class="visible-md-inline-block visible-lg-inline-block hidden-mobile"> Clear</span>
+        </button>
+        <div class="floated-customizer-panel">
+          <div class="fcp-content">
+            <form class="form-inline justify-content-sm-end">
+              <div class="close-customizer-btn"><i class="os-icon os-icon-x"></i></div>
+              <div class="fcp-group">
+                <div class="fcp-group-header">Menu Filters</div>
+                <div class="fcp-group-contents">
+                  <div class="fcp-field">
+                    <label >Type:</label>
+                    <select name="type" class="form-control form-control-sm rounded widthSelect" 
+                            [(ngModel)]="objFilter.type" #type="ngModel" (change)="listSendChecksTransactions()">
+                      <option value="All">All</option>
+                      <option value="invoice">Invoice</option>
+                      <option value="check">Check</option>
+                      <option value="recurring (check)">Recurring Check</option>
+                      <option value="recurring (invoice)">Recurring Invoice</option>
+                    </select>
+                  </div>
+                  <div class="fcp-field with-image-selector-w">
+                    <label >Status:</label>
+                    <select name="status" class="form-control form-control-sm rounded widthSelect" 
+                            [(ngModel)]="objFilter.status" #status="ngModel" (change)="listSendChecksTransactions()">
+                      <option value="All">All</option>
+                      <option value="processed">Paid</option>
+                      <option value="pending">In process</option>
+                      <option value="voided">Void</option>
+                      <option value="failed">Failed</option>
+                      <option value="printed">Printed</option>
+                      <option value="unpaid">Unpaid</option>
+                      <option value="expired">Expired</option>
+                      <option value="delayed">Delayed</option>
+                    </select>
+                  </div>
+                  <div class="fcp-field">
+                    <label >Recurring:</label>
+                    <select name="recurring" class="form-control form-control-sm rounded widthSelect" 
+                            [(ngModel)]="objFilter.recurring" #recurring="ngModel" (change)="listSendChecksTransactions()">
+                      <option value="All">All</option>
+                      <option value="0">No</option>
+                      <option value="1">Yes</option>
+                    </select>               
+                  </div>                      
+                  <div class="fcp-field">
+                    <label >Transfer Speed:</label>
+                    <select name="transfer_speed" class="form-control form-control-sm rounded widthSelect" 
+                            [(ngModel)]="objFilter.transfer_speed" #transfer_speed="ngModel" (change)="listSendChecksTransactions()">
+                      <option value="All">All</option>
+                      <option value="standart">Standard</option>
+                      <option value="nextday">Next Day</option>
+                    </select>                    
+                  </div>                          
+                </div>
+              </div>
+            </form>
+          </div>                
+        </div>
+      </div>
+      <!--**************************** AND FILTER *********************************-->
+    </div>
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12">
+            <button type="button" class="btn btn-danger" *ngIf="userService.isMerchant()" [disabled]="!canVoidCheck" (click)="voidChecks()">
+              <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;VOID
+            </button>
+            <br>
+            <table id="dataTable12" width="100%" class="table table-striped table-lightfont dataTable sendChecks responsive-table" 
+                   role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col"><input style="margin: 5px" type="checkbox" [(ngModel)]="selectAllChecks" (click)="selectAllCheck()"></th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="applySort('number', paginationService.sortDir)">Number</a>
+                    <i *ngIf="paginationService.sortField == 'number' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'number' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="applySort('type', paginationService.sortDir)">Type</a>
+                    <i *ngIf="paginationService.sortField == 'type' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'type' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="applySort('amount', paginationService.sortDir)">Amount</a>
+                    <i *ngIf="paginationService.sortField == 'amount' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'amount' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="applySort('status', paginationService.sortDir)">Status</a>
+                    <i *ngIf="paginationService.sortField == 'status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">Sender</th>
+                  <th scope="col" *ngIf="!userService.isClient()">Recipient</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="applySort('created', paginationService.sortDir)">Date</a>
+                    <i *ngIf="paginationService.sortField == 'created' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'created' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let transactionMerchant of lstSendChecks">
+                  <td>
+                    <input style="margin: 5px" type="checkbox" [(ngModel)]="transactionMerchant.multiple" (click)="unCheckedChecks($event)"
+                           [disabled]="!transService.canVoidCheck(transactionMerchant.status, transactionMerchant.type) || transService.isSystemPaiment(transactionMerchant)">
+                  </td>
+                  <td data-title="Number" scope="row">{{transactionMerchant.number || '&nbsp;'}}</td>
+                  <td data-title="Type" class="text-capitalize">{{transactionMerchant.type || '&nbsp;'}}</td>
+                  <td data-title="Amount">{{getAmountString(transactionMerchant || '&nbsp;')}}</td>
+                  <td data-title="Status" class="text-capitalize">
+                    <span *ngIf="transactionMerchant.status != 'failed'" [innerHTML]="getStatus(transactionMerchant)"></span>
+                    <span *ngIf="transactionMerchant.status == 'failed'">
+                      <a href="javascript:void(0)" (click)="failedInfoPopup( failedInfoDialog, transactionMerchant )">Failed</a>
+                    </span>
+                  </td>
+                  <td data-title="Sender">{{transactionMerchant.sndr_name || '&nbsp;'}}
+                    <br>
+                    {{transactionMerchant.sndr_email || '&nbsp;'}}
+                  </td>
+                  <td data-title="Recipient" *ngIf="!userService.isClient()">
+                    {{transactionMerchant.rec_name || '&nbsp;'}}<br>{{transactionMerchant.rec_email || '&nbsp;'}}
+                  </td>
+                  <td data-title="Description">{{transactionMerchant.description || '&nbsp;'}}</td>
+                  <td data-title="Date">{{userService.getDateFormat(transactionMerchant.created_at)}}</td>
+                  <td data-title="Action">
+                    <button title="Resend Notification" *ngIf="canResendNotification(transactionMerchant, 'check')" 
+                            style="margin: 3px;padding: 5px 13px;" class="btn btn-primary btn-sm btn-rounded" type="button" 
+                            (click)="resendNotificationCheck(transactionMerchant)">
+                      <i class="fa fa-bell-o"></i>&nbsp;<span class='accdec'>Resend</span>
+                    </button>
+
+                    <button title="Resend Notification" *ngIf="canResendNotification(transactionMerchant, 'invoice')" 
+                            style="margin: 3px;padding: 5px 13px;" class="btn btn-primary btn-sm btn-rounded" type="button" 
+                            (click)="resendNotificationInvoice(transactionMerchant)">
+                      <i class="fa fa-bell-o"></i>&nbsp;<span class='accdec'>Resend</span>
+                    </button>
+                    <button title="Pay" style="margin: 3px;padding: 5px 13px;" class="btn btn-primary btn-sm btn-rounded" type="button"
+                            (click)="payInvoiceTransaction(transactionMerchant)" *ngIf="canInvoicePay(transactionMerchant)"
+                            [disabled]="isLoading">
+                      <i class="picons-thin-icon-thin-0424_money_payment_dollar_cash"></i>&nbsp;<span class='accdec'>Pay</span>
+                    </button>
+                    <button title="Accept" style="margin: 3px;padding: 5px 13px;" class="btn btn-primary btn-sm btn-rounded" type="button"
+                            (click)="acceptTransactionCheck(transactionMerchant)" *ngIf="canAcceptFunds(transactionMerchant)">
+                      <i class="fa fa-check"></i>&nbsp;<span class='accdec'>Accept</span>
+                    </button>
+                    <a title="Accept" style="margin: 3px;padding: 5px 13px;" class="btn btn-primary btn-sm btn-rounded"
+                            href="{{getAcceptFundsByLink(transactionMerchant)}}" *ngIf="canAcceptFundsByLink(transactionMerchant)">
+                      <i class="fa fa-check"></i>&nbsp;<span class='accdec'>Accept</span>
+                    </a>
+                    <button title="View Check Info" *ngIf="canViewCheckInfo(transactionMerchant)"
+                            style="margin: 3px;padding: 5px 13px;" class="btn btn-primary btn-sm btn-rounded" type="button" 
+                            (click)= "sendCheckInfoPopup( sendChacksDialog, transactionMerchant )" >
+                            <i class="fa fa-search"></i>&nbsp;<span class='accdec'>View</span>
+                    </button>
+
+                    <button title="Decline" style="margin: 3px;padding: 5px 13px;" *ngIf="canDecline(transactionMerchant)"
+                            (click)="voidTransactionCheck(transactionMerchant)" class="btn btn-danger btn-sm btn-rounded" type="button">
+                      <i class="fa fa-trash-o"></i>&nbsp;<span class='accdec'>Decline</span>
+                    </button>
+                    <button title="Decline" style="margin: 3px;padding: 5px 13px;" *ngIf="canVoid(transactionMerchant)"
+                            (click)="voidTransactionCheck(transactionMerchant)" class="btn btn-danger btn-sm btn-rounded" type="button">
+                      <i class="fa fa-trash-o"></i>&nbsp;<span class='accdec'>Void</span>
+                    </button> 
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!lstSendChecks.length" class="ssg-nothing-found">
+          <div class="icon-w"><i class="os-icon os-icon-eye-off"></i></div>
+          <span>No transaction were found. Try changing your query...</span>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="listSendChecksTransactions($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="element-box element-box-custom" *ngIf="userService.isAdmin() || userService.isSuperAdmin()">
+    <div class="row wrap-filters" style="border-bottom: 1px solid gainsboro;">
+      <div class="col-12 col-sm-6 col-md-6 col-lg-3 daterpicer" style="position: relative;max-width: 250px;">
+        <i class="fa fa-calendar" (click)="jqueryService.onClick('#date_piker_range')" style="cursor: pointer"></i>
+        <input type="text" id="date_piker_range"
+               style="line-height: 1.1;width: 90%; border: none; display: inline-block"
+               placeholder="{{strDataRangePlaseHolder}}"
+               class="form-control"
+               bsDaterangepicker
+               [bsConfig]="{containerClass: 'theme-dark-blue'}"
+               [(ngModel)]="daterangepickerModel"
+               (bsValueChange)="onValueRangeDate($event)">
+        <i class="fa fa-angle-down hidden-md-down" (click)="jqueryService.onClick('#date_piker_range')" style="cursor: pointer"></i>
+      </div>
+      <div class="col-12 col-sm-6 col-md-6 col-lg-3 ">
+        <div id="dataTable1_filter">
+            <input type="search" class="form-control form-control-sm" placeholder="Search" [ngModelOptions]="{standalone: true}"
+                   [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel"
+                   (search)="listSendChecksTransactions(null)" (keyup)="listSendChecksTransactions(null, true)">
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-md-6 col-lg-3 text-center" style="max-width: 230px;">
+        <a href="javascript:void(0)" *ngIf="lstSendChecks.length" download="test" style="margin-top: 5px;position: relative;display: inline-block;"
+           (click)="listSendChecksTransactions(null, false, true)">
+          <i class="fa fa-file-text-o"></i>&nbsp;
+          <span class="hidden-md-down">Download to Excel CSV</span>
+        </a>
+      </div>
+      <!--****************************  FILTER *********************************-->
+      <div class="col-12 col-sm-6 col-md-6 col-lg-3 buttonsFilterAndClear" style="position: relative; text-align: right;">
+        <div class="btn-primary button-filters btn-sm btn-rounded btn">
+          <i class="fa fa-filter"></i>
+          <span class="visible-md-inline-block visible-lg-inline-block hidden-mobile">Filters</span>
+        </div>
+        <button type="button" class="btn-default btn-sm btn-rounded btn pull-right" (click)="resetFilter()">
+          <i class="icon-feather-x"></i>
+          <span class="visible-md-inline-block visible-lg-inline-block hidden-mobile"> Clear</span>
+        </button>
+        <div class="floated-customizer-panel">
+          <div class="fcp-content">
+            <form class="form-inline justify-content-sm-end" *ngIf="userService.isAdmin() || userService.isSuperAdmin()">
+              <div class="close-customizer-btn"><i class="os-icon os-icon-x"></i></div>
+              <div class="fcp-group">
+                <div class="fcp-group-header">Menu Filters</div>
+                <div class="fcp-group-contents">
+                  <div class="fcp-field">
+                    <label >Type:</label>
+                    <select name="type" class="form-control form-control-sm rounded widthSelect" 
+                            [(ngModel)]="objFilter.type" #type="ngModel" (change)="listSendChecksTransactions()">
+                      <option value="All">All</option>
+                      <option value="invoice">Invoice</option>
+                      <option value="check">Check</option>
+                      <option value="recurring (check)">Recurring Check</option>
+                      <option value="recurring (invoice)">Recurring Invoice</option>
+                    </select>
+                  </div>
+                  <div class="fcp-field with-image-selector-w">
+                    <label >Status:</label>
+                    <select name="status" class="form-control form-control-sm rounded widthSelect" 
+                            [(ngModel)]="objFilter.status" #status="ngModel" (change)="listSendChecksTransactions()">
+                      <option value="All">All</option>
+                      <option value="processed">Paid</option>
+                      <option value="pending">In process</option>
+                      <option value="voided">Void</option>
+                      <option value="failed">Failed</option>
+                      <option value="printed">Printed</option>
+                      <option value="unpaid">Unpaid</option>
+                      <option value="expired">Expired</option>
+                      <option value="delayed">Delayed</option>
+                    </select>
+                  </div>
+                  <div class="fcp-field">
+                    <label >Recurring:</label>
+                    <select name="recurring" class="form-control form-control-sm rounded widthSelect" 
+                            [(ngModel)]="objFilter.recurring" #recurring="ngModel" (change)="listSendChecksTransactions()">
+                      <option value="All">All</option>
+                      <option value="0">No</option>
+                      <option value="1">Yes</option>
+                    </select>               
+                  </div>                      
+                  <div class="fcp-field">
+                    <label >Transfer Speed:</label>
+                    <select name="transfer_speed" class="form-control form-control-sm rounded widthSelect" 
+                            [(ngModel)]="objFilter.transfer_speed" #transfer_speed="ngModel" (change)="listSendChecksTransactions()">
+                      <option value="All">All</option>
+                      <option value="standart">Standard</option>
+                      <option value="nextday">Next Day</option>
+                    </select>                    
+                  </div>                          
+                </div>
+              </div>
+            </form>
+          </div>                
+        </div>
+      </div>
+      <!--**************************** AND FILTER *********************************-->
+    </div>
+    <div class="clear-block"></div>
+    <div class="row">
+      <div class="col-sm-12">
+        <button type="button" class="btn btn-danger" [disabled]="!canVoidCheck" (click)="voidAdminChecks()">
+          <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;VOID
+        </button>
+        <br>
+        <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable sendChecks responsive-table" 
+               role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+          <thead>
+            <tr role="row">
+              <th scope="col"><input style="margin: 5px" type="checkbox" [(ngModel)]="selectAllChecks" (click)="selectAllCheck()"></th>
+              <th scope="col">                      
+                <a href="javascript:void(0);" (click)="applySort('number', paginationService.sortDir)">Number</a>
+                <i *ngIf="paginationService.sortField == 'number' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                <i *ngIf="paginationService.sortField == 'number' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+              </th>
+              <th scope="col">                      
+                <a href="javascript:void(0);" (click)="applySort('amount', paginationService.sortDir)">Amount</a>
+                <i *ngIf="paginationService.sortField == 'amount' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                <i *ngIf="paginationService.sortField == 'amount' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+              </th>
+              <th scope="col">Sender</th>
+              <th scope="col">Recipient</th>
+              <th scope="col">Description</th>
+              <th scope="col">
+                <a href="javascript:void(0);" (click)="applySort('type', paginationService.sortDir)">Type</a>
+                <i *ngIf="paginationService.sortField == 'type' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                <i *ngIf="paginationService.sortField == 'type' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+              </th>
+              <th scope="col">                      
+                <a href="javascript:void(0);" (click)="applySort('status', paginationService.sortDir)">Status</a>
+                <i *ngIf="paginationService.sortField == 'status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                <i *ngIf="paginationService.sortField == 'status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+              </th>
+              <th scope="col">                      
+                <a href="javascript:void(0);" (click)="applySort('created', paginationService.sortDir)">Date</a>
+                <i *ngIf="paginationService.sortField == 'created' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                <i *ngIf="paginationService.sortField == 'created' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+              </th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr role="row" *ngFor="let transaction of lstSendChecks">
+              <td>
+                <input style="margin: 5px" type="checkbox" [(ngModel)]="transaction.multiple" (click)="unCheckedChecks($event)"
+                       [disabled]="!transService.canVoidCheck(transaction.status)">
+              </td>
+              <td data-title="Number" scope="row">
+                {{transaction.number || '&nbsp;'}}
+                <span class="badge badge-warning" style="margin: 3px;display: block;" *ngIf="transaction.is_nextday > 0">
+                  Next Day
+                </span>
+                <span class="badge badge-warning" style="margin-left: 3px;display: block;margin-bottom: 2px;" *ngIf="transaction.twin_attempt > 0">
+                  {{transaction.twin_attempt}} Duplicate
+                </span>
+              </td>
+              <td data-title="Amount">{{transaction.amount | currency:transaction.currency:'symbol' || '&nbsp;'}}</td>
+              <td data-title="Sender">
+                {{transaction.sndr_name || '&nbsp;'}}
+                <br>
+                <a *ngIf="canSenderEmailLink(transaction)" 
+                  href="/users/{{transaction.sender.dwl_token}}/{{transaction.sender.u_token}}">{{transaction.sndr_email || '&nbsp;'}}
+                </a>
+                <span *ngIf="!canSenderEmailLink(transaction)" >
+                  {{transaction.sndr_email || '&nbsp;'}}
+                </span>
+              </td>
+              <td data-title="Recipient">
+                {{transaction.rec_name || '&nbsp;'}}
+                <br>
+                <a *ngIf="canRecipientEmailLink(transaction)" 
+                  href="/users/{{transaction.recipient.dwl_token}}/{{transaction.recipient.u_token}}">{{transaction.rec_email || '&nbsp;'}}
+                </a>
+                <span *ngIf="!canRecipientEmailLink(transaction)">
+                  {{transaction.rec_email || '&nbsp;'}}
+                </span>
+              </td>
+              <td data-title="Description">{{transaction.description || '&nbsp;'}}</td>
+              <td data-title="Type">{{transaction.type || '&nbsp;'}}</td>
+              <td data-title="Status">
+                <span *ngIf="transaction.status != 'failed'" [innerHTML]="getStatus(transaction)"></span>
+                <span *ngIf="transaction.status == 'failed'">
+                      <a *ngIf="transaction.failed != null" href="javascript:void(0)" (click)="failedInfoPopup( failedInfoDialog, transaction )">Failed</a>
+                      <span *ngIf="transaction.failed == null">Failed</span>
+                </span>
+              </td>
+              <td data-title="Date" class="col-md-100">{{userService.getDateFormat(transaction.created_at)}}</td>
+              <td data-title="Actions" class="actions" style=" padding-left: 0px; padding-right: 0px;">
+<!--                <button title="View Check Info" *ngIf="canViewCheckInfo(transaction)" -->
+<!--                        style="margin: 3px;padding: 5px 13px;" class="btn btn-primary btn-sm btn-rounded" type="button" -->
+<!--                        (click)= "sendCheckInfoPopup( sendChacksDialog, transaction )" >-->
+<!--                        <i class="fa fa-search"></i>-->
+<!--                </button>-->
+                <a href="javascript:void(0);" title="View Check Info" *ngIf="canViewCheckInfo(transaction)"
+                  style="margin: 3px;" class=""
+                  (click)= "sendCheckInfoPopup( sendChacksDialog, transaction )" >
+                  <i class="fa fa-search"></i>
+                </a>
+                <a href="javascript:void(0);" title="Void" style="margin: 3px;color: red;" *ngIf="canDecline(transaction)"
+                        (click)="voidTransactionCheck(transaction)" class="">
+                  <i class="fa fa-trash-o"></i>
+<!--                  <i class="picons-thin-icon-thin-0060_error_warning_danger_stop_delete_exit"></i>-->
+<!--                  <span>Void</span>-->
+                </a>
+                <a href="javascript:void(0);" (click)="toogleFraud(transaction)" title="{{ transaction.fraud == 1 ? 'Fraud / Mark as normal' : 'Normal / Mark as fraud'}}"
+                   class="action-toogle-fraud" style="position: relative;">
+                  <i class="icon-feather-alert-triangle" style="color: #bbbaba" [ngClass]="{ 'has-fraud': transaction.fraud == 1 }"></i>
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div *ngIf="!lstSendChecks.length" class="ssg-nothing-found">
+      <div class="icon-w"><i class="os-icon os-icon-eye-off"></i></div>
+      <span>No transaction were found. Try changing your query...</span>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-12">
+        <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+          <div class="showentries">Show entries</div>
+          <ng-pagination 
+            [position]="'left'" 
+            [pageSize]="paginationService.pageSize"                     
+            [itemsCount]="paginationService.itemsCount" 
+            (getPageData)="listSendChecksTransactions($event)">                      
+          </ng-pagination>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="send-request-box" *ngIf="userService.isMerchant() && !userService.isDwollaSuspended()">
+    <a class="btn btn-primary btn-rounded dashboard-request-check" href="/receive-money" *ngIf="userService.canProcessChecks('receive-money')">
+      Request a Check
+    </a>
+    <button class="btn btn-primary btn-rounded dashboard-request-check" 
+            type="button" (click)="callAction(userService.getUserCheckingActionForRequest('/receive-money'))" *ngIf="!userService.canProcessChecks('receive-money')">
+      Request a Check
+    </button>
+    <a class="btn btn-primary btn-rounded dashboard-send-check" href="/send-money" *ngIf="userService.canProcessChecks('send-money')">
+      Send a Check
+    </a>
+    <button class="btn btn-primary btn-rounded dashboard-send-check" 
+          type="button" (click)="callAction(userService.getUserCheckingActionForSend('/send-money'))" *ngIf="!userService.canProcessChecks('send-money')">
+          Send a Check
+    </button>
+  </div>
+</div>
+
+<ng-template #sendChacksDialog let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content" style="padding: 0;">
+    <div class="modal-header">
+      <h4 class="modal-title">Check Info</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+
+    <div class="checkWrapper">
+      <div class="check">
+        <div class="checkElement previewCurrentDate">{{userService.getDateFormat(checkPopupInfo.created_at)}}</div>
+        <div class="checkElement previewReceiver">{{checkPopupInfo.rec_name}}</div>
+        <div class="checkElement previewAmount">{{checkPopupInfo.amount | currency: '' :''}}</div>
+        <div class="checkElement previewAmountWord">{{utility.toWords(checkPopupInfo.amount | currency: '' :'')}}</div>
+        <div class="checkElement previewDesc">{{checkPopupInfo.description}}</div>
+        <div class="checkElement previewBankName">
+          <span *ngIf="(userService.isMerchant() || userService.isClient()) && checkPopupInfo.bank_info">
+            {{checkPopupInfo.bank_info.name || ''}}
+          </span>
+          <span *ngIf="(userService.isAdmin() || userService.isSuperAdmin()) && checkPopupInfo.sender_info && checkPopupInfo.sender_info.bank_info">
+            {{checkPopupInfo.sender_info.bank_info.name }}
+          </span>
+        </div>
+    <div class="checkElement previewSignWrapper">
+      <div class="previewWithOutSignWrapper">
+        <span *ngIf="checkPopupInfo.sender && checkPopupInfo.sender.u_token == userService.getToken()">
+          <span *ngIf="!userService.getSignature()" class="signatureName">{{userService.getFullName()}}</span>
+          <img *ngIf="userService.getSignature()" class="signature" src="{{userService.getSignature()}}">
+        </span>
+        <span  *ngIf="checkPopupInfo.sender && checkPopupInfo.sender.u_token != userService.getToken()">
+          <span *ngIf="!checkPopupInfo.signature" class="signatureName">{{checkPopupInfo.sndr_name}}</span>
+          <img *ngIf="checkPopupInfo.signature" class="signature" src="{{checkPopupInfo.signature}}">
+        </span>
+        <span  *ngIf="!checkPopupInfo.sender">
+          <span class="signatureName">{{checkPopupInfo.sndr_name}}</span>
+        </span>
+      </div>
+    </div>
+    <div class="checkElement infoWrapper">
+      <div>
+        <div class="previewSenderName">{{checkPopupInfo.sndr_name}}</div>
+        <div class="smallText">{{checkPopupInfo.sndr_email}}</div>
+      </div>
+    </div>
+    <div class="checkElement routingNumber">A{{getRoutingNumber()}}A</div>
+    <div class="checkElement accountNumber">******{{getAccountNumber()}}</div>
+    <div class="checkElement userCheckNumber">{{checkPopupInfo.number}}</div>
+  </div>
+</div>
+<div class="modal-body">
+  &nbsp;&nbsp;
+  <!--</div>-->
+  <div class="profile-tile">
+    <span class="profile-tile-box">
+      <div class="pt-avatar-w" style="border-radius: 0px;">
+        <i style="color:#aab7c8; font-size: 5em;" class="picons-thin-icon-thin-0414_money_cash_coins_payment"></i>
+      </div>
+    </span>
+
+    <div class="profile-tile-meta" style='font-size: 22px;'>
+      <ul *ngIf="userService.isAdmin() || userService.isSuperAdmin()">
+        <li style="margin-bottom: 15px">
+          <div>
+            <span class="added_withdrawn">Date:</span> 
+            <span class="added_withdrawn_source">&nbsp;{{userService.getDateFormat(checkPopupInfo.created_at,  'MMM D, YYYY hh:mm:ss A')}}</span>
+          </div>
+          <div>
+            <span class="added_withdrawn">Date Paid:</span> 
+            <span class="added_withdrawn_source">&nbsp;
+              <span *ngIf="checkPopupInfo.payment_at">
+                {{userService.getDateFormat(checkPopupInfo.payment_at, 'MMM D, YYYY hh:mm:ss A')}}
+              </span>
+            </span>
+          </div>
+          <div>
+            <span class="added_withdrawn">Description:</span> 
+            <span class="added_withdrawn_source">&nbsp;{{checkPopupInfo.description}}</span>
+          </div>
+          <div>
+            <span class="added_withdrawn">Type:</span> 
+            <span class="added_withdrawn_source">&nbsp;{{checkPopupInfo.type}}</span>
+          </div>
+          <div>
+            <span class="added_withdrawn">Recurring:</span> 
+            <span class="added_withdrawn_source">&nbsp;{{isReccuring( checkPopupInfo.type ) ? 'Yes' : 'No'}}</span>
+          </div>
+          <div>
+            <span class="added_withdrawn">Transfer:</span> 
+            <span class="added_withdrawn_source">&nbsp;{{ checkPopupInfo.is_nextday ? 'Next Day' : 'Standard'}}</span>
+          </div>
+          <div *ngIf="canViewFeesOnCheck(checkPopupInfo)">
+            <span class="added_withdrawn">Fee:</span>
+            <span class="added_withdrawn_source">&nbsp;{{checkPopupInfo.amount_fee | currency:'':'symbol'}}</span>
+          </div>
+        </li>
+
+        <li>
+          <div>
+            <span class="added_withdrawn"><b>TO:</b></span> 
+            <span class="added_withdrawn_source">&nbsp;</span></div>
+        </li>
+        <li style="margin-bottom: 15px">
+          <div>
+            <span class="added_withdrawn">Name:</span> 
+            <span class="added_withdrawn_source">&nbsp;{{checkPopupInfo.rec_name}}</span>
+          </div>            
+          <div>
+            <span class="added_withdrawn">Email: </span> 
+            <a href="/users/{{checkPopupInfo.reciever_info.account.dwl_token}}/{{checkPopupInfo.reciever_info.account.u_token}}"
+               *ngIf="checkPopupInfo.reciever_info && checkPopupInfo.reciever_info.account">{{checkPopupInfo.rec_email}}</a>
+            <span *ngIf="!checkPopupInfo.reciever_info || !checkPopupInfo.reciever_info.account" class="added_withdrawn_source">&nbsp;{{checkPopupInfo.rec_email}}</span>
+          </div>
+          <div *ngIf="checkPopupInfo.reciever_info && checkPopupInfo.reciever_info.bank_info">
+            <div>
+              <span class="added_withdrawn">Bank Name:</span> 
+              <span class="added_withdrawn_source">&nbsp;{{checkPopupInfo.reciever_info.bank_info.name}}</span>
+            </div>
+            <div>
+              <span class="added_withdrawn">Last 4 digits of account:</span> 
+              <span class="added_withdrawn_source">&nbsp;**** {{checkPopupInfo.reciever_info.account.number}}</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div>
+            <span class="added_withdrawn"><b>FROM:</b></span> 
+            <span class="added_withdrawn_source">&nbsp;</span></div>
+        </li>
+        <li style="margin-bottom: 15px">
+          <div>
+            <span class="added_withdrawn">Name:</span> 
+            <span class="added_withdrawn_source">&nbsp;{{checkPopupInfo.sndr_name}}</span>
+          </div>            
+          <div>
+            <span class="added_withdrawn">Email: </span>
+            <a href="/users/{{checkPopupInfo.sender_info.account.dwl_token}}/{{checkPopupInfo.sender_info.account.u_token}}"
+               *ngIf="checkPopupInfo.sender_info && checkPopupInfo.sender_info.account">{{checkPopupInfo.sndr_email}}</a>
+            <span *ngIf="!checkPopupInfo.sender_info || !checkPopupInfo.sender_info.account" class="added_withdrawn_source">&nbsp;{{checkPopupInfo.sndr_email}}</span>
+          </div>
+          <div *ngIf="checkPopupInfo.sender_info && checkPopupInfo.sender_info.bank_info">
+            <div>
+              <span class="added_withdrawn">Bank Name:</span> 
+              <span class="added_withdrawn_source">&nbsp;{{checkPopupInfo.sender_info.bank_info.name}}</span>
+            </div>
+            <div>
+              <span class="added_withdrawn">Last 4 digits of account:</span> 
+              <span class="added_withdrawn_source">&nbsp;**** {{checkPopupInfo.sender_info.account.number}}</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div>
+            <span class="added_withdrawn">STATUS:</span> 
+            <span class="added_withdrawn_source" [innerHTML]="getStatus(checkPopupInfo)"></span>
+          </div>
+          <div>
+            <span class="added_withdrawn">TRANSACTION ID:</span> 
+            <span class="added_withdrawn_source">&nbsp;{{checkPopupInfo.dwl_t_token}}</span>
+          </div>
+        </li>
+      </ul>
+      <ul *ngIf="userService.isMerchant() || userService.isClient()">
+        <li>
+          <div>
+            <span class="added_withdrawn">Name:</span> 
+            <span class="added_withdrawn_source">&nbsp;
+              {{checkPopupInfo.rec_name}}
+            </span>
+          </div>            
+          <div>
+            <span class="added_withdrawn">Email</span> 
+            <span class="added_withdrawn_source">&nbsp;
+              {{checkPopupInfo.rec_email}}
+            </span>
+          </div>            
+        </li>
+        <li>
+          <div>
+            <span class="added_withdrawn">Date:</span> 
+            <span class="added_withdrawn_source">&nbsp;
+              {{userService.getDateFormat(checkPopupInfo.created_at)}}
+            </span>
+          </div>
+          <div>
+            <span class="added_withdrawn">Date Paid:</span> 
+            <span class="added_withdrawn_source">&nbsp;
+              <span *ngIf="checkPopupInfo.payment_at">
+                {{userService.getDateFormat(checkPopupInfo.payment_at)}}
+              </span>
+            </span>
+          </div>
+        </li>
+        <li></li>
+        <li>Number:&nbsp;<span class="added_withdrawn_source">{{checkPopupInfo.number}}</span></li>
+        <li>Amount:&nbsp;<span class="added_withdrawn_source">{{getAmountString(checkPopupInfo)}}</span></li>
+        <li *ngIf="canViewFeesOnCheck(checkPopupInfo)">
+          Fee:&nbsp;<span class="added_withdrawn_source">{{checkPopupInfo.amount_fee | currency:'':'symbol'}}</span>
+        </li>
+        <li>Status:&nbsp;<span class="added_withdrawn_source" [innerHTML]="getStatus(checkPopupInfo)"></span></li>
+        <li>Description:&nbsp;<span class="added_withdrawn_source">{{checkPopupInfo.description}}</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <!--<button type="button" class="btn btn-secondary" (click)="c('Close click')">Close</button>-->
+  <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+</div>
+</div>
+</ng-template>
+
+<ng-template #failedInfoDialog let-c="close" let-d="dismiss">
+  <div class="manual-verification modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title center">Failed Transaction</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="profile-tile">
+        <div class="profile-tile-meta" style='font-size: 22px;'>
+          <ul>
+            <li>Code:&nbsp;<span class="added_withdrawn_source">{{failedPopupInfo.code || '&nbsp;'}}</span></li>
+            <li>Date:&nbsp;<span class="added_withdrawn_source">{{userService.getDateFormat(failedPopupInfo.created || '&nbsp;')}}</span></li>
+            <li>Description:&nbsp;<span class="added_withdrawn_source">{{failedPopupInfo.description || '&nbsp;'}}</span></li>
+            <li>Explanation:&nbsp;<span class="added_withdrawn_source">{{failedPopupInfo.explanation || '&nbsp;'}}</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>   
+    </div>
+  </div>
+</ng-template>

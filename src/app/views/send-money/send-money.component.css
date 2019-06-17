@@ -1,0 +1,16 @@
+@media only screen and (min-width: 480px){
+  .previewSignWrapper {
+    top: 137px;
+    left: 307px;
+  }
+}
+.signature{
+  width: 195px;
+}
+.signatureName{
+  font-family: journal;
+}
+.previewWithOutSignWrapper {
+  font-size: 2.5em;
+  line-height: 1.5;
+}

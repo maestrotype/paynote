@@ -1,0 +1,35 @@
+.added_withdrawn_source{
+  font-weight: bold;
+  text-transform: initial;
+}
+.profile-tile-meta ul{
+  font-size: 0.9rem !important;
+}
+div.dataTables_wrapper div.dataTables_filter {
+    text-align: left;
+}
+.ssg-nothing-found i{
+  float: left;
+    margin-right: 15px;
+}
+.previewWithOutSignWrapper .signature { position: relative; top: -20px; }
+
+@media only screen and (min-width: 480px){
+  .previewSignWrapper {
+    top: 160px;
+    left: 290px;
+  }
+}
+@media (max-width: 480px) {
+  .previewWithOutSignWrapper .signature { position: relative; top: 0px; }
+}
+.signature{
+  width: 195px;
+}
+.signatureName{
+  font-family: journal;
+}
+.previewWithOutSignWrapper {
+    font-size: 2em;
+    line-height: 1.3;
+}

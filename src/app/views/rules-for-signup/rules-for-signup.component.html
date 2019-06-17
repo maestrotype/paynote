@@ -1,0 +1,184 @@
+<div class="element-wrapper">
+  <h6  class="element-header">Rules for SignUp</h6>
+  <div class="element-box">
+    <div class="row">
+      <div class="col-lg-12">
+        <form>
+          <h5 class="form-header">Status Signup Queue</h5>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-4 col-md-4 col-sm-4" for="status_signup_queue">
+              <span *ngIf="objRule.enabled == 1">Enabled</span>
+              <span *ngIf="objRule.enabled == 0">Disabled</span>
+            </label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <button type="button" id="update_rules_for_sign_up" class="btn btn-primary btn-rounded btn-lg" 
+                [disabled]="isLoading" (click)="updateStatusSignUpRule()">
+                <span *ngIf="objRule.enabled == 0">Enable</span>
+                <span *ngIf="objRule.enabled == 1">Disable</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-lg-6">
+        <form>
+          <h5 class="form-header">Signup Review Queue</h5>
+          <!--<div class="form-desc"></div>-->
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="maxmind_risk_score_review">Maxmind Risk Score</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" placeholder="0" type="text" id="maxmind_risk_score_review"
+                     [(ngModel)]="objSignUpRules.maxmind_risk_score.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="maxmind_ip_score_review">Maxmind IP Score</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" placeholder="0" type="text" id="maxmind_ip_score_review"
+                     [(ngModel)]="objSignUpRules.maxmind_ip_score.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="high_risk_country_review">High Risk Country</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="high_risk_country_review"
+                     [(ngModel)]="objSignUpRules.high_risk_country.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="maxmind_carder_email_review">Maxmind Carder Email</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="maxmind_carder_email_review"
+                     [(ngModel)]="objSignUpRules.maxmind_carder_email.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="postal_in_city_review">Billing postal code is in the billing city</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="postal_in_city_review"
+                     [(ngModel)]="objSignUpRules.postal_in_city.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="addres_in_ip_country_review">Billing address is in IP country</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="addres_in_ip_country_review"
+                     [(ngModel)]="objSignUpRules.addres_in_ip_country.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="postal_to_ip_review">Billing postal code to IP address distance</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" placeholder="0" type="text" id="postal_to_ip_review"
+                     [(ngModel)]="objSignUpRules.postal_to_ip.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="same_ip_review">Same IP</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="same_ip_review"
+                     [(ngModel)]="objSignUpRules.same_ip.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="same_fingerprint_review">Same Fingerprint</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="same_fingerprint_review"
+                     [(ngModel)]="objSignUpRules.same_fingerprint.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="phone_voip_review">Phone type VOIP</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="phone_voip_review"
+                     [(ngModel)]="objSignUpRules.phone_voip.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="col-lg-6">
+        <form>
+          <h5 class="form-header">Signup Lock Queue</h5>
+          <!--<div class="form-desc"></div>-->
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="maxmind_risk_score_lock">Maxmind Risk Score</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" placeholder="0" type="text" id="maxmind_risk_score_lock"
+                     [(ngModel)]="objSignUpRules.maxmind_risk_score.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="maxmind_ip_score_lock">Maxmind IP Score</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" placeholder="0" type="text" id="maxmind_ip_score_lock"
+                     [(ngModel)]="objSignUpRules.maxmind_ip_score.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="high_risk_country_lock">High Risk Country</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="high_risk_country_lock"
+                     [(ngModel)]="objSignUpRules.high_risk_country.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="maxmind_carder_email_lock">Maxmind Carder Email</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="maxmind_carder_email_lock"
+                     [(ngModel)]="objSignUpRules.maxmind_carder_email.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="postal_in_city_lock">Billing postal code is in the billing city</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="postal_in_city_lock"
+                     [(ngModel)]="objSignUpRules.postal_in_city.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="addres_in_ip_country_lock">Billing address is in IP country</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="addres_in_ip_country_lock"
+                     [(ngModel)]="objSignUpRules.addres_in_ip_country.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="postal_to_ip_lock">Billing postal code to IP address distance</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" placeholder="0" type="text" id="postal_to_ip_lock"
+                     [(ngModel)]="objSignUpRules.postal_to_ip.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="same_ip_lock">Same IP</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="same_ip_lock"
+                     [(ngModel)]="objSignUpRules.same_ip.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="same_fingerprint_lock">Same Fingerprint</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="same_fingerprint_lock"
+                     [(ngModel)]="objSignUpRules.same_fingerprint.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="phone_voip_lock">Phone type VOIP</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="phone_voip_lock"
+                     [(ngModel)]="objSignUpRules.phone_voip.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="buttons-w text-center" style="width: 100%;">            
+        <button type="button" id="update_rules_for_sign_up" class="btn btn-primary btn-rounded btn-lg" 
+                [disabled]="isLoading" (click)="updateSignUpRules()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>

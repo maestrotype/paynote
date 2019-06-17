@@ -1,0 +1,155 @@
+<div class="element-wrapper">
+  <h6  class="element-header">Phone Number on Multiple Users</h6>
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-12">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search" 
+                       [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel" 
+                       (search)="getMultiplePhones(null)" (keyup)="getMultiplePhones(null)">
+              </label>
+              <button title="Add" style="margin: 6px;" class="pull-right btn btn-primary btn-sm btn-rounded btn-rounded-margin" type="button" 
+                      (click)="prepareAdd(editPhoneNumberForm)">Add
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable sendChecks responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('phone', paginationService.sortDir, getMultiplePhones(null))">Phone</a>
+                    <i *ngIf="paginationService.sortField == 'phone' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'phone' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('limit', paginationService.sortDir, getMultiplePhones(null))">Limit</a>
+                    <i *ngIf="paginationService.sortField == 'limit' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'limit' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('registered', paginationService.sortDir, getMultiplePhones(null))">Used</a>
+                    <i *ngIf="paginationService.sortField == 'registered' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'registered' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('enabled', paginationService.sortDir, getMultiplePhones(null))">Enabled</a>
+                    <i *ngIf="paginationService.sortField == 'enabled' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'enabled' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">Note</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let phoneNumber of objMultiplePhoneComp.lstPhoneNumbers" >
+                  <td data-title="Phone">{{phoneNumber.phone}}</td>
+                  <td data-title="Limit">{{phoneNumber.limit || '0'}}</td> 
+                  <td data-title="Used">{{phoneNumber.registered || '0'}}</td>
+                  <td data-title="Enabled">{{phoneNumber.enabled ? 'Yes' : 'No'}}</td>
+                  <td data-title="Note">{{phoneNumber.note || '&nbsp;'}}</td>
+                  <td data-title="Action">
+                    <button title="Edit" class="btn btn-primary btn-sm btn-rounded" type="button" 
+                            (click)="prepareEdit(phoneNumber, editPhoneNumberForm)">Edit
+                    </button>
+                    <button title="Disable" class="btn btn-primary btn-sm btn-rounded" type="button" 
+                            (click)="disableMupliPhone(phoneNumber)">
+                      <span *ngIf="phoneNumber.enabled">Disable</span>
+                      <span *ngIf="!phoneNumber.enabled">Enable</span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+        <div *ngIf="!objMultiplePhoneComp.lstPhoneNumbers.length" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No request were found...</span>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="objMultiplePhoneComp.lstPhoneNumbers.length" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="getMultiplePhones($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #editPhoneNumberForm let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title" *ngIf="!objMultiplePhoneComp.objPhoneNumber.id">Add Phone Number</h4>
+      <h4 class="modal-title" *ngIf="objMultiplePhoneComp.objPhoneNumber.id">Edit Phone Number</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form  name="form" #f="ngForm">
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !phone.valid && (phone.dirty || phone.touched)}">
+              <label for="">Phone</label>
+              <input id="addPhone" class="form-control" placeholder="Phone" type="text" 
+                     [(ngModel)]="objMultiplePhoneComp.objPhoneNumber.phone" 
+                    name="phone" required #phone="ngModel" [textMask]="{mask:utility.maskPhone}"
+                    [disabled]="objMultiplePhoneComp.objPhoneNumber.id">
+              <div class="help-block form-text text-muted form-control-feedback" 
+                    *ngIf="!phone.valid && (phone.dirty || phone.touched)">
+                <span *ngIf="phone.errors.required">Phone is required </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !limit.valid && (limit.dirty || limit.touched)}">
+              <label for="">Limit</label>
+              <input id="addLimit" class="form-control" placeholder="Limit" type="text" 
+                     [(ngModel)]="objMultiplePhoneComp.objPhoneNumber.limit" 
+                     name="limit" required #limit="ngModel">
+              <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!limit.valid && (limit.dirty || limit.touched)">
+                <span *ngIf="limit.errors.required">Limit is required</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="form-group">
+              <label for="">Note</label>
+              <textarea id="addNote" class="form-control" placeholder="Note"
+                     [(ngModel)]="objMultiplePhoneComp.objPhoneNumber.note" 
+                     name="note" #note="ngModel"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+      <div class="modal-footer">
+        <button id="cancelButton" class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+        <button id="addEditButton" class="slick-next slick-arrow" type="submit" [disabled]="isLoading || !f.form.valid"
+                (click)="editPhoneNumber()">
+          <span *ngIf="!objMultiplePhoneComp.objPhoneNumber.id">Add</span>
+          <span *ngIf="objMultiplePhoneComp.objPhoneNumber.id">Edit</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>

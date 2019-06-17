@@ -1,0 +1,337 @@
+<div class="element-wrapper settingsTab">
+  <h6 class="element-header">Settings</h6>
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+  <div class="element-box1" style="padding-top: 1.5rem; padding-bottom: 1.5rem ">
+    <div class="os-tabs-w">
+      <div class="os-tabs-controls">
+        <ul class="nav nav-tabs bigger">
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#tab_details"><i class="picons-thin-icon-thin-0714_identity_card_photo_user_profile"></i> Profile info</a>
+          </li>
+        </ul>
+      </div>
+      <div class="tab-content">
+        <div class="tab-pane active" id="tab_details">
+          <form  name="form" (ngSubmit)="f.form.valid && updateProfileInfo()" #f="ngForm">
+                 <!--<div>-->
+                 <!--              <div class="row">
+                                 <div class="col-sm-6">
+                                   <div class="form-group" [ngClass]="{'has-error has-danger': !first_name.valid && (first_name.dirty || first_name.touched)}">
+                                        <label for="">First Name</label>
+                                     <input class="form-control" placeholder="{{modelSettingsInfo.first_name}}" type="text" 
+                                            [(ngModel)]="modelSettingsInfo.first_name" 
+                                            name="firstName" required #first_name="ngModel" [disabled]="true">
+                                            <div class="help-block form-text text-muted form-control-feedback" 
+                                            *ngIf="!first_name.valid && (first_name.dirty || first_name.touched)">
+                                            <span *ngIf="first_name.errors.required">
+                                         First Name is required
+                                       </span>
+                                     </div>
+                                   </div>
+                                 </div>
+                                 <div class="col-sm-6">
+                                   <div class="form-group" [ngClass]="{'has-error has-danger': !last_name.valid && (last_name.dirty || last_name.touched)}">
+                                        <label for="">Last Name</label>
+                                     <input class="form-control" placeholder="{{modelSettingsInfo.last_name}}" type="text" [(ngModel)]="modelSettingsInfo.last_name" 
+                                            name="last_name" required #last_name="ngModel"  [disabled]="true">
+                                            <div class="help-block form-text text-muted form-control-feedback" 
+                                            *ngIf="!last_name.valid && (last_name.dirty || last_name.touched)">
+                                            <span *ngIf="last_name.errors.required">
+                                         Last Name is required
+                                       </span>
+                                     </div>
+                                   </div>
+                                 </div>
+                               </div>
+
+              <div class="row">
+
+                <div class="" [ngClass]="{'col-sm-4 errors': !userService.isEmailConfirmation(), 
+                     'col-sm-6': userService.isEmailConfirmation()}">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !email.valid && (email.dirty || email.touched)}">
+                    <label for="">
+                      Email |
+                      <span *ngIf="userService.isEmailConfirmation()">
+                        <span class="status-pill green" data-title="Complete" data-toggle="tooltip" data-original-title="" title=""></span> verified
+                      </span>
+                      <span *ngIf="!userService.isEmailConfirmation()">
+                        <span class="status-pill red" data-title="Cancelled" data-toggle="tooltip" data-original-title="" title=""></span> unverified
+                      </span>
+                    </label>
+                    <input class="form-control" placeholder="{{modelSettingsInfo.email}}" type="text" [(ngModel)]="modelSettingsInfo.email" 
+                           name="update_email" required #email="ngModel" [disabled]="true">
+                           <div class="help-block form-text text-muted form-control-feedback" 
+                           *ngIf="!email.valid && (email.dirty || email.touched)">
+                           <span *ngIf="email.errors.required">
+                        Email is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-sm-2" *ngIf="!userService.isEmailConfirmation()">
+                  <div class="form-group"><label style='color: red;opacity: 0;'>Email not verifyed</label>
+                    <button type="button" class="btn btn-danger form-control btn-rounded btn-rounded-margin" (click)="profileInfoVerifyEmail(modelSettingsInfo.email)"> Verify Email </button>
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="form-group" [ngClass]="{'has-error has-danger': !phone.valid && (phone.dirty || phone.touched)}">
+                       <label for="">Phone</label>
+                    <input appNumbers class="form-control" placeholder="{{modelSettingsInfo.phone}}" type="text" required name="phone"
+                           [(ngModel)]="modelSettingsInfo.phone" 
+                           #phone="ngModel" [disabled]="true">
+                    <div class="help-block form-text text-muted form-control-feedback" 
+                         *ngIf="!phone.valid && (phone.dirty || phone.touched)">
+                         <span *ngIf="phone.errors.required">
+                        Phone is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>-->
+                 <hr>           
+            <div class="row" *ngIf="userService.isMerchant() && modelSettingsInfo.settings">
+              <div class="col-sm-6">
+                <div class="form-group" [ngClass]="{'has-error has-danger': !check_number.valid && (check_number.dirty || check_number.touched)}">
+                     <label for="">Check number <i [matTooltipPosition]="'above'" [matTooltipShowDelay]="100"
+                      matTooltip="The check number entered is the actual starting number. The next check will have the number {{modelSettingsInfo.settings.check_number + 1}}, not {{modelSettingsInfo.settings.check_number}}."  
+                      aria-hidden="true" class="fa fa-question-circle" placement="bottom"></i>
+                  </label>
+                  <input class="form-control" placeholder="Check number" min="1" type="number" 
+                         [(ngModel)]="modelSettingsInfo.settings.check_number" 
+                         name="check_number" #check_number="ngModel">
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group" [ngClass]="{'has-error has-danger': !invoice_number.valid && (invoice_number.dirty || invoice_number.touched)}">
+                     <label for="">Invoice number <i [matTooltipPosition]="'above'" [matTooltipShowDelay]="100"
+                      matTooltip="The invoice number entered is the actual starting number. The next invoice will have the number {{modelSettingsInfo.settings.invoice_number + 1}}, not {{modelSettingsInfo.settings.invoice_number}}." 
+                      aria-hidden="true" class="fa fa-question-circle" placement="bottom"></i></label>
+                  <input class="form-control" placeholder="Invoice number" min="1" type="number" 
+                         [(ngModel)]="modelSettingsInfo.settings.invoice_number" 
+                         name="invoice_number" #invoice_number="ngModel">
+
+                </div>
+              </div>
+            </div>
+            <!--</div>-->
+            <div class="clearfix"></div>
+            <br>
+            <div class="row" *ngIf="userService.isMerchant() || userService.isCustomer()">
+                 <div class="col-sm-12"  *ngIf="userService.isMerchant()">
+                <!--<signature-pad [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad>-->
+                <div class="form-group">
+                  <label for="">Signature 
+                    <a [matTooltipPosition]="'above'" [matTooltipShowDelay]="100"
+                      matTooltip="{{messages.get('TOOLTIP_UPDATE_SIGNATURE')}}" aria-hidden="true" href="javascript:void(0)" 
+                      (click)="openModal(addSignature)">
+                      <i class="picons-thin-icon-thin-0001_compose_write_pencil_new"></i>
+                    </a>
+                  </label><br>
+                  <img style="width: 260px;" class="signature-image" src="{{userService.getSignature()}}">
+                </div>
+              </div>
+              <!--              <div class="col-sm-6 settingsLimits" *ngIf="userService.isMerchant() && userService.isDwollaVerified()"><br/>
+                              <br/>
+                              <div class="row">
+                                <div class="col-sm-6">
+                                  <label style="font-size: 20px;">Send limits 
+                                    <i *ngIf="modelSettingsInfo.settings.send_limit.Enabled" class="fa fa-question-circle" 
+                                      [matTooltipPosition]="'above'" [matTooltipShowDelay]="100"
+                                        matTooltip="{{messages.get('TOOLTIP_SEND_LIMIT')}}"></i>
+                                    <span style="font-size: 15px;" *ngIf="!modelSettingsInfo.settings.send_limit.Enabled"> | <b>Disabled</b></span>
+                                  </label>
+                                  <div [ngClass]="{ 'enabledColor': !modelSettingsInfo.settings.send_limit.Enabled}">
+                                    <ul>
+                                      <li>Daily ({{modelSettingsInfo.settings.send_limit.Daily || 0 | currency:'':'symbol'}})</li>
+                                      <li>Monthly ({{modelSettingsInfo.settings.send_limit.Monthly || 0 | currency:'':'symbol'}})</li>
+                                      <li>Checks ({{modelSettingsInfo.settings.send_limit.Checks || 0 | currency:'':'symbol'}})</li>
+                                    </ul>
+                                  </div>
+              
+                                </div>
+                                <div class="col-sm-6">
+                                  <label  style="font-size: 20px;" for="">Receive limits 
+                                    <i *ngIf="modelSettingsInfo.settings.receive_limit.Enabled" class="fa fa-question-circle" 
+                                      [matTooltipPosition]="'above'" [matTooltipShowDelay]="100"
+                                        matTooltip="{{messages.get('TOOLTIP_RECEIVE_LIMIT')}}"></i>
+                                    <span style="font-size: 15px;" *ngIf="!modelSettingsInfo.settings.receive_limit.Enabled"> | <b>Disabled</b></span>
+                                  </label>
+                                  <div [ngClass]="{ 'enabledColor': !modelSettingsInfo.settings.receive_limit.Enabled}">
+                                    <ul>
+                                      <li>Daily ({{modelSettingsInfo.settings.receive_limit.Daily || 0 | currency:'':'symbol'}})</li>
+                                      <li>Monthly ({{modelSettingsInfo.settings.receive_limit.Monthly || 0 | currency:'':'symbol'}})</li>
+                                      <li>Invoices ({{modelSettingsInfo.settings.receive_limit.Invoices || 0 | currency:'':'symbol'}})</li>
+                                    </ul>
+                                  </div>
+                                </div>                
+                              </div>
+                            </div>
+              <div class="col-sm-6 settingsLimits" *ngIf="userService.isDwollaUnVerified()"><br/>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <label  style="font-size: 20px;" for="">Receive limits 
+                      <i class="fa fa-question-circle" [matTooltipPosition]="'above'" [matTooltipShowDelay]="100"
+                         matTooltip="{{messages.get('TOOLTIP_RECEIVE_LIMIT')}}"></i>
+                    </label>
+                    <div>
+                      <ul>
+                        <li>Weekly ({{modelSettingsInfo.settings.receive_limit.Weekly || 0 | currency:'':'symbol'}})</li>
+                      </ul>
+                    </div>
+                  </div>                
+                </div>
+              </div>-->
+            </div>
+
+            <div class="clearfix"></div>
+            <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+            <br>
+            <br>
+            <button *ngIf="userService.isMerchant() && userService.isFilledInfoForDwolla()" 
+              [disabled]="isLoading || !f.form.valid" class="btn btn-primary btn-rounded btn-rounded-margin" style="margin-top:5px;margin-bottom:5px;">Save</button>
+            <button type="button" class="btn btn-outline-secondary btn-rounded btn-rounded-margin" style="margin-top:5px;margin-bottom:5px;" *ngIf="userService.isPasswordSet()"
+                    (click)="openModal(addChangePassword)"> Change Password </button>
+          </form>
+        </div>        
+        <div class="tab-pane" id="tab_conversion"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #addSignature let-c="close" let-d="dismiss" let-create="addFundSources">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title" style="padding: 0 15px;">Edit your signature online</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <div class="modal-body" style="text-align: center;">   
+      <div class="modal-body signatureBox">  
+        <label style='margin-bottom: 15px;'>{{messages.get('ADD_SIGNATURE_TEXT')}}</label>
+        <signature-pad [options]="signaturePadOptions"></signature-pad>
+        <div class="m-signature-pad--footer">
+          <button class="button clear" type="button" 
+                  (click)="this.jqueryService.clearCanvas('canvas')" [disabled]="isLoading">Clear</button>
+          <button class="button save" type="button" 
+                  (click)="onSaveHandler()" [disabled]="isLoading">Save</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #addChangePassword let-c="close" let-d="dismiss" let-create="addFundSources">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Change Password
+      </h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form name="form" class="form-validation" (ngSubmit)="f.form.valid && onChangePassword(addPinCode)" #f="ngForm">
+          <div class="modal-body">    
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !currentPassword.valid && (currentPassword.dirty || currentPassword.touched)}">
+                 <label for="">Current Password</label>
+              <input class="form-control" placeholder="Current Password" type="password" [(ngModel)]="modelChangePassword.currentPassword" 
+                     name="currentPassword" required #currentPassword="ngModel">
+                     <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!currentPassword.valid && (currentPassword.dirty || currentPassword.touched)">
+                     <span *ngIf="currentPassword.errors.required">
+                  Current Passwor is required
+                </span>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group" [ngClass]="{'has-error has-danger': !newtPassword.valid && (newtPassword.dirty || newtPassword.touched)}">
+                     <label for="">New Password</label>
+                  <input class="form-control" placeholder="New Password" type="password" [(ngModel)]="modelChangePassword.newtPassword" 
+                         name="newtPassword" required #newtPassword="ngModel">
+                         <div class="help-block form-text text-muted form-control-feedback" 
+                         *ngIf="!newtPassword.valid && (newtPassword.dirty || newtPassword.touched)">
+                         <span *ngIf="newtPassword.errors.required">
+                      New Password is required
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group" [ngClass]="{'has-error has-danger': !newtPasswordConfirm.valid && (newtPasswordConfirm.dirty || newtPasswordConfirm.touched)}">
+                     <label for="">New Password (confirm)</label>
+                  <input class="form-control" placeholder="New Password (confirm)" type="password" [(ngModel)]="modelChangePassword.newtPasswordConfirm" 
+                         name="newtPasswordConfirm" required #newtPasswordConfirm="ngModel">
+                         <div class="help-block form-text text-muted form-control-feedback" 
+                         *ngIf="!newtPasswordConfirm.valid && (newtPasswordConfirm.dirty || newtPasswordConfirm.touched)">
+                         <span *ngIf="newtPasswordConfirm.errors.required">
+                      New Password (confirm) is required
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+        <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+      </div>
+      <div class="modal-footer">
+        <!--<button type="button" class="btn btn-outline-warning" (click)="onClearHandler()">Clear</button>-->
+        <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Cancel</button>
+        <button [disabled]="loading || !f.form.valid" class="slick-next slick-arrow" type="submit">Update</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #addPinCode let-c="close" let-d="dismiss" let-create="addPinCode">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Verify your phone </h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form name="form" class="form-validation" (ngSubmit)="f.form.valid && onVerifyPhone()" #f="ngForm">
+          <div class="modal-body">    
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !pinCode.valid && (pinCode.dirty || pinCode.touched)}">
+                 <label for=""><i class="icon-feather-hash"></i> Pin Code</label>
+              <input class="form-control" placeholder="Pin Code" type="text" [(ngModel)]="modelChangePassword.pinCode" 
+                     name="phone_pin" required  maxlength="4" #pinCode="ngModel">
+
+              <div class="help-block form-text text-muted form-control-feedback" 
+                   *ngIf="!pinCode.valid && (pinCode.dirty || pinCode.touched)">
+                   <span *ngIf="pinCode.errors.required">
+                  Pin Code is required
+                </span>
+                <span *ngIf="pinCode.errors.minlength">
+                  Pin Code must be at least 4 digits long.
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+        <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+      </div>
+      <div class="modal-footer">
+        <!--<button type="button" class="btn btn-outline-warning" (click)="onClearHandler()">Clear</button>-->
+        <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Cancel</button>
+        <button [disabled]="loading || !f.form.valid" class="slick-next slick-arrow">Update</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+

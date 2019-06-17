@@ -1,0 +1,419 @@
+
+<div class="element-wrapper">
+  <h6 class="element-header">Customers</h6>
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-3">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search customer" 
+                       [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel" 
+                       (search)="getListCustomers()" (keyup)="getListCustomers(null)">
+                <button type="button" class="btn-default btn-sm btn-rounded btn" (click)="resetFilter()">
+                  <i class="icon-feather-x"></i>
+                  <span class="visible-md-inline-block visible-lg-inline-block hidden-mobile"> Clear</span>
+                </button>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="position: relative;margin-top: 40px;">
+          <hr>
+          <!--          <button class="btn btn-primary btn-rounded" type="button" title="Add"
+                            style="position: absolute;padding: 15px;font-weight: bold;font-size: 20px;right: 0px;top: -70px;"
+                            (click)="openAddCustomersByOwnerModal(addCustomersByOwner)" *ngIf="!userService.isDwollaSuspended()">+</button>-->
+          <div class="col-sm-12 table-responsive">
+            <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    <!--Name-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('name', paginationService.sortDir, getListCustomers(null))">Name</a>
+                    <i *ngIf="paginationService.sortField == 'name' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'name' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Email-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('email', paginationService.sortDir, getListCustomers(null))">Email</a>
+                    <i *ngIf="paginationService.sortField == 'email' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'email' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Phone-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('phone', paginationService.sortDir, getListCustomers(null))">Phone</a>
+                    <i *ngIf="paginationService.sortField == 'phone' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'phone' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <!--                  <th scope="col">
+                                      Status
+                                      <a href="javascript:void(0);" (click)="paginationService.applySort('dwl_status', paginationService.sortDir, getListCustomers(null))">Status</a>
+                                      <i *ngIf="paginationService.sortField == 'dwl_status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                                      <i *ngIf="paginationService.sortField == 'dwl_status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                                    </th>-->
+                  <th scope="col">
+                    <!--Created-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, getListCustomers(null))">Created</a>
+                    <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col" *ngIf="!userService.isDwollaSuspended()">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let customer of listCustomers">
+                  <td data-title="Name" scope="row">
+                    {{customer.name || '&nbsp;'}}
+                  </td>
+                  <td data-title="Email">
+                    {{customer.email || '&nbsp;'}}
+                  </td>
+                  <td data-title="Phone">
+                    {{customer.phone || '&nbsp;'}}
+                  </td>
+                  <!--                  <td data-title="Status">
+                                      {{customer.dwl_status || '&nbsp;'}}
+                                    </td>-->
+                  <td data-title="Created">
+                    {{userService.getDateFormat(customer.created_at)}}
+                  </td>
+                  <td data-title="Action" *ngIf="!userService.isDwollaSuspended()">
+                    <button class="btn btn-primary btn-sm btn-rounded customer-send" (click)= "openSendDialog( sendMoneyCustomer, customer )"
+                            *ngIf="userService.canProcessChecks('send-money')">
+                            Send
+                    </button>
+                    <button class="btn btn-primary btn-sm btn-rounded customer-receive" (click)= "openReceiveDialog( receiveMoneyCustomer, customer )"
+                            *ngIf="userService.canProcessChecks('receive-money')">
+                            Receive
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No customer were found.</span>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="getListCustomers($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #addCustomersByOwner let-c="close" let-d="dismiss" let-create="addFundSources">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Add a Customer</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form name="form" (ngSubmit)="f.form.valid && addNewCustomer()" #f="ngForm">
+          <div class="modal-body">     
+        <div class="modal-body"> 
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !firstName.valid && (firstName.dirty || firstName.touched)}">
+                   <label for="">First Name</label>
+                <input class="form-control" placeholder="First Name" type="text" [(ngModel)]="modelNewCustomer.firstName" 
+                       name="firstName" required #firstName="ngModel">
+                       <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="!firstName.valid && (firstName.dirty || firstName.touched)">
+                       <span *ngIf="firstName.errors.required">
+                    First Name is required
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !lastName.valid && (lastName.dirty || lastName.touched)}">
+                   <label for="">Last Name</label>
+                <input class="form-control" placeholder="Last Name" type="text" [(ngModel)]="modelNewCustomer.lastName" 
+                       name="lastName" required #lastName="ngModel">
+                       <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="!lastName.valid && (lastName.dirty || lastName.touched)">
+                       <span *ngIf="lastName.errors.required">
+                    Last Name is required
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !email.valid && (email.dirty || email.touched)}">
+                   <label for="">Email</label>
+                <input class="form-control" placeholder="Email" type="text" [(ngModel)]="modelNewCustomer.email" 
+                       name="email" required #email="ngModel">
+                       <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="!email.valid && (email.dirty || email.touched)">
+                       <span *ngIf="email.errors.required">
+                    Email is required
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{ 'has-error has-danger': !phone.valid && (phone.dirty || phone.touched) }">
+                   <label>Phone number</label>
+                <input class="form-control" title="Phone number" placeholder="Phone number" type="text" name="phone"
+                       [(ngModel)]="modelNewCustomer.phone" #phone="ngModel" required maxlength="10" appNumbers>
+                <div *ngIf="!phone.valid && (phone.dirty || phone.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Phone number is required</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" [ngClass]="{ 'has-error has-danger': !routingNumber.valid && (routingNumber.dirty || routingNumber.touched) }">
+               <label>Routing Number</label>
+            <input class="form-control" title="Routing Number" placeholder="Routing Number" type="text" name="routingNumber"
+                   [(ngModel)]="modelNewCustomer.routingNumber" #routingNumber="ngModel" required maxlength="10" appNumbers>
+            <div *ngIf="!routingNumber.valid && (routingNumber.dirty || routingNumber.touched)" 
+              class="help-block form-text with-errors form-control-feedback">Routing Number is required</div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Bank Name</label>
+                <input class="form-control" placeholder="Bank Name" type="test" name="name" required
+                       [(ngModel)]="modelNewCustomer.name" #name="ngModel">
+                       <div *ngIf="!name.valid && (name.dirty || name.touched)" 
+                       class="help-block form-text with-errors form-control-feedback">Bank Name is required</div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Bank Account Type</label>
+                <select style="width: 100%;" class="form-control" placeholder="Bank Account Type" name="bankAccountType" required
+                        [(ngModel)]="modelNewCustomer.bankAccountType" #bankAccountType="ngModel">
+                        <option value="checking" selected="true">Checking</option>
+                  <option value="savings">Savings</option>
+                </select>
+                <div *ngIf="!bankAccountType.valid && (bankAccountType.dirty || bankAccountType.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Bank Account Type is required</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Account Number</label>
+                <input class="form-control" placeholder="Account Number" type="text" placeholder="e.g. 489729074589" name="accountNumber" appNumbers required maxlength="17"
+                       [(ngModel)]="modelNewCustomer.accountNumber" #accountNumber="ngModel">
+                <div *ngIf="!accountNumber.valid && (accountNumber.dirty || accountNumber.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Account Number is required</div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Confirm Account Number</label>
+                <input class="form-control" placeholder="Confirm Account Number" type="text" placeholder="e.g. 489729074589" name="cAccountNumber" appNumbers required maxlength="17"
+                       [(ngModel)]="modelNewCustomer.cAccountNumber" #cAccountNumber="ngModel">
+                <div *ngIf="!cAccountNumber.valid && (cAccountNumber.dirty || cAccountNumber.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Confirm Account Number is required</div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+
+
+          <!--      <div class="form-group" [ngClass]="{'has-error has-danger': !businessName.valid && (businessName.dirty || businessName.touched)}">
+                     <label for="">Business Name</label>
+                  <input class="form-control" placeholder="Business Name" type="text" [(ngModel)]="modelNewCustomer.businessName" 
+                         name="businessName" required #businessName="ngModel">
+                         <div class="help-block form-text text-muted form-control-feedback" 
+                         *ngIf="!businessName.valid && (businessName.dirty || businessName.touched)">
+                         <span *ngIf="businessName.errors.required">
+                      Business Name is required
+                    </span>
+                  </div>
+                </div>-->
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Cancel</button>
+        <button [disabled]="isLoading || !f.form.valid" class="slick-next slick-arrow">Add</button>
+
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #sendMoneyCustomer let-c="close" let-d="dismiss" let-create="mailStorage">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Send Money</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form  name="form" (ngSubmit)="f.form.valid && prepareCreatePayLink()" #f="ngForm">
+           <div class="modal-body">
+        <div class="modal-body"> 
+
+          <div class="row">          
+            <div class="col-sm-12">
+              <span>Payee's name: </span>
+              <span><b>{{objSend.name}}</b></span>
+            </div>
+            <div class="col-sm-12">
+              <span>Payee's email: </span>
+              <span><b>{{objSend.email}}</b></span>
+            </div>
+          </div>
+          <br>
+
+          <!--        <div class="form-group"  [ngClass]="{ 'has-error has-danger': !email.valid && (email.dirty || email.touched) }">
+                    <label for="">Payee's name</label>
+                    <input class="form-control" placeholder="Payee's name" type="text" name="name"
+                           [(ngModel)]="objSend.name" #name="ngModel" [disabled]="true">
+                  </div>
+                  
+                  <div class="form-group"  [ngClass]="{ 'has-error has-danger': !email.valid && (email.dirty || email.touched) }">
+                    <label for="">Payee's email</label>
+                    <input class="form-control" placeholder="Payee's email" type="email" name="email"
+                           [(ngModel)]="objSend.email" #email="ngModel" [disabled]="true">   
+                  </div>-->
+
+          <div class="row">
+
+            <div class="col-sm-4">
+              <div class="form-group"  [ngClass]="{ 'has-error has-danger': !amount.valid && (amount.dirty || amount.touched) }">
+                   <label for="">Amount</label>
+                <input autocomplete="off" id="sendMoneyAmount" class="form-control" placeholder="Amount" type="text" name="amount" currencyMask
+                       [(ngModel)]="objSend.amount" #amount="ngModel" required min="{{userService.getMinSendAmount()}}"
+                       (change)="checkSourceAccount()" (blur)="checkSourceAccount()">
+                       <div *ngIf="!amount.valid && (amount.dirty || amount.touched)" 
+                       class="help-block form-text with-errors form-control-feedback">Amount is required</div>
+                <div *ngIf="!amount.valid && (amount.dirty || amount.touched) && amount.errors.min" 
+                  class="help-block form-text with-errors form-control-feedback">The minimum amount you can send is {{userService.getMinSendAmount() | currency}}
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-8">
+            <div class="form-group"  [ngClass]="{ 'has-error has-danger': !fs_token.valid && (fs_token.dirty || fs_token.touched) }">
+                 <label for="">Source Account</label>
+              <select  class="form-control" placeholder="Source Account" name="fs_token" (change)="selectSourceBankAccount()"
+                       [(ngModel)]="objSend.fs_token" #fs_token="ngModel" required style="width: 100%;">
+                <option *ngFor="let objFundSource of lstFundSources" value="{{objFundSource.id}}">
+              <span *ngIf="objFundSource.type == 'bank'">
+                {{objFundSource.bankName}}, {{objFundSource.name}} {{objFundSource.bankAccountType}}
+              </span>
+              <span *ngIf="objFundSource.type == 'balance'">
+                {{objFundSource.name}} {{objFundSource.balance.value | currency:objFundSource.balance.currency:'symbol' }}
+              </span>
+              </option>
+            </select>
+            <div *ngIf="!fs_token.valid && (fs_token.dirty || fs_token.touched)" 
+              class="help-block form-text with-errors form-control-feedback">Source Bank Account</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" [ngClass]="{ 'has-error has-danger': !description.valid && (description.dirty || description.touched) }">
+           <label for="">Description <i class="fa fa-question-circle" [matTooltipPosition]="'right'" [matTooltipShowDelay]="100"
+                                   matTooltip="{{messages.get('SEND_RECEIVE_DESCRIPTION_MAX_LENGTH')}}"></i></label>
+        <input id="customerSendMoneyDescription" class="form-control" placeholder="Description" type="text" name="description" required
+               maxlength="75" [(ngModel)]="objSend.description" #description="ngModel">
+        <div *ngIf="!description.valid && (description.dirty || description.touched)" 
+          class="help-block form-text with-errors form-control-feedback">Description is required</div>
+      </div>
+
+      <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Cancel</button>
+    <button [disabled]="isLoading || !f.form.valid" class="slick-next slick-arrow">Send Money</button>
+  </div>
+</form>
+</div>
+</ng-template>
+
+<ng-template #receiveMoneyCustomer let-c="close" let-d="dismiss" let-create="mailStorage">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Receive Money</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form  name="form" (ngSubmit)="f.form.valid && prepareCreateRequestCheck()" #f="ngForm">
+           <div class="modal-body">
+        <div class="modal-body"> 
+
+          <div class="row">          
+            <div class="col-sm-12">
+              <span>Payee's name: </span>
+              <span><b>{{objReceive.sndr_name}}</b></span>
+            </div>
+            <div class="col-sm-12">
+              <span>Payee's email: </span>
+              <span><b>{{objReceive.sndr_email}}</b></span>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-sm-4">
+              <div class="form-group"  [ngClass]="{ 'has-error has-danger': !amount.valid && (amount.dirty || amount.touched) }">
+                   <label for="">Amount</label>
+                <input  autocomplete="off" id="receiveMoneyAmount" class="form-control" placeholder="Amount" type="text" name="amount" currencyMask
+                        [(ngModel)]="objReceive.amount" #amount="ngModel" required min="{{userService.getMinRequestAmount()}}">
+                        <div *ngIf="!amount.valid && (amount.dirty || amount.touched)" 
+                        class="help-block form-text with-errors form-control-feedback">Amount is required</div>
+                <div *ngIf="!amount.valid && (amount.dirty || amount.touched) && amount.errors.min" 
+                  class="help-block form-text with-errors form-control-feedback">The minimum amount you can request is {{userService.getMinRequestAmount() | currency}}
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-8" [ngClass]="{ 'has-error has-danger': !description.valid && (description.dirty || description.touched) }">
+               <div class="form-group">
+              <label for="">Description <i class="fa fa-question-circle" [matTooltipPosition]="'right'" [matTooltipShowDelay]="100"
+                                           matTooltip="{{messages.get('SEND_RECEIVE_DESCRIPTION_MAX_LENGTH')}}"></i></label>
+              <input id="customerReceiveMoneyDescription" class="form-control" placeholder="Description" type="text" name="description" required
+                     maxlength="75" [(ngModel)]="objReceive.description" #description="ngModel">
+              <div *ngIf="!description.valid && (description.dirty || description.touched)" 
+                class="help-block form-text with-errors form-control-feedback">Description is required</div>
+            </div>
+          </div>
+        </div>    
+        <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Cancel</button>
+      <button [disabled]="isLoading || !f.form.valid" class="slick-next slick-arrow">Receive Money</button>
+    </div>
+  </form>
+</div>
+</ng-template>

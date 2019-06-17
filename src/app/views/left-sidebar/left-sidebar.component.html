@@ -1,0 +1,124 @@
+<div class="menu-mobile menu-activated-on-click color-scheme-dark">
+  <div class="mm-logo-buttons-w">
+    <a *ngIf="userService.isAdmin() || userService.isSuperAdmin()" class="mm-logo" href="/users">
+      <img src="assets/img/PaynoteLogoNewBlue.svg">
+    </a>
+    <a *ngIf="userService.isMerchant() || userService.isCustomer() || userService.isDemoUser()" class="mm-logo" href="/transactions">
+      <img src="assets/img/PaynoteLogoNewBlue.svg">
+    </a>
+    <div class="mm-buttons">
+      <div class="content-panel-open">
+        <div class="os-icon os-icon-grid-circles"></div>
+      </div>
+      <div class="mobile-menu-trigger">
+        <div class="os-icon os-icon-hamburger-menu-1"></div>
+      </div>
+    </div>
+  </div>
+  <div class="menu-and-user">
+    <div class="logged-user-w">
+      <div class="avatar-w">
+        <img alt="" src="assets/img/avatars/user2-160x160.jpg">
+      </div>
+      <div class="logged-user-info-w">
+        <div class="logged-user-name">
+          {{getName()}}
+        </div>
+        <div *ngIf="userService.isAdmin() || userService.isSuperAdmin()" class="logged-user-role">
+          Administrator
+        </div>
+      </div>
+    </div>
+    <!--------------------
+    START - Mobile Menu List
+    -------------------->
+
+    <ul class="main-menu" *ngIf="userService.isMerchant() || userService.isCustomer() || userService.isDemoUser() || userService.isAdmin() || userService.isSuperAdmin()">
+        <li *ngFor="let item of userService.menu" id="{{item.id}}" [ngClass]="{'hide-li': !item.permissionValue, 'has-sub-menu': item.subMenu }">
+        <a [href]="item.sref" (click)="callAction(item.clickAction)"  title="{{item.title}}" class="mobile-item" [ngClass]="{'mobile-item': !item.subMenu }">
+          <div class="icon-w">
+            <i *ngIf="!item.image" class="{{item.iconClasses}}"></i>
+            <img *ngIf="item.image" class="np_image" src="assets/img/{{item.mobile_src}}">
+          </div>
+          <span>{{item.name}}</span>
+        </a>
+        <ul class="sub-menu" *ngIf="item.subMenu">
+          <li *ngFor="let submenu of item.menu" id="{{submenu.id}}">
+            <a href="{{submenu.sref}}" class="mobile-item">{{submenu.name}}</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <!--------------------
+    END - Mobile Menu List
+    -------------------->
+  </div>
+</div>
+<div class="menu-w color-scheme-light color-style-transparent menu-position-side menu-side-left menu-layout-compact sub-menu-style-over sub-menu-color-bright selected-menu-color-light menu-activated-on-hover menu-has-selected-link"
+     [ngClass]="{ 'color-scheme-dark': jqueryService.haveItemInLocalStorage('colorScheme') }">
+     <div class="logo-w">
+    <a *ngIf="userService.isAdmin() || userService.isSuperAdmin()" class="logo" href="/users">
+      <img src="assets/img/PaynoteNewBlue@2x.png">
+    </a>
+    <a *ngIf="userService.isMerchant() || userService.isCustomer() || userService.isDemoUser()" class="logo" href="/transactions">
+      <img src="assets/img/PaynoteNewBlue@2x.png">
+    </a>
+  </div>
+  <div class="logged-user-w avatar-inline" *ngIf="!userService.isDemoUser()">
+    <div class="logged-user-i"  (click)="userService.redirectJustSimple('transactions')">
+      <div class="avatar-w">
+        <img alt="" src="assets/img/avatars/user2-160x160.jpg">
+      </div>
+      <div class="logged-user-info-w">
+        <div class="logged-user-name">
+          {{getName()}}
+        </div>
+        <div class="logged-user-role">
+          {{getRoleName()}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ul id="MainMenu" class="main-menu" *ngIf="userService.isMerchant() || userService.isCustomer() || userService.isDemoUser() || userService.isAdmin() || userService.isSuperAdmin()"
+    [ngClass]="{ 'main-menu-admin': userService.isAdmin() || userService.isSuperAdmin() }">
+      <li *ngFor="let item of userService.menu" id="{{item.id}}" [ngClass]="{'hide-li': !item.permissionValue, 'has-sub-menu': item.subMenu }">
+      <!--<a href="javascript:void(0)" title="{{item.title}}" (click)="checkAction(item)">-->
+      <!--<a href="javascript:void(0)" title="{{item.title}}" (click)="location.go(item.sref)">-->
+      <a [href]="item.sref" title="{{item.title}}" (click)="callAction(item.clickAction)">
+        <!--<a [href]="item.sref" title="{{item.title}}">-->
+        <div class="icon-w">          
+          <i *ngIf="!item.image" class="{{item.iconClasses}}"></i>
+          <img *ngIf="item.image" class="np_image" src="assets/img/{{item.src}}">
+        </div>
+        <span>{{item.name}}</span>
+      </a>
+      <div class="sub-menu-w" *ngIf="item.subMenu">
+        <div class="sub-menu-header">{{item.name}}</div>
+        <div class="sub-menu-icon">
+          <i class="{{item.iconClasses}}"></i>
+        </div>
+        <div class="sub-menu-i">
+          <ul class="sub-menu">
+            <li *ngFor="let submenu of item.menu" id="{{submenu.id}}">
+              <a href="{{submenu.sref}}">
+                <i class="{{submenu.iconClasses}}"></i>{{submenu.name}}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </li>
+
+  </ul>
+</div>
+<div class="left-menu-bottom-logout">
+  <div class="left-menu-bottom-logout-top-box">
+    <a class="left-menu-bottom-logout-link" href="{{objLink.privacy_policy}}" target="_blank">Privacy Policy</a>
+    <a class="left-menu-bottom-logout-link" href="{{objLink.terms_of_service}}" target="_blank">Terms of Service</a>
+  </div>
+  <div class="left-menu-bottom-logout-bottom-box">
+    <a href="javascript:void(0)" (click)="logout()"><i class="os-icon os-icon-signs-11"></i><span>Logout</span></a>
+    <!--<a href="javascript:void(0)" (click)="logout()"><img class="np_image" src="assets/img/np-logout-1350691-000000.svg"><span>Logout</span></a>-->
+  </div>
+</div>

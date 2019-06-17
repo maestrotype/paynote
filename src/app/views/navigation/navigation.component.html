@@ -1,0 +1,85 @@
+<div class="top-bar" [ngClass]="{ 'color-scheme-dark': jqueryService.haveItemInLocalStorage('colorScheme') }">
+  <div class="top-menu-controls">
+<!--    <button class="btn btn-dark btn-rounded pull-left" (click)="goBack()" style="margin-top: 5px; margin-left: 15px;">-->
+<!--      <i class="icon-feather-chevron-left"></i>-->
+<!--      <span class="visible-md-inline-block visible-lg-inline-block hidden-mobile"> Go Back</span>-->
+<!--    </button>-->
+    <a href="javascript:void(0)" (click)="goBack()" style="font-size: 18px;margin-top: 5px; margin-left: 15px;" class="buttonBackOnHeader pull-left">
+      <i class="icon-feather-chevron-left"></i>
+      <span class="visible-md-inline-block visible-lg-inline-block hidden-mobile"> Go Back</span>
+    </a>
+
+    <div class="top-icon top-settings os-dropdown-trigger os-dropdown-position-left pull-right">
+      <!--<i class="picons-thin-icon-thin-0699_user_profile_avatar_man_male"></i>-->
+      <img class="np_image2" src="assets/img/np-account-1181419-000000.svg">
+      <i class="os-icon os-icon-chevron-down"></i>
+      <div class="os-dropdown">
+        <div class="icon-w">
+          <i class="os-icon os-icon-ui-46"></i>
+        </div>
+        <ul>
+          <li>
+            <a href="/account-settings" *ngIf="userService.isMerchant() && !userService.isDwollaSuspended() || userService.isCustomer() && !userService.isDwollaSuspended()">
+              <i class="os-icon os-icon-ui-49"></i><span>Profile Settings</span>
+            </a>
+            <a href="/settings" *ngIf="userService.isAdmin() || userService.isSuperAdmin()">
+              <i class="os-icon os-icon-ui-49"></i><span>Profile Settings</span>
+            </a>
+          </li>
+          <li>
+            <a href="/billing" *ngIf="userService.isMerchant() && !userService.isDwollaSuspended()">
+              <i class="os-icon os-icon-grid-10"></i><span>Billing Info</span>
+            </a>
+          </li>
+          <li>
+            <a href="javascript:void(0)" (click)="logout()"><i class="os-icon os-icon-signs-11"></i><span>Logout</span></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div *ngIf="!userService.isDwollaSuspended()" class="messages-notifications os-dropdown-trigger os-dropdown-position-left pull-right" >
+      <img class="np_image2" src="assets/img/np-notification-1155784-000000.svg">
+      <!--<i class="icon-feather-bell"></i>-->
+      <!--<i class="os-icon os-icon-others-43"></i>-->
+      <div class="new-messages-count" *ngIf="intCountMessages > 0">
+        {{intCountMessages}}
+      </div>
+      <div class="os-dropdown light message-list">
+        <ul *ngIf="listMessages.length">
+          <li *ngFor="let objMessage of listMessages">
+            <a href="{{objMessage.link}}">
+              <!--              <div class="user-avatar-w">
+                              <img alt="" src="assets/img/avatars/user2-160x160.jpg">
+                            </div>-->
+              <div class="message-content">
+                <h6 class="message-from">{{objMessage.message1}}</h6>
+                <h6 class="message-title">{{objMessage.message2}}</h6>
+              </div>
+            </a>
+          </li>
+        </ul>
+        <ul *ngIf="!listMessages.length">
+          <li>
+            <a href="javascript:void(0)">
+              <div class="message-content">
+                <h6 class="message-from">List messages empty</h6>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <button class="btn btn-primary bg-yellow backToAdmin btn-rounded pull-right" (click)="userService.backToSuperAdmin()" *ngIf="userService.isGhostLogin"
+            style="margin-top: 5px; margin-left: 10px;">
+      <i class="fa fa-arrow-circle-o-left"></i>
+      <span class="visible-md-inline-block visible-lg-inline-block"> Back to Admin</span>
+    </button>
+    <!--------------------
+    END - Messages Link in secondary top menu
+    --------------------><!--------------------
+    START - Settings Link in secondary top menu
+    -------------------->
+
+  </div>
+</div>

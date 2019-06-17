@@ -1,0 +1,72 @@
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.indication-icon {
+  font-size: 16px;
+  line-height: 25px;
+  cursor: pointer;
+  color: green;
+}
+
+.popup-labels {
+  position: absolute;
+  left: 0%;
+  padding: 20px;
+  background: rgba(0,0,0, 0.3);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  /*display: none;*/
+}
+
+.popup-custom {
+  position: absolute;
+  background-color: red;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+}
+
+.mail, .name {
+  white-space: nowrap;
+  width: 110px;
+  overflow: auto;
+  text-overflow: ellipsis;
+}
+.visible-popup .popup-labels{
+
+  display: block;
+  animation: 0.5s fadeIn;
+}
+
+.td-container {
+  display: flex;
+  align-items: flex-start;
+  width: 120px;
+  position: relative;
+}
+
+.customer {
+  display: inline-block;
+}
+
+.icon-warning {
+  color: orange;
+}
+
+.icon-light {
+  color: green;
+}
+
+.icon-danger {
+  color: red;
+}

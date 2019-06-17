@@ -1,0 +1,219 @@
+<div class="element-wrapper" style="padding-bottom: 0px;">
+  <h6 class="element-header">Mass Payouts</h6>
+  <div class="element-box">
+    <!--      <h5 class="form-header">Send instantly to your bank</h5>
+          <div class="form-desc">
+            Send money in minutes to your bank account using your eligible debit card.
+          </div>-->
+    <div class="alert alert-success" role="alert" [hidden]="!errorService.isSuccess" [innerHTML]=errorService.successMessage></div>
+
+    <div class="row">
+      <div class="col-lg-6">
+        <h5>{{messages.get('BATCH_SEND_TEXT_TOP')}}</h5>
+        <br >
+        <div  class="row">
+          <div  class="col-sm-12 col-md-12 col-lg-12 col-xl-6">
+            <h5 style="margin-top: 10px;">Source bank account</h5>
+          </div>
+          <div  class="col-sm-12 col-md-12 col-lg-12 col-xl-6">
+            <div  class="form-group">
+              <select  class="form-control" placeholder="Source Account" name="fs_token"
+                       [(ngModel)]="objSend.fs_token" #fs_token="ngModel" required style="width: 100%;">
+                <option *ngFor="let objFundSource of lstFundSources" value="{{objFundSource.id}}">
+              <span *ngIf="objFundSource.type == 'bank'">
+                {{objFundSource.bankName}}, {{objFundSource.name}} {{objFundSource.bankAccountType}}
+                <span *ngIf="objFundSource.account && objFundSource.account.number">
+                  , **** {{objFundSource.account.number}} <span *ngIf='objFundSource.balance'> Balance {{objFundSource.balance.value | currency:objFundSource.balance.currency:'symbol' }}</span> 
+                </span>
+              </span>
+              <span *ngIf="objFundSource.type == 'balance'">
+                {{objFundSource.name}} {{objFundSource.balance.value | currency:objFundSource.balance.currency:'symbol' }}
+              </span>
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <br >
+      <div  class="row">
+        <div  class="col-sm-12 col-md-12 col-lg-12 col-xl-8" style='margin-bottom: 10px;'>
+          <input id="batchSendInput" name="batchSendInput" touranchor="tour-csv-upload" type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+        </div>
+        <div  class="col-sm-12 col-md-12 col-lg-12 col-xl-4" style="margin: 0;">
+          <button  class="btn btn-primary btn-block btn-rounded" title="Send Checks Button" touranchor="tour-csv-send-checks" 
+                   type="button" (click)="onFileChange()"> Send Checks &nbsp; </button>
+          <br >
+        </div>
+      </div>
+    </div>
+    <div  class="col-lg-6" touranchor="tour-csv-template">
+      <div  class="row">
+        <div  class="col">
+          <h5>{{messages.get('BATCH_SEND_LEFT_TITLE')}}</h5>
+<!--          <h5 *ngIf="objSend.batch_type == 'custom'">{{messages.get('BATCH_SEND_LEFT_CUSTOM_TITLE')}}</h5>
+          <p *ngIf="objSend.batch_type == 'custom'">{{messages.get('BATCH_SEND_LEFT_CUSTOM_DESCRIPTION_TEXT')}}</p>-->
+          <p> 1) <a  href="/assets/download/paynote_mass_payouts_template_v3.xlsx" download="paynote_mass_payouts_template_v2.xlsx">Download and populate the Paynote Mass Payouts XLSX file template.</a></p>
+          <p> 2) {{messages.get('BATCH_SEND_LEFT_TEXT_ITEM_2')}} </p>
+          <p> 3) {{messages.get('BATCH_SEND_LEFT_TEXT_ITEM_3')}} </p>
+          <p> 4) {{messages.get('BATCH_SEND_LEFT_TEXT_ITEM_4_1')}} </p>
+          <p> 5) {{messages.get('BATCH_SEND_LEFT_TEXT_ITEM_5')}} </p>
+          <p> 6) {{messages.get('BATCH_SEND_LEFT_TEXT_ITEM_4')}} </p>
+        </div>
+      </div>
+      <div  class="row">
+        <div  class="col">
+          <img style="width: 100%;" src="/assets/img/sample_csv_image.png"></div>
+      </div>
+    </div>
+  </div>
+  <br [hidden]="!errorService.isError">
+  <br [hidden]="!errorService.isError">
+  <div class="alert alert-danger" role="alert" [hidden]="!errorService.isError" [innerHTML]=errorService.errorMessage></div>
+</div>  
+</div>
+
+<div class="element-wrapper">
+  <h6 class="element-header">Batch List</h6>
+  <!--<div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div>--> 
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-3">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search batch" 
+                       [(ngModel)]="paginationService.searchQuery" (search)="getBatchList(null)" (keyup)="getBatchList(null)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="position: relative;margin-top: 40px;">
+          <hr>
+          <div class="col-sm-12">
+            <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info"
+                   style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    Name                    
+                  </th>
+                  <th scope="col">
+                    Amount                    
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('status', paginationService.sortDir, getBatchList(null))">Status</a>
+                    <i *ngIf="paginationService.sortField == 'status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    Count payments                    
+                  </th>
+                  <th scope="col">Count error</th>
+                  <th scope="col">Count success</th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, getBatchList(null))">Created</a>
+                    <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let batch of listBatch">
+                  <td data-title="Name" scope="row">{{batch.name || '&nbsp;'}}</td>
+                  <td data-title="Amount">{{batch.amount | currency:'' :'symbol' || '&nbsp;'}}</td>
+                  <td data-title="Status">{{batch.status || '&nbsp;'}}</td>
+                  <td data-title="Count payments">{{batch.count_payments || '&nbsp;'}}</td>
+                  <td data-title="Count error">{{batch.count_error}}</td>
+                  <td data-title="Count success">{{batch.count_success}}</td>
+                  <td data-title="Created">{{userService.getDateFormat(batch.created_at)}}</td>
+                  <td data-title="Action">
+                    <a href="javascript:void(0);" (click)="openModal(foundingSourcesRemoveDialog, batch.batch_token)" title="Action">
+                       <i class="picons-thin-icon-thin-0043_eye_visibility_show_visible"></i>
+                    </a>
+                  </td>   
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!listBatch.length" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No batch were found. Try changing your query...</span>
+        </div>
+        <div class="row">          
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="getBatchList($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #foundingSourcesRemoveDialog let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Batch Details</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-sm-12">
+          <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info"
+                 style="width: 100%;">
+            <thead>
+              <tr role="row">
+                <th scope="col">Status</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Name</th>
+                <th scope="col">Address</th>
+                <th scope="col">Check #</th>
+                <th scope="col">Memo</th>
+                <th scope="col">Routing Number</th>
+                <th scope="col">Account Number</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr role="row" *ngFor="let details of batchDetails">
+                <td data-title="Status" scope="row">
+                  <span class="text-capitalize">{{details.status || '&nbsp;'}}</span>
+                  <span *ngIf="details.error"> : {{details.error}}</span>
+                </td>
+                <td data-title="Amount">{{details.payment_detail.Amount | currency:'' :'symbol' || '&nbsp;'}}</td>
+                <td data-title="Name" style="word-break: normal;">
+                  <span *ngIf="details.payment_detail['Business Name']">{{details.payment_detail['Business Name'] || '&nbsp;'}}</span>
+                  <span>{{details.payment_detail['First Name'] || '&nbsp;'}}&nbsp;{{details.payment_detail['Last Name'] || '&nbsp;'}}</span>
+                </td>
+                <td data-title="Address">{{details.payment_detail['Address'] || '&nbsp;'}}</td>
+                <td data-title="Check No">{{details.payment_detail['Check No'] || '&nbsp;'}}</td>
+                <td data-title="Address">{{details.payment_detail['Memo'] || '&nbsp;'}}</td> 
+                <td data-title="Routing Number">{{details.payment_detail['Routing Number'] || '&nbsp;'}}</td>
+                <td data-title="Routing Number">{{details.payment_detail['Account Number'] || '&nbsp;'}}</td>         
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+    </div>
+  </div>
+</ng-template>
+<app-transactions></app-transactions>

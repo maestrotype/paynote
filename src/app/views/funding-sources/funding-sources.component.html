@@ -1,0 +1,642 @@
+<div class="element-wrapper">
+  <h6  *ngIf="userService.isSuperAdmin() && !isAdminControl" class="element-header">Funding Sources</h6>
+  <div class="alert alert-success" role="alert" [hidden]="!errorService.isSuccess" [innerHTML]=errorService.successMessage></div>
+  <div class="alert alert-danger" role="alert" [hidden]="!errorService.isError" [innerHTML]=errorService.errorMessage></div>
+  <div class="element-box">
+    <div class="form-desc" *ngIf="lstMerchantFundSources && !lstMerchantFundSources.length">This customer currently doesn’t have any active funding sources.</div>
+    <div class="element-box-tp" *ngIf="lstMerchantFundSources">
+      <button class="btn btn-primary btn-rounded btn-sm" type="button" title="Add Bank" id="add_funding_source" 
+              style="position: relative;top: -20px;" *ngIf="!countFSBank && !isAdminControl" [disabled]="limitCountFSBank"
+              (click)="openDialog(selectTypeAddFundingSource)">+ Add Bank</button>
+      <div *ngFor="let fundSources of lstMerchantFundSources">
+        <div class="profile-tile" *ngIf="fundSources.type == 'bank'">
+          <a class="profile-tile-box">
+            <!--<a class="profile-tile-box" href="users_profile_small.html">-->
+            <div class="pt-avatar-w" style="border-radius: 0px;">
+              <img alt="" src="assets/img/bank.svg">
+            </div>
+          </a>
+          <div class="profile-tile-meta">
+            <ul>
+              <li>
+                <div class="badge badge-primary" *ngIf="fundSources.account && fundSources.account.primary == 1">PRIMARY</div>&nbsp;
+                <div class="badge badge-success text-capitalize" *ngIf="isFSVerified(fundSources.status)">{{fundSources.status}}</div>&nbsp;
+                <div class="badge badge-secondary text-capitalize" *ngIf="!isFSVerified(fundSources.status)">{{fundSources.status}}</div>
+              </li>
+              <li>
+                Added:&nbsp;<span style="font-weight: bold;">{{userService.getDateFormat(fundSources.created)}}</span>
+              </li>
+              <li *ngIf="fundSources.account">
+                Bank Name:&nbsp;<span style="font-weight: bold;">{{fundSources.account.bank}} *{{fundSources.account.number}}</span>
+              </li>
+              <li *ngIf="!fundSources.account">
+                Bank Name:&nbsp;<span style="font-weight: bold;">{{fundSources.bankName}}</span>
+              </li>
+              <li *ngIf="fundSources.account && fundSources.account.access_token">
+                Bank Balance:&nbsp;
+                <span style="font-weight: bold;">
+                  <span *ngIf="fundSources.balance != null && fundSources.balance.value != null">
+                    {{fundSources.balance.value | currency:fundSources.balance.currency :'symbol' || '&nbsp;'}}
+                  </span>
+                  <span *ngIf="fundSources.balance === null || !fundSources.balance || fundSources.balance.value === null">
+                    $0.00
+                  </span>
+                </span>
+              </li>
+            </ul>
+            <div class="pt-btn">
+              <button [disabled]="loading" class="btn btn-primary btn-sm btn-rounded btn-rounded-margin"
+                      style="color: white;margin-left: 0px !important;margin-right: 1rem !important;"
+                      *ngIf="fundSources.account && fundSources.account.primary == 0 && fundSources.status == 'verified'"
+                      (click)="makePrimaryFounSource( fundSources.id )" >Make Primary</button>
+              <button [disabled]="loading" class="btn btn-secondary btn-sm btn-rounded btn-rounded-margin"
+                      style="color: white;margin-left: 0px !important;margin-right: 1rem !important;"
+                      *ngIf="canRemoveBankAccount(fundSources)"
+                      (click)="openDialogRemoveFSModal(foundingSourcesRemoveDialog, fundSources)" >Remove</button>
+              <button [disabled]="loading" class="btn btn-success btn-sm btn-rounded btn-rounded-margin"
+                      style="color: white;margin-left: 0px !important;margin-right: 1rem !important;"
+                      *ngIf="!isFSVerified(fundSources.status)"
+                      (click)="openDialogVerifiedFSModal(foundingSourcesVerifiedDialog, fundSources)">Verify</button>
+              <button [disabled]="loading" class="btn btn-success btn-sm btn-rounded btn-rounded-margin"
+                      style="color: white;margin-left: 0px !important;margin-right: 1rem !important;"
+                      *ngIf="(userService.isSuperAdmin() || userService.isAdmin()) && fundSources.account && fundSources.account.access_token"
+                      (click)="checkBalance(fundSources)">Check Balance</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br>
+      <div *ngIf="limitCountFSBalance">
+        <div *ngFor="let fundSources of lstMerchantFundSources">
+          <div class="profile-tile" *ngIf="fundSources.type == 'balance'">
+            <a class="profile-tile-box">
+              <!--<a class="profile-tile-box" href="users_profile_small.html">-->
+              <div class="pt-avatar-w" style="border-radius: 0px;">
+                <img alt="" src="assets/img/balance.svg">
+              </div>
+            </a>
+            <div class="profile-tile-meta">
+              <ul>
+                <li style="font-size: 14px;">
+                  <span *ngIf="objFundingSourcesComp.modelSetReserve.reserve_with_cap == 0 && objMerchant.settings && !objMerchant.settings.once_amount_reserve">
+                    <strong>Paynote Balance</strong>
+                  </span>
+                  <span *ngIf="objMerchant.settings && objMerchant.settings.once_amount_reserve > 0 && !objMerchant.disable_transfer_to_bank
+                      && objFundingSourcesComp.modelSetReserve.reserve_with_cap == 0">
+                    <strong>Reserve Balance:</strong>&nbsp;
+                    <span style="text-transform: initial;">{{objMerchant.settings.once_amount_reserve | currency:'USD' :'symbol' || '&nbsp;'}} Fixed Reserve</span>
+                  </span>
+                  <span *ngIf="objFundingSourcesComp.modelSetReserve.reserve_with_cap == 1">
+                    <strong>Reserve Balance:</strong>&nbsp;
+                    <span *ngIf="objFundingSourcesComp.modelSetReserve.percent_cap" style="text-transform: initial;">
+                      {{objFundingSourcesComp.modelSetReserve.percent_cap}}% Rolling Reserve capped at
+                      {{objFundingSourcesComp.modelSetReserve.amount_cap | currency:'USD' :'symbol' || '&nbsp;'}}
+                    </span>
+                  </span>
+                </li>
+                <li>
+                  <span style="font-weight: bold;font-size: 22px;">{{fundSources.balance.value | currency:fundSources.balance.currency :'symbol' || '&nbsp;'}}</span>
+                </li>
+              </ul>
+              <div class="pt-btn" *ngIf="userService.isSuperAdmin() || userService.isAdmin()">
+                <button class="btn btn-primary btn-sm btn-rounded btn-rounded-margin" style="color: white;margin-left: 0px !important;margin-right: 1rem !important;"
+                    (click)="openDialog( addToBalanceDialog )" >
+                  Add to Balance
+                </button>
+                <button class="btn btn-primary btn-sm btn-rounded btn-rounded-margin" style="color: white; margin-left: 0px !important;margin-right: 1rem !important;"
+                        (click)="openDialog( addReserveToBalanceDialog )">
+                  <span *ngIf="objFundingSourcesComp.modelSetReserve.reserve_with_cap == 0 && objMerchant.settings && !objMerchant.settings.once_amount_reserve">
+                    Set Reserve
+                  </span>
+                  <span *ngIf="objMerchant.settings && (objFundingSourcesComp.modelSetReserve.reserve_with_cap == 1 || objMerchant.settings.once_amount_reserve)">
+                    Edit Reserve
+                  </span>
+                </button>
+                <button class="btn btn-primary btn-sm btn-rounded btn-rounded-margin" style="color: white; margin-left: 0px !important;margin-right: 1rem !important;"
+                        (click)="releaseReserve(true, true)"
+                        *ngIf="objFundingSourcesComp.modelSetReserve.reserve_with_cap == 1 || (objMerchant.settings && objMerchant.settings.once_amount_reserve > 0)">
+                  Release Reserve
+                </button>
+                <button class="btn btn-primary btn-sm btn-rounded btn-rounded-margin" style="color: white; margin-left: 0px !important;margin-right: 1rem !important;"
+                        *ngIf="fundSources.balance && fundSources.balance.value > 0"
+                        (click)="openDialog( transferToBankdDialog )" >
+                  Transfer to bank
+                </button>
+                <br>
+                <div style="margin-top: 10px;">
+                  <mat-checkbox class="" [(ngModel)]="objMerchant.disable_transfer_to_bank" [value]="objMerchant.disable_transfer_to_bank"
+                                (change)="releaseReserve( objMerchant.disable_transfer_to_bank, false )">
+                    Availability of the button "Transfer to bank"
+                  </mat-checkbox>
+                </div>
+              </div>
+              <div class="pt-btn" *ngIf="userService.isMerchant()">
+                <button class="btn btn-primary btn-sm btn-rounded btn-rounded-margin" style="color: white;"
+                        *ngIf="fundSources.balance && fundSources.balance.value > 0 && userService.canTransferToBank()"
+                        (click)="openDialog( transferToBankdDialog )" >
+                  Transfer to bank
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--*************************************************** POPUPS ******************************************************-->
+
+<ng-template #foundingSourcesRemoveDialog let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Remove funding sources account?</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      {{messages.get('REMOVE_FUNDING_SOURCES_ACCOUNT')}}
+      <div class="profile-tile">
+        <span class="profile-tile-box">
+          <div class="pt-avatar-w" style="border-radius: 0px;">
+            <img alt="" src="assets/img/bank.svg">
+          </div>
+        </span>
+        <div class="profile-tile-meta">
+          <ul>
+            <li>
+              <span style="font-weight: bold;">
+                {{objRemoveFSId.name}}
+              </span>
+            </li>
+            <li>
+              ID:&nbsp;<span>{{objRemoveFSId.id}}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="alert alert-danger" role="alert" *ngIf="errorService.isError" [innerHTML]=errorService.errorMessage></div>
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+      <button [disabled]="loading" class="slick-next slick-arrow" type="button" (click)="removeFundSource(objRemoveFSId.id )">Remove</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #addToBalanceDialog let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Add to Balance</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <form name="form" (ngSubmit)="f.form.valid && addToBalance()" #f="ngForm">
+      <div class="modal-body">
+        <div class="profile-tile">
+          <span class="profile-tile-box">
+            <div class="pt-avatar-w" style="border-radius: 0px;">
+              <img alt="" src="assets/img/balance.svg">
+            </div>
+          </span>
+          <div class="profile-tile-meta">
+            <div class="row">
+              <div class="col-sm-12 col-lg-12 col-md-12 col-xs-12">
+                <div class="form-group">
+                  <label for="">Select Bank</label>
+                  <select name="fundingsource_bank" class="form-control" placeholder="Select Bank" required style="width: 100%"
+                          [(ngModel)]="modelAddToBalance.fundingsource_bank" #fundingsource_bank="ngModel">
+                    <option *ngFor="let bank of lstModalFundSources" [value]="bank.id">
+                      {{ bank.account.bank }} ****{{bank.account.number}}
+                    </option>                     
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-12 col-lg-12 col-md-12 col-xs-12">
+                <div class="form-group" [ngClass]="{ 'has-error has-danger': !amount.valid && (amount.dirty || amount.touched) }">
+                     <label for="">Amount</label>
+                  <input name="amount" class="form-control" placeholder="Amount" max="{{fltNegativeBalanse}}" 
+                         type="text" required currencyMask autocomplete="off"
+                         [(ngModel)]="modelAddToBalance.amount" #amount="ngModel">
+                  <div *ngIf="!amount.valid && (amount.dirty || amount.touched)" 
+                         class="help-block form-text with-errors form-control-feedback">
+                    <span *ngIf="amount.errors.required">
+                      Amount is required
+                    </span>                 
+                    <span *ngIf="amount.errors.max">
+                      {{messages.get('MAX_AMOUNT_OF_NEGATIVE_BALANCE')}}
+                    </span>
+                  </div>
+                </div>
+              </div>                
+            </div>                
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Cancel</button>
+        <button [disabled]="loading || !f.form.valid" class="slick-next slick-arrow">Add to Balance</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+<ng-template #addReserveToBalanceDialog let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Set Reserve</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <form name="form" (ngSubmit)="f.form.valid && setReserveToBalance()" #f="ngForm">
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-12 col-lg-12 col-md-12 col-xs-12">
+            <input name="reserve_with_cap" type="radio" [(ngModel)]="objFundingSourcesComp.modelSetReserve.reserve_with_cap" #reserve_with_cap="ngModel" [value]="0" id="reserve_with_cap_0">
+            &nbsp;
+            <label for="reserve_with_cap_0" style="top: -2px;position: relative;font-size: 12px;font-weight: bold;">Set up reserve at once</label>
+          </div>
+          <div class="col-sm-12 col-lg-8 col-md-8 col-xs-12">
+            <div class="form-group">
+              <label for="fundingsource_bank">Select Bank</label>
+              <select name="fundingsource_bank" id="fundingsource_bank" class="form-control" placeholder="Select Bank" required style="width: 100%"
+                      [disabled]="objFundingSourcesComp.modelSetReserve.reserve_with_cap == 1"
+                      [(ngModel)]="objFundingSourcesComp.modelSetReserve.fundingsource_bank" #fundingsource_bank="ngModel">
+                <option *ngFor="let bank of lstModalFundSources" [value]="bank.id">
+                  {{ bank.account.bank }} ****{{bank.account.number}}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="col-sm-12 col-lg-4 col-md-4 col-xs-12">
+            <div class="form-group" [ngClass]="{ 'has-error has-danger': !amount.valid && (amount.dirty || amount.touched) }">
+                 <label for="amount">Amount</label>
+              <input name="amount" class="form-control" placeholder="Amount" type="text" required currencyMask autocomplete="off" id="amount"
+                     [disabled]="objFundingSourcesComp.modelSetReserve.reserve_with_cap == 1"
+                     [(ngModel)]="objFundingSourcesComp.modelSetReserve.amount" #amount="ngModel">
+              <div *ngIf="!amount.valid && (amount.dirty || amount.touched)"
+                     class="help-block form-text with-errors form-control-feedback">
+                <span *ngIf="amount.errors && amount.errors.required">
+                  Amount is required
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-12 col-lg-12 col-md-12 col-xs-12">
+            <input name="reserve_with_cap" type="radio" [(ngModel)]="objFundingSourcesComp.modelSetReserve.reserve_with_cap" #reserve_with_cap="ngModel" [value]="1" id="reserve_with_cap_1">
+            &nbsp;
+            <label for="reserve_with_cap_1" style="top: -2px;position: relative;font-size: 12px;font-weight: bold;">Rolling Reserve with Cap</label>
+          </div>
+          <div class="col-sm-12 col-lg-6 col-md-6 col-xs-12">
+            <div class="form-group" [ngClass]="{ 'has-error has-danger': !amount_cap.valid && (amount_cap.dirty || amount_cap.touched) }">
+              <label for="amount_cap">Amount</label>
+              <input name="amount_cap" class="form-control" placeholder="Amount" type="text" required currencyMask autocomplete="off" id="amount_cap"
+                     [disabled]="objFundingSourcesComp.modelSetReserve.reserve_with_cap == 0"
+                     [(ngModel)]="objFundingSourcesComp.modelSetReserve.amount_cap" #amount_cap="ngModel">
+              <div *ngIf="!amount_cap.valid && (amount_cap.dirty || amount_cap.touched)"
+                   class="help-block form-text with-errors form-control-feedback">
+                <span *ngIf="amount_cap.errors && amount_cap.errors.required">
+                  Amount is required
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-12 col-lg-6 col-md-6 col-xs-12">
+            <div class="form-group" [ngClass]="{ 'has-error has-danger': !percent_cap.valid && (percent_cap.dirty || percent_cap.touched) }">
+              <label for="percent_cap">% based on amount received in 1 day</label>
+              <input name="percent_cap" class="form-control" placeholder="%" type="text" required autocomplete="off" id="percent_cap"
+                     [disabled]="objFundingSourcesComp.modelSetReserve.reserve_with_cap == 0"
+                     [(ngModel)]="objFundingSourcesComp.modelSetReserve.percent_cap" #percent_cap="ngModel">
+              <div *ngIf="!percent_cap.valid && (percent_cap.dirty || percent_cap.touched)"
+                   class="help-block form-text with-errors form-control-feedback">
+                <span *ngIf="percent_cap.errors && percent_cap.errors.required">
+                  % based on amount is required
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Cancel</button>
+        <button [disabled]="loading || !f.form.valid" class="slick-next slick-arrow">Set Reserve</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #transferToBankdDialog let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">Transfer to bank</h4>
+    <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+            <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <form name="form" (ngSubmit)="f.form.valid && transferToBank()" #f="ngForm">
+    <div class="modal-body">
+      <div class="profile-tile">
+        <span class="profile-tile-box">
+          <div class="pt-avatar-w" style="border-radius: 0px;">
+            <img alt="" src="assets/img/balance.svg">
+          </div>
+        </span>
+        <div class="profile-tile-meta">
+          <div class="row">
+            <div class="col-sm-12 col-lg-12 col-md-12 col-xs-12">
+              <div class="form-group">
+                <label for="">Select Bank</label>
+                <select name="fundingsource_bank" class="form-control" placeholder="Select Bank" required style="width: 100%"
+                        [(ngModel)]="modelTransferToBank.fundingsource_bank" #fundingsource_bank="ngModel">
+                  <option *ngFor="let bank of lstModalFundSources" [value]="bank.id">
+                    {{ bank.account.bank }} ****{{bank.account.number}}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="col-sm-12 col-lg-12 col-md-12 col-xs-12">
+              <div class="form-group" [ngClass]="{ 'has-error has-danger': !amount.valid && (amount.dirty || amount.touched) }">
+                <label for="">Amount</label>
+                <input name="amount" class="form-control" placeholder="Amount" type="text" required currencyMask autocomplete="off"
+                       [(ngModel)]="modelTransferToBank.amount" #amount="ngModel" max="{{fltNegativeBalanse}}">
+                <div *ngIf="!amount.valid && (amount.dirty || amount.touched)" class="help-block form-text with-errors form-control-feedback">
+                  <span *ngIf="amount.errors.required">Amount is required</span>
+                  <span *ngIf="amount.errors.max">You have exceeded maximum allowed amount.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+      <button [disabled]="loading || !f.form.valid" class="btn btn-primary">Transfer to Bank</button>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template #foundingSourcesVerifiedDialog let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Please verify your account</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <form name="form" (ngSubmit)="f.form.valid && verifyFundingSourcesBank(objRemoveFSId.id )" #f="ngForm">
+          <div class="modal-body">
+        <div class="profile-tile">
+          <div class="profile-tile-meta" style="padding-left: 0px;">
+            <ul>
+              <li>
+                <span class="text-initial vfs-text">
+                  Please enter the two micro-deposit amounts made to your <i>{{objRemoveFSId.name}}</i> ending in 
+                  <i>{{objRemoveFSId.account.number}}</i> on or around <i>{{userService.getDateFormat(objRemoveFSId.account.created_at)}}</i>
+                </span>
+              </li>
+              <li>
+                <br>
+              </li>
+              <li>
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group" [ngClass]="{ 'has-error has-danger': !amount1.valid && (amount1.dirty || amount1.touched) }">
+                         <label for="">Amount 1</label>
+                      <input id="Amount1" name="amount1" class="form-control" placeholder="$0.__" type="text" required 
+                             [(ngModel)]="modelVerifyFundSource.amount1" #amount1="ngModel" [textMask]="{mask: utility.maskMicroDeposit}">
+                             <div *ngIf="!amount1.valid && (amount1.dirty || amount1.touched)" 
+                             class="help-block form-text with-errors form-control-feedback">
+                             <span *ngIf="amount1.errors.required">
+                          Amount 1 is required
+                        </span>
+                        <!--                      <span *ngIf="amount1.errors.min">
+                                                Amount 1 must be at min 0.01 USD.
+                                              </span>                  -->
+                      </div>
+                      <span class="text-initial ex-style">ex. $0.01</span>     
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group" [ngClass]="{ 'has-error has-danger': !amount2.valid && (amount2.dirty || amount2.touched) }">
+                         <label for="">Amount 2</label>
+                      <input id="Amount2" name="amount2" class="form-control" placeholder="$0.__" type="text" required
+                             [(ngModel)]="modelVerifyFundSource.amount2" #amount2="ngModel" [textMask]="{mask: utility.maskMicroDeposit}">
+                             <div *ngIf="!amount2.valid && (amount2.dirty || amount2.touched)" 
+                             class="help-block form-text with-errors form-control-feedback">
+                             <span *ngIf="amount2.errors.required">
+                          Amount 2 is required
+                        </span>
+                        <!--                      <span *ngIf="amount2.errors.min">
+                                                Amount 2 must be at min 0.01 USD.
+                                              </span>                  -->
+                      </div>
+                      <span class="text-initial ex-style">ex. $0.03</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+        <div class="alert alert-danger" role="alert" *ngIf="errorService.isError" [innerHTML]=errorService.errorMessage></div>
+      </div>
+
+      <div class="modal-footer">
+        <!--        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+                <button [disabled]="loading || !f.form.valid" class="btn btn-primary">Verify</button>
+        -->
+        <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+        <button [disabled]="loading || !f.form.valid" class="slick-next slick-arrow" type="submit">Verify</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+
+
+<ng-template #confermDeactivationDialog let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title" style="padding: 10px 20px 0 20px;">Deactivate customer?</h4>
+    <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+            <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    {{messages.get('DIACTIVATE_CUSTOMER')}}
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+    <button class="btn btn-primary" type="button" (click)="deactivateCustomer(objCustomer.id)">Deactivate</button>
+  </div>
+</ng-template>
+
+
+<!--**********************************************ADD_FUNDING_SOURCE************************************************-->
+
+<ng-template #selectTypeAddFundingSource let-c="close" let-d="dismiss">
+  <div class="modal-header">    
+    <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+            <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="onboarding-media">
+    <img src="assets/img/undraw-vault-9-cmw.png" 
+         srcset="assets/img/undraw-vault-9-cmw@2x.png 2x, assets/img/undraw-vault-9-cmw@3x.png 3x" 
+         class="addFundingSourceImg">
+  </div>  
+  <div class="modal-body addFundingSourceBox">    
+    <div class="modal-body">
+      <div class="onboarding-content with-gradient">
+        <h4 class="modal-title">{{messages.get('TITLE_ADD_FUNDING_SOURCE')}}</h4>
+        <p>{{messages.get('SELECT_VERIFICATION_METHOD')}}</p>
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <button id="instantVerificationBtn" class="btn btn-primary btn-rounded" title="Instant Verification" [disabled]="loading"
+                      type="button" (click)="openDialogPlaid()">
+                Instant Verification
+              </button>
+            </div>
+            <div class="form-group">
+              <label>
+                {{messages.get('INSTANT_VERIFICATION')}}
+              </label>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <button id="manualVerificationBtn" class="btn btn-primary btn-rounded" type="button" [disabled]="loading"
+                      (click)="openDialog(contentAddFundSource, selectTypeAddFundingSource)" title="Manual Verification">
+                      Manual Verification
+            </button>
+          </div>
+          <div class="form-group">
+            <label>
+              {{messages.get('MANUAL_VERIFICATION')}}
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-danger" role="alert" *ngIf="errorService.isError" [innerHTML]=errorService.errorMessage></div>
+  </div>
+</div>
+</ng-template>
+
+<ng-template #contentAddFundSource let-c="close" let-d="dismiss">
+  <div class="manual-verification">
+    <div class="modal-header">      
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="manual-verification-title">
+        <h4 class="modal-title">{{messages.get('MANUALLY_VERIFY_YOUR_BANK_ACCOUNT')}}</h4>
+      </div>
+      <div class="modal-body">
+        <p class="mf-text">{{messages.get('ENTER_YOUR_BANK_DETAILS_BELOW_AND_SUBMIT')}}</p>
+        <p class="mf-text">{{messages.get('TO_VERIFY_YOUR_BANK_ACCOUNT_MANUALLY')}}</p>
+        <p class="mf-text">{{messages.get('TO_AVOID_ANY_OVERDRAFT_OR_OTHER_BANK')}}</p>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <form name="form" #f="ngForm" (ngSubmit)="modelNewFundSource.valid && addFundSources()" 
+              class="form-validation" autocomplete="nope" [formGroup]="modelNewFundSource">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{ 'has-error has-danger': modelNewFundSource.get('routingNumber').errors 
+                   && (modelNewFundSource.get('routingNumber').dirty || modelNewFundSource.get('routingNumber').touched) }">
+                <label for="">Routing Number</label>
+                <input name="routingNumber" class="form-control" placeholder="Routing Number" type="text" 
+                       formControlName="routingNumber" required autocomplete="off" minlength="9" onlyNumbers 
+                       (change)="getBankRouting()">
+                <div *ngIf="modelNewFundSource.get('routingNumber').errors &&
+                  (modelNewFundSource.get('routingNumber').dirty || modelNewFundSource.get('routingNumber').touched)" 
+                  class="help-block form-text with-errors form-control-feedback">
+                  <span *ngIf="modelNewFundSource.get('routingNumber').errors.minlength">
+                    Routing Number must be at least 9 characters long.
+                  </span>
+                  <span *ngIf="modelNewFundSource.get('routingNumber').errors.required">
+                    Routing Number is required
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Bank Name</label>
+                <div *ngIf="modelNewFundSource.value.name" class="mv-bankName">{{modelNewFundSource.value.name}}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{ 'has-error has-danger': modelNewFundSource.get('accountNumber').errors 
+                   && (modelNewFundSource.get('accountNumber').dirty || modelNewFundSource.get('accountNumber').touched) }">
+                <label for="">Account Number</label>
+                <input name="accountNumber" class="form-control" placeholder="e.g. 489729074589" type="text" onlyNumbers
+                       formControlName="accountNumber" required autocomplete="off" minlength="4" maxlength="17">
+                <div *ngIf="modelNewFundSource.get('accountNumber').errors &&
+                  (modelNewFundSource.get('accountNumber').dirty || modelNewFundSource.get('accountNumber').touched)" 
+                  class="help-block form-text with-errors form-control-feedback">
+                  <span *ngIf="modelNewFundSource.get('accountNumber').errors.minlength">
+                    Account Number must be at least 4 characters long.
+                  </span>
+                  <span *ngIf="modelNewFundSource.get('accountNumber').errors.maxlength">
+                    Account Number must be at max 17 digits long.
+                  </span>
+                  <span *ngIf="modelNewFundSource.get('accountNumber').errors.required">
+                    Account Number is required
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{ 'has-error has-danger': modelNewFundSource.get('re_account_number').errors 
+                   && (modelNewFundSource.get('re_account_number').dirty || modelNewFundSource.get('re_account_number').touched) }">
+                <label for="">Confirm Account Number</label>
+                <input name="re_account_number" class="form-control" placeholder="e.g. 489729074589" type="text" minlength="4" maxlength="17"
+                       formControlName="re_account_number" required autocomplete="off" validateEqual="accountNumber" onlyNumbers>
+                <div *ngIf="modelNewFundSource.get('re_account_number').errors &&
+                  (modelNewFundSource.get('re_account_number').dirty || modelNewFundSource.get('re_account_number').touched)" 
+                  class="help-block form-text with-errors form-control-feedback">
+                  <span *ngIf="modelNewFundSource.get('re_account_number').errors.minlength">
+                    Confirm Account must be at least 4 characters long<br>
+                  </span>
+                  <span *ngIf="modelNewFundSource.get('re_account_number').errors.maxlength">
+                    Confirm Account Number must be at max 17 digits long<br>
+                  </span>
+                  <span *ngIf="modelNewFundSource.get('re_account_number').errors.required">
+                    Confirm Account Number is required<br>
+                  </span>
+                  <span *ngIf="!modelNewFundSource.get('re_account_number').errors.validateEqual">
+                    Account Number mismatch <br>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="form-group">
+                <img style="width: 100%;" class="brnumber-img" src="assets/img/us-bank-routing-numbers.png">
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-danger" role="alert" *ngIf="errorService.isError" [innerHTML]=errorService.errorMessage></div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="openBackModal(selectTypeAddFundingSource)">Cancel</button>
+      <button [disabled]="loading || !modelNewFundSource.valid" class="slick-next slick-arrow" type="submit" 
+        (click)="addFundSources()">Submit & Verify</button>
+    </div>
+  </div>
+</ng-template>
+

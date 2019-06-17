@@ -1,0 +1,43 @@
+.formStepper mat-horizontal-stepper mat-form-field { width: 50%; padding-right: 10px; }
+
+.formStepperButtons { margin-top: 20px; }
+
+.formStepperLabel { margin-top: 10px; margin-bottom: 30px; font-weight: bold; font-size: 16px; }
+
+.onboarding-modal.modal .modal-dialog.modal-centered { max-width: 750px; }
+
+.mat-progress-spinner { margin: auto; }
+
+ul.rectangle-steps {
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+  position: absolute;
+  top: 10px;
+  left: 0px;
+}
+ul.rectangle-steps {
+  margin: 0px;
+  padding: 0px;
+  list-style-type: none;
+}
+ul.rectangle-steps li {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #d8e5f4;
+  cursor: pointer;
+  display: inline-block;
+  margin: 0px 5px 0px 5px;
+}
+ul.rectangle-steps li.active {
+  background-color: #147ff5;
+}
+.formStepperButtons { position: relative }
+.mat-button { z-index: 100 }
+
+
+
+@media only screen and (max-width: 540px) {
+  .formStepper mat-horizontal-stepper mat-form-field { width: 100%; padding-right: 0px; }
+}

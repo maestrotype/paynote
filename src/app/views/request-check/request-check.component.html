@@ -1,0 +1,246 @@
+<div class="element-wrapper" style="padding-bottom: 0px;">
+  <h6 class="element-header">Request a Check</h6>
+  <div class="element-box">
+    <!--      <h5 class="form-header">Send instantly to your bank</h5>
+          <div class="form-desc">
+            Send money in minutes to your bank account using your eligible debit card.
+          </div>-->
+    <br>
+    <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+    <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div>
+    <br> 
+    <div>
+      <form name="form" (ngSubmit)="f.form.valid && checkEmailAddress()" #f="ngForm" autocomplete="nope">
+        <div class="row"> 
+          <div class="col-lg-5">
+            <div class="form-group" [ngClass]="{ 'has-error has-danger': !sndr_name.valid && (sndr_name.dirty || sndr_name.touched) }">
+              <input type="hidden" name="name" [(ngModel)]="objSend.sndr_name" #sndr_name="ngModel">
+              <label for="">Payor's name</label>
+              <input class="form-control payment_customer_name" placeholder="Payor's name" type="text" name="name" id="payee_s_name"
+                   [(ngModel)]="objSend.sndr_name" #sndr_name="ngModel" required  *ngIf="!arrayCustomers.length">
+                   
+              <ng-select class="customers_autocomplite" [items]="arrayCustomers" [addTag]="true" addTagText="Add New Payee's name" name="name"
+                        bindLabel="name" [(ngModel)]="objSend.sndr_name" #sndr_name="ngModel" [selectOnTab]="true"
+                        autofocus (change)="handleResultSelected($event)" placeholder="{{objRequestCheckComp.form.name_placeholder}}"
+                        bindValue="id" required id="requestMoneyPayeesName" (blur)="blurSelect()"
+                        (search)="searchSelect($event)" *ngIf="arrayCustomers.length">
+              </ng-select>
+              <div *ngIf="!sndr_name.valid && (sndr_name.dirty || sndr_name.touched)" 
+                class="help-block form-text with-errors form-control-feedback">Payor's name is required</div>
+            </div>
+            <div class="form-group"  [ngClass]="{ 'has-error has-danger': !sndr_email.valid && (sndr_email.dirty || sndr_email.touched) }">
+              <label for="">Payor's email</label>
+              <input id="receiveMoneyPayorsEmail" class="form-control" placeholder="Payor's email" type="email" name="sndr_email"
+                     [(ngModel)]="objSend.sndr_email" #sndr_email="ngModel" required pattern="[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$">   
+              <div *ngIf="!sndr_email.valid && (sndr_email.dirty || sndr_email.touched)" 
+                class="help-block form-text with-errors form-control-feedback">Payor's email is required</div>
+            </div>
+            <div class="row">
+              <div class="col-lg-4 col-md-4 col-sm-4 col-12">
+                <div class="form-group"  [ngClass]="{ 'has-error has-danger': !amount.valid && (amount.dirty || amount.touched) }">
+                    <label for="">Amount</label>
+                  <input autocomplete="off" id="receiveMoneyAmount" class="form-control" placeholder="Amount" type="text" name="amount" currencyMask
+                         [(ngModel)]="objSend.amount" #amount="ngModel" required min="{{userService.getMinRequestAmount()}}">
+                  <div *ngIf="!amount.valid && (amount.dirty || amount.touched)" 
+                    class="help-block form-text with-errors form-control-feedback">Amount is required</div>
+                  <div *ngIf="!amount.valid && (amount.dirty || amount.touched) && amount.errors.min" 
+                    class="help-block form-text with-errors form-control-feedback">The minimum amount you can request is {{userService.getMinRequestAmount() | currency}}
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-8 col-md-8 col-sm-8 col-12">
+                <div class="form-group" [ngClass]="{ 'has-error has-danger': !description.valid && (description.dirty || description.touched) }">
+                  <label for="">Description <i class="fa fa-question-circle" [matTooltipPosition]="'right'" [matTooltipShowDelay]="100"
+                                                   matTooltip="{{messages.get('SEND_RECEIVE_DESCRIPTION_MAX_LENGTH')}}"></i></label>
+                  <input id="receiveMoneyDescription" maxlength="75" class="form-control" placeholder="Description" type="text" required name="description"
+                         [(ngModel)]="objSend.description" #description="ngModel">
+                  <div *ngIf="!description.valid && (description.dirty || description.touched)" 
+                    class="help-block form-text with-errors form-control-feedback">Description is required</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-7">
+            <div class="row">
+              <div class="col-lg-4 col-md-4 col-sm-6">
+                <fieldset class="form-group" touranchor="tour-recurring-checks" style="margin-top: 0;">
+                  <label for="" style="margin-bottom: 0.8em;">Recurring</label>
+                  <div class="input-group"> &nbsp;&nbsp; 
+                    <label class="switch switch-default switch-pill switch-primary">
+                      <mat-slide-toggle
+                        id="receiveMoneyRecurring"
+                        class="example-margin"
+                        (change)="onChangeReccuring($event)"
+                        color="primary"
+                        [(ngModel)]="objSend.recurring" [ngModelOptions]="{standalone: true}">
+                        Billing cycle
+                      </mat-slide-toggle>
+                    </label>
+                  </div>
+                </fieldset>
+              </div>
+              <div class="col-lg-4 col-md-4 col-sm-6">
+                <label for="">Billing cycle</label>
+                <select id="receiveMoneyMakeRecurring" class="form-control" placeholder="Make recurring " name="recurringPeriod" style="width: 100%;"
+                        [(ngModel)]="objSend.billing_cycle" #billing_cycle="ngModel" [disabled]="!makeRecurringToggle">
+                  <option value="day" *ngIf="subDomen != 'paynote'">Daily</option>
+                  <option value="week" selected>Weekly</option>
+                  <option value="month">Monthly</option>
+                </select>
+              </div>
+              <div class="col-lg-4 col-md-4 col-sm-6">
+                <div class="form-group">
+                  <label for="">
+                    Installments #:
+                    <i class="fa fa-question-circle" title="Total number of recurring payments for this subscription. Leave empty for infinite subscription."></i>
+                  </label>
+                  <input id="receiveMoneyNumberPayments" class="form-control" placeholder="&infin;" type="number" name="num_of_payments"
+                         [(ngModel)]="objSend.num_of_payments" #num_of_payments="ngModel"
+                         [disabled]="!makeRecurringToggle">
+                  <small *ngIf="makeRecurringToggle" class="hint">Leave blank to schedule payments in perpetuity.</small>
+                </div>
+              </div>
+              <div  class="col-sm-12 col-md-12 col-lg-12 col-xl-12" style='margin-bottom: 10px;'>   
+                <label style="display: block;">Attach a file</label>
+                <input id="requestCheckInput" name="requestCheckInput" type="file" 
+                       accept="application/pdf" (change)="onImageChangeFromFile($event)" 
+                       [ngClass]="{ 'errorFileType': errorFileType || errorFileSize}">
+                <span style="font-size: 11px;color:#68a7f7;display: block;margin-top: 5px;">PDF 5MB Max</span>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12 col-lg-7 col-md-6">    
+                <div class="buttons-w text-right" style="margin-top: 25px;">
+                  <button id="receiveMoneyButton" [disabled]="!f.form.valid || isNotHaveFunds || isLoading || errorFileSize" 
+                          class="btn btn-primary btn-rounded btn-lg btn-block">Request Check</button>
+                </div> 
+              </div>
+            </div> 
+          </div>
+          </div>
+          <div id="request_money_url" style="display: none;"></div>
+    </form>
+  </div>
+</div>
+</div>
+<br>
+<div class="element-wrapper">
+  <h6 class="element-header">Payment Requests</h6>
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-4">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search request" 
+                       [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel" 
+                       (search)="listInvoices(null)" (keyup)="listInvoices(null)">
+                <button type="button" class="btn-default btn-sm btn-rounded btn" (click)="resetFilter()">
+                  <i class="icon-feather-x"></i>
+                  <span class="visible-md-inline-block visible-lg-inline-block hidden-mobile"> Clear</span>
+                </button>
+              </label><br><br>
+              <button type="button" class="btn btn-danger" *ngIf="userService.canVoidCheck()" [disabled]="!canVoidIncoice" (click)="voidInvoices()">
+                <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;VOID
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable sendChecks responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    <input type="checkbox" [(ngModel)]="selectAllInvoices" (click)="selectAllCheck()">
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="applySort('number', paginationService.sortDir)">Number</a>
+                    <i *ngIf="paginationService.sortField == 'number' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'number' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="applySort('sndr_email', paginationService.sortDir)">Address</a>
+                    <i *ngIf="paginationService.sortField == 'sndr_email' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'sndr_email' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="applySort('amount', paginationService.sortDir)">Amount</a>
+                    <i *ngIf="paginationService.sortField == 'amount' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'amount' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="applySort('status', paginationService.sortDir)">Status</a>
+                    <i *ngIf="paginationService.sortField == 'status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="applySort('sndr_name', paginationService.sortDir)">Name</a>
+                    <i *ngIf="paginationService.sortField == 'sndr_name' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'sndr_name' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="applySort('created_at', paginationService.sortDir)">Date</a>                      
+                    <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>                  
+                  </th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let invoice of lstInvoices" >
+                    <td data-title="">
+                    <input style="margin: 5px;" type="checkbox" [(ngModel)]="invoice.multiple" (click)="unCheckedInvoices($event)" 
+                           [disabled]="!transactionService.canCancelInvoice(invoice.status)">
+                  </td>
+                  <td data-title="Number" scope="row">{{invoice.number  || '&nbsp;'}}</td>
+                  <td data-title="Address" style="word-break: break-all">{{invoice.sndr_email  || '&nbsp;'}}</td>
+                  <td data-title="Amount">{{invoice.amount | currency:invoice.currency:'symbol' || '&nbsp;'}}</td> 
+                  <td data-title="Status" class="text-capitalize" [innerHTML]="getStatus(invoice)"></td>
+                  <td data-title="Name">{{invoice.sndr_name  || '&nbsp;'}}</td>
+                  <td data-title="Date" class="col-md-100">
+                    {{userService.getDateFormat(invoice.created_at)}}
+                  </td>
+                  <td data-title="Description">{{invoice.description || '&nbsp;'}}</td>
+                  <td data-title="Action">
+                    <button title="Resend Notification" style="margin: 6px;" *ngIf="invoice.status == 'New'" 
+                            class="btn btn-primary btn-sm btn-rounded btn-rounded-margin" type="button" 
+                            (click)="resendNotification(invoice)">
+                      <i class="fa fa-bell-o"></i>
+                      <!--<span class="resendNotification">&nbsp;Resend Notification</span>-->
+                    </button>
+                    &nbsp;
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No request were found...</span>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="listInvoices($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--<app-transactions [clientName]="objSend.name"></app-transactions>-->

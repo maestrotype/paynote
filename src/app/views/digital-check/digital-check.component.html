@@ -1,0 +1,842 @@
+<!-- Google Tag Manager (noscript) -->
+<noscript>
+  <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W7RK4F" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+<!-- End Google Tag Manager (noscript) -->
+<ng-http-loader 
+    [backgroundColor]="'#ff0000'"
+    [spinner]="spinkit.skWave"
+    [debounceDelay]="100"
+    [minDuration]="300">
+</ng-http-loader>
+<div class="content-box check-digital check-payment-received">
+  <div class="element-wrapper">
+    <div class="element-box col-lg-11 col-md-12" style="margin: auto;">
+      <div *ngIf="isCheckValid">
+        <h6 class="element-header row">
+          <div class="col-lg-4 col-md-12">
+            <img *ngIf="!haveCustomLogo()" alt="" src="assets/img/Paynote_-_New_Blue@2x.png">
+            <img *ngIf="haveCustomLogo()" alt="" [src]="getCustomLogo()">
+          </div>
+          <div class="col-lg-8  col-md-12 text-right">
+            <p class="securely-digital-checks">{{getCustomTitle()}}</p>
+          </div>
+        </h6>
+        <div class="row">
+          <div class="col-lg-4 col-md-12 col-sm-12">
+            <div class="Hey-Name"><p>Hey, {{objPaymentLink.name}}</p></div>
+            <div class="Hey-Name"><p>Deposit Your Check</p></div>
+            <p class="pay-link-text-body">
+              You have received a 
+              <span *ngIf="objPaymentLink.billing_cycle">
+                {{utility.getFrequencyString( objPaymentLink.billing_cycle )}} recurring
+              </span> 
+              digital check for the sum of <b>${{objPaymentLink.amount | currency: 'USD' :''}}</b> 
+              from <b>{{objMoneyFrom.name}}</b>.
+            </p>
+            <!--<p class="pay-link-text-body">Digital checks are a secure and simple alternative to paper checks.</p>-->
+            <p class="pay-link-text-body">
+              Deposit the check online for free by adding your account info using your online banking username and password. 
+              If your bank isn't listed, you can enter your banks routing and account number.
+            </p>
+          </div>
+          <div class="col-lg-8 col-md-12 col-sm-12">
+            <div class="checkWrapper">
+              <div id="processedWaterMarkValid">{{messages.get('DIGITAL_CHECK_WATER_MARK')}}</div>
+              <div class="check">
+                <div class="checkElement previewCurrentDate">{{getDateFormat( objPaymentLink.created_at) }}</div>
+                <div class="checkElement previewReceiver">{{objPaymentLink.name}}</div>
+                <div class="checkElement previewAmount">{{objPaymentLink.amount | currency: '' :''}}</div>
+                <div class="checkElement previewAmountWord">{{utility.toWords(objPaymentLink.amount | currency: '' :'')}} //////</div>
+                <div class="checkElement previewDesc" *ngIf="objPaymentLink.metadata">
+                  {{objPaymentLink.metadata.description}}
+                </div>
+                <div class="checkElement previewBankName" *ngIf="objBankInfo.name">
+                  {{objBankInfo.name}}
+                </div>
+                <div class="checkElement previewSignWrapper">
+                  <div class="previewWithOutSignWrapper">
+                    <span *ngIf="!isSignature" class="signatureName">{{signature}}</span>
+                    <img *ngIf="isSignature" class="signature" src="{{signature}}">
+                  </div>
+                </div>
+                <div class="checkElement infoWrapper">
+                  <div>
+                    <div class="previewSenderName">{{objMoneyFrom.name}}</div>
+                    <div class="smallText">{{objMoneyFrom.email}}</div>
+                  </div>
+                </div>
+                <div class="checkElement routingNumber">A{{objAccount.routing}}A</div>
+                <!--<div class="checkElement accountNumber">******{{objAccount.number}}C</div>-->
+                <div class="checkElement userCheckNumber" *ngIf="objPaymentLink.metadata">
+                  {{objPaymentLink.metadata.number || '0001'}}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-12 col-md-12 col-sm-12 col-12 digital-buttons">
+            <h3 class="text-center" style="margin: 0px 0px 30px 0px;" *ngIf="havePrintDeposit() && haveOnlineDeposit()">
+              Select how you want to deposit the Check
+            </h3>
+            <div class="row" style="margin-bottom: 30px;">
+              <div *ngIf="!isCheckPrinted && haveOnlineDeposit()" class="{{getClassForOnlineDepositButton()}}">
+                <button class="btn btn-primary btn-rounded btn-lg" type="button"
+                        (click)="openModal(depositCheckOnline);" *ngIf="!isExistUser || !requireTwoAuth()">
+                  <b>{{getLabelOnlineDeposit()}}</b><br>
+                  <small>Free and Secure <i class="icon-feather-lock"></i></small>
+                </button>
+                <button class="btn btn-primary btn-rounded btn-lg" type="button"
+                        (click)="openModal(verifyPhoneExistUser); sendVerifyCode()" *ngIf="isExistUser && requireTwoAuth()">
+                  <b>{{getLabelOnlineDeposit()}}</b><br>
+                  <small>Free and Secure <i class="icon-feather-lock"></i></small>
+                </button>
+              </div>
+              <div *ngIf="havePrintDeposit()" class="{{getClassForPrintButton()}}">
+                <button class="btn btn-outline-primary btn-rounded btn-lg" type="button" style="width: 100%"
+                        (click)="openModal(printDepositCheck)">
+                  <b>{{getLabelPrintDeposit()}}</b><br>
+                  <small>Using your banks mobile app</small>&nbsp;
+                  <i class="fa fa-question-circle"
+                    title="Print and Deposit the Check using your smartphone and your banks mobile app. No special paper, printer, or ink required."></i>
+                </button>
+              </div>
+            </div>
+            <div class="information-is-never-stored-on-servers text-center">
+              <i class="icon-feather-lock"></i> Bank login information is never stored on our servers.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="isCheckExpired">
+        <div class="row">
+          <div class="text-center col-lg-8" style="margin: auto;">
+            <h4 [innerHTML]="messages.get('DIGITAL_CHECK_IS_EXPIRED')"></h4>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="errorService.isError">
+        <div class="row">
+          <div class="text-center col-lg-8" style="margin: auto;">
+            <h4 [innerHTML]="errorService.errorMessage"></h4>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="isCheckPrinted && !isCheckPrintedInSession">
+        <h6 class="element-header">CHECK PRINTED</h6>
+        <div class="row">
+          <div class="text-center col-lg-8" style="margin: auto;">
+            <h4>{{messages.get('DIGITAL_CHECK_IS_CHECK_PRINTED_TEXT')}}</h4>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="isCheckCanseled">
+        <h6 class="element-header">CHECK CANCELED</h6>
+        <div class="row">
+          <div class="text-center col-lg-9" style="margin: auto;">
+            <h4>{{messages.get('DIGITAL_CHECK_IS_CHECK_CANCELED')}}</h4>
+          </div>
+          <div class="checkWrapper">
+            <div id="processedWaterMarkCanceled">CANCELED</div>
+            <div class="check">
+              <div class="checkElement previewCurrentDate">{{getDateFormat( objPaymentLink.created_at) }}</div>
+              <div class="checkElement previewReceiver">{{objPaymentLink.name}}</div>
+              <div class="checkElement previewAmount">{{objPaymentLink.amount | currency: '' :''}}</div>
+              <div class="checkElement previewAmountWord">{{utility.toWords(objPaymentLink.amount | currency: '' :'')}} //////</div>
+              <div class="checkElement previewDesc" *ngIf="objPaymentLink.metadata">
+                {{objPaymentLink.metadata.description}}
+              </div>
+              <div class="checkElement previewBankName" *ngIf="objBankInfo.name">
+                {{objBankInfo.name}}
+              </div>
+              <div class="checkElement previewSignWrapper">
+                <!--                <div class="previewSignName">
+                                </div>-->
+                <div class="previewWithOutSignWrapper">
+                  <span *ngIf="!isSignature" class="signatureName">{{signature}}</span>
+                  <img *ngIf="isSignature" class="signature" src="{{signature}}">
+                </div>
+              </div>
+              <div class="checkElement infoWrapper">
+                <div>
+                  <div class="previewSenderName">{{objMoneyFrom.name}}</div>
+                  <div class="smallText">{{objMoneyFrom.email}}</div>
+                </div>
+              </div>
+              <div class="checkElement routingNumber">A{{objAccount.routing}}A</div>
+              <!--<div class="checkElement accountNumber">******{{objAccount.number}}C</div>-->
+              <div class="checkElement userCheckNumber" *ngIf="objPaymentLink.metadata">
+                {{objPaymentLink.metadata.number || '0001'}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="isCheckProcess">
+        <h6 class="element-header">CHECK BEING PROCESSED</h6>
+        <div class="row">
+          <div class="text-center col-lg-12" style="margin: auto;">
+            <h4 [innerHTML]="messages.get('THIS_CHECK_HAS_BEEN_SEND')"></h4>
+            <h4 [innerHTML]="messages.get('DIGITAL_CHECK_BEING_PROCESSED_TEXT')"></h4>
+          </div>
+          <div class="clear-block"></div>
+          <br><br><br>
+          <div class="text-center" style="margin: auto">
+            <a style="margin: auto;" class="btn btn-primary btn-rounded" href="/login">
+              GO TO LOGIN  <i class="fa fa-long-arrow-right"></i>
+            </a>
+            <a href="/create-password" class="btn btn-outline-primary btn-rounded">Create Password</a>
+          </div>
+        </div>
+      </div>
+      <div class="terms-privacy-policy-links text-center" style="margin-top: 30px;">
+        <a href="{{objLink.terms_of_service}}" target="_blank">Terms of Service</a>&nbsp;|&nbsp;
+        <a href="{{objLink.privacy_policy}}" target="_blank">Privacy Policy</a>
+        &nbsp;|&nbsp;&#9400;&nbsp;Seamless Chex, Inc. All Rights Reserved
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #verifyPhoneExistUser let-c="close" let-d="dismiss">
+  <div class="manual-verification">
+    <div class="modal-header">
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="manual-verification-title">
+        <h4 class="modal-title">
+          You transacted with us earlier using email {{objExistUser.email}} and bank account ending in {{objCurAccount.number}}
+        </h4>
+        <p style="padding: 0 9%;">{{messages.get('POPUP_VERIFY_CODE_MESSAGE')}}</p>
+      </div>
+      <form name="form" autocomplete="nope" [formGroup]="verifyPhoneFormGroup">
+        <div class="form-group verify_code_inputs text-center">
+          <input class="form-control text-center" maxlength="1" type="text" name="pin_part_1" autocomplete="nope" 
+                 formControlName="pin_part_1" appNumbers id="pin_part_1" (input)="nextDigit(1)"
+                 >&nbsp;
+          <input class="form-control text-center" maxlength="1" type="text" name="pin_part_2" autocomplete="nope" 
+                 formControlName="pin_part_2" appNumbers id="pin_part_2" (input)="nextDigit(2)">&nbsp;
+          <input class="form-control text-center" maxlength="1" type="text" name="pin_part_3" autocomplete="nope" 
+                 formControlName="pin_part_3" appNumbers id="pin_part_3" (input)="nextDigit(3)">&nbsp;
+          <input class="form-control text-center" maxlength="1" type="text" name="pin_part_4" autocomplete="nope" 
+                 formControlName="pin_part_4" appNumbers id="pin_part_4">
+          <br>
+          <br>
+          <button style="color: #1071ef; text-decoration: underline;" type="button" class="btn btn-link" (click)="sendVerifyCode()">
+            Resend
+          </button>
+        </div>
+
+        <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+        <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" style="" (click)="c('Cross click')">Cancel</button>
+      <button class="slick-next slick-arrow" type="submit" style="" 
+              (click)="verifyPhoneCode(depositCheckOnline, false, verifyPhoneExistUser)" 
+              [disabled]="verifyPhoneFormGroup.get('pin_part_4').errors">
+              Submit & verify
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #depositCheckOnline let-c="close" let-d="dismiss">
+  <div *ngIf="isExistUser">
+    <div class="manual-verification">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="manual-verification-title">
+          <h4 class="modal-title">Payment confirmation</h4>          
+        </div>
+        <div class="modal-body">
+          <div class="manual-verification-title">
+            <p style="padding: 0 9%;margin: 0;"> 
+              You are ready to receive a check payment of <b>{{objPaymentLink.amount | currency:'' :'symbol'}}</b>. 
+            The money will be send to <b>{{objCurAccount.bank}}</b> account ending in <b>{{objCurAccount.number}}</b> the next business day.
+            </p>
+            <button style="margin-top: 10px;" type="button" class="btn btn-link" *ngIf="lstAccounts.length < 8"
+                    (click)="openModal(selectTypeAddFundingSource, depositCheckOnline)" [disabled]="isLoading">
+                    Add Bank Account</button>
+          </div>
+          <br>
+          <div class="form-group" style="margin-bottom: 0px;" *ngIf="lstAccounts.length > 1">
+            <!--<label>Select :</label>-->
+            <select name="userAccount" class="form-control" placeholder="Select Account" [(ngModel)]="objDigitCheck.account_id" #userAccount="ngModel"
+                    (change)="selectAnotherBankAccount()" style="width: 100%;">
+              <!--<option value="">{{account.bank}}&nbsp;{{account.account}}</option>-->
+              <option *ngFor="let account of lstAccounts; let i = index" value="{{i}}">{{account.bank}}&nbsp;****{{account.number}}</option>
+            </select>
+          </div>
+          <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+          <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div>
+          <div *ngIf="isLoading" class="alert alert-warning" role="alert" style="margin-top: 20px;">
+            Please wait. Do not refresh browser page until you will see payment confirmation message. Thank you.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="slick-prev slick-arrow" type="button" (click)="openBackModal()" [disabled]="isLoading">Cancel</button>
+        <button class="slick-next slick-arrow" type="button" [disabled]="isLoading" 
+                (click)="signUpByPayLink(successReceivedMoney, depositCheckOnline, true)">
+                Submit & confirm
+        </button>
+      </div>
+    </div>
+  </div>
+
+<div *ngIf="!isExistUser">
+  <div class="modal-header">
+    <!--<h4 class="modal-title">Deposit the Check online</h4>-->
+    <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+            <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="onboarding-media">
+    <img style="width: 310px;" src="assets/img/checkImg.png" class="addFundingSourceImg">
+  </div> 
+  <div class="modal-body addFundingSourceBox" style="padding-bottom: 0px;">
+    <div class="modal-body" style="background-position: 100% 50%;">
+      <div class="onboarding-content with-gradient">
+        <h4 class="modal-title">{{messages.get('DEPOSIT_THE_CHECK_ONLINE')}}</h4>
+        <div style="padding: 0px 20px;">
+          {{messages.get('DEPOSITING_A_DIGITAL_CHECK_TEXT')}}
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <button class="btn btn-primary btn-lg btn-block btn-rounded" title="Individual Type" type="button"
+                      [ngClass]="{ 'btn-success': objDigitCheck.accountType == 'personal' }"
+                      (click)="objDigitCheck.accountType = 'personal'">INDIVIDUAL</button>
+            </div>
+            <div class="form-group">
+              <label>
+                {{messages.get('DEPOSIT_TO_A_PERSONAL')}}
+              </label>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <button class="btn btn-primary btn-lg btn-block btn-rounded" title="Business Type" type="button"
+                      [ngClass]="{ 'btn-success': objDigitCheck.accountType == 'business' }" 
+                      (click)="objDigitCheck.accountType = 'business'">BUSINESS</button>
+            </div>
+            <div class="form-group">
+              <label>
+                {{messages.get('DEPOSIT_TO_A_BUSSINESS')}}
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="row" *ngIf="objDigitCheck.accountType != ''">
+          <div class="col-sm-12">
+            <div class="alert alert-warning" role="alert">
+              <span *ngIf="objDigitCheck.accountType == 'business' ">
+                {{messages.get('DIGITAL_CHECK_DEPOSIT_POPUP_BUSINESS_INFO_TEXT')}}
+              </span>
+              <span *ngIf="objDigitCheck.accountType == 'personal' ">
+                {{messages.get('DIGITAL_CHECK_DEPOSIT_POPUP_INDIVIDUAL_INFO_TEXT')}}
+              </span>
+              <br><br>
+              <div class="text-left">
+                <label class="checkbox-inline" style="font-size: 14px;color: black;">
+                  <input type="checkbox" class="" [(ngModel)]="objDigitCheck.acceptPolicy" #acceptPolicy="ngModel">&nbsp;&nbsp;
+                  I have read and accept the Paynote 
+                  <a href="https://www.seamlesschex.com/terms-of-service/" target="_blank">
+                    <b>Terms of Service</b>
+                  </a> and 
+                  <a href="https://www.seamlesschex.com/privacy-policy/" target="_blank">
+                    <b>Privacy Policy</b>
+                  </a>, as well as our partner Dwolla’s 
+                  <a href="https://www.dwolla.com/legal/tos/" target="_blank">
+                    <b>Terms of Service</b>
+                  </a> and 
+                  <a href="https://www.dwolla.com/legal/privacy/" target="_blank">
+                    <b>Privacy Policy</b>
+                  </a>.
+                </label>
+              </div>
+              <br>
+              <button class="btn btn-success btn-block btn-rounded" title="Account Type Confirm" type="button"
+                      [disabled]="!objDigitCheck.acceptPolicy" *ngIf="requireTwoAuth()"
+                      (click)="onAccept(verifyPhone, depositCheckOnline)">ACCEPT</button>
+              <button class="btn btn-success btn-block btn-rounded" title="Account Type Confirm" type="button"
+                      [disabled]="!objDigitCheck.acceptPolicy" *ngIf="!requireTwoAuth()"
+                      (click)="openModal(selectTypeAddFundingSource, depositCheckOnline)">ACCEPT</button>
+            </div>
+          </div>
+        </div>
+        <br>
+        <div class="text-center">
+          <a href="https://www.seamlesschex.com/terms-of-service/" target="_blank" class="Our-Terms-Conditio">
+            Our Terms &amp; Conditions are valid here.
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</ng-template>
+
+<ng-template #successReceivedMoney let-c="close" let-d="dismiss">
+  <div class="manual-verification">
+    <div class="modal-header">
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="manual-verification-title">
+        <h4 class="modal-title">Check Being Processed</h4>
+      </div>
+      You successfully initiated a transfer of <b>{{objPaymentLink.amount | currency:'' :'symbol'}}</b> from <b>{{objMoneyFrom.name}}</b> 
+      to your <b>{{objDigitCheck.bank_name || objCurAccount.bank}}</b> account ending in <b>{{getLastDigitAccount() || objCurAccount.number}}</b>.
+      <br><br>       
+      {{messages.get('DIGITAL_CHECK_SUCCESS_RECEIVED_MANEY_TEXT')}}
+      <div class="modal-body" style="text-align: center;">
+        <button style="padding: 7px 25px;" class="btn btn-primary btn-rounded" type="button" (click)="loginCreatedUser()">GO TO DASHBOARD  <i class="fa fa-long-arrow-right"></i> </button>
+      </div>
+    </div>
+    <div class="modal-footer">
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #seeDepositConfirmation let-c="close" let-d="dismiss">
+  <div class="manual-verification">
+    <div class="modal-header">
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="manual-verification-title">
+        <h4 class="modal-title">Deposit confirmation</h4>
+        <p style="padding: 0 9%;">
+          You successfully received a check payment of <b>{{objPaymentLink.amount | currency:'' :'symbol'}}</b> from <b>{{objMoneyFrom.name}}</b> 
+          to <b>{{objDigitCheck.bank_name || objCurAccount.bank}}</b> account ending in <b>{{getLastDigitAccount() || objCurAccount.number}}</b>.
+          <br><br>       
+          {{messages.get('DIGITAL_CHECK_SUCCESS_RECEIVED_MANEY_TEXT')}}
+        </p>
+      </div>
+      <div class="modal-body" style="text-align: center;">
+        <button style="padding: 7px 25px;" class="btn btn-primary btn-rounded" type="button" (click)="loginCreatedUser()">GO TO DASHBOARD  <i class="fa fa-long-arrow-right"></i> </button>
+<!--        <br>
+        <button style="color: #1071ef;" type="button" class="btn btn-link" (click)="setThankYouMessage(true, '/thank-you');">I'M OUT</button>        -->
+      </div>
+    </div>
+    <div class="modal-footer">
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #verifyPhone let-c="close" let-d="dismiss">
+  <div class="manual-verification">
+    <div class="modal-header">
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="manual-verification-title">
+        <h4 class="modal-title">{{messages.get('POPUP_VERIFY_CODE_TITLE')}}</h4>
+        <p style="padding: 0 9%;">{{messages.get('POPUP_VERIFY_CODE_MESSAGE')}}</p>
+      </div>
+      <div class="modal-body">
+        <form name="form" class="" autocomplete="nope" [formGroup]="verifyPhoneFormGroup">
+          <div class="form-group verify_code_inputs text-center">
+            <input class="form-control text-center" type="text" name="pin_part_1" autocomplete="nope" 
+                   formControlName="pin_part_1" appNumbers id="pin_part_1" (input)="nextDigit(1)"
+                   (paste)="pasteCode($event.clipboardData.getData('text/plain'))">&nbsp;
+            <input class="form-control text-center" maxlength="1" type="text" name="pin_part_2" autocomplete="nope" 
+                   formControlName="pin_part_2" appNumbers id="pin_part_2" (input)="nextDigit(2)"
+                   (paste)="pasteCode($event.clipboardData.getData('text/plain'))">&nbsp;
+            <input class="form-control text-center" maxlength="1" type="text" name="pin_part_3" autocomplete="nope" 
+                   formControlName="pin_part_3" appNumbers id="pin_part_3" (input)="nextDigit(3)"
+                   (paste)="pasteCode($event.clipboardData.getData('text/plain'))">&nbsp;
+            <input class="form-control text-center" maxlength="1" type="text" name="pin_part_4" autocomplete="nope" 
+                   formControlName="pin_part_4" appNumbers id="pin_part_4"
+                   (paste)="pasteCode($event.clipboardData.getData('text/plain'))">
+            <br>
+            <br>
+            <button style="color: #1071ef; text-decoration: underline;" type="button" class="btn btn-link" (click)="sendVerifyCode()">
+              Resend
+            </button>
+          </div>
+          <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+          <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+        </form>
+      </div>
+    </div><br><br>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" style="" (click)="openBackModal(depositCheckOnline)">Cancel</button>
+      <button class="slick-next slick-arrow" type="submit" style="" (click)="verifyPhoneCode(selectTypeAddFundingSource, false, verifyPhone)" 
+              [disabled]="verifyPhoneFormGroup.get('pin_part_4').errors">Submit & Verify</button>
+    </div>
+  </div>
+</ng-template>
+
+<!--<ng-template #verifyPhone let-c="close" let-d="dismiss">
+  <div class="manual-verification">
+    <div class="modal-header">
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="manual-verification-title">
+        <h4 class="modal-title">{{messages.get('PLEASE_VERIFY_YOUR_PHONE')}}</h4>
+        <p style="padding: 0 9%;">{{messages.get('PLEASE_VERIFY_YOUR_PHONE_TEXT')}}</p>
+      </div>
+      <div class="modal-body">
+        <br><br>
+        <form name="form" class="form-validation" autocomplete="nope" [formGroup]="verifyPhoneFormGroup">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{ 'has-error has-danger': verifyPhoneFormGroup.get('phone').errors 
+                   && (verifyPhoneFormGroup.get('phone').dirty || verifyPhoneFormGroup.get('phone').touched) }">
+                   <label>{{messages.get('DIGITAL_CHECK_VERITY_ENTER_PHONE_TEXT')}}</label>
+                <input class="form-control" title="Phone number" placeholder="e.g.4897973417" type="text" name="phone" autocomplete="off"
+                       formControlName="phone"
+                       [textMask]="{mask: maskPhone}">
+                       <div *ngIf="verifyPhoneFormGroup.get('phone').errors &&
+                       (verifyPhoneFormGroup.get('phone').dirty || verifyPhoneFormGroup.get('phone').touched)" 
+                       class="help-block form-text with-errors form-control-feedback">
+                       <span *ngIf="verifyPhoneFormGroup.get('phone').errors.validPhone">
+                    Phone must be at least 10 digits long.
+                  </span>
+                  <span *ngIf="verifyPhoneFormGroup.get('phone').errors.required">
+                    Phone number is required
+                  </span>
+                </div>
+              </div>
+
+              <button style="color: #1071ef; text-decoration: underline; padding-left: 0;" class="btn btn-link" type="button" (click)="sendVerifyCode()" [disabled]="verifyPhoneFormGroup.get('phone').errors">
+                Send Verification Code <i class="fa fa-check-circle"></i>
+              </button>
+              <br><br>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{ 'has-error has-danger': verifyPhoneFormGroup.get('phone_pin').errors 
+                   && (verifyPhoneFormGroup.get('phone_pin').dirty || verifyPhoneFormGroup.get('phone_pin').touched)}"
+                   [hidden]="!objDigitCheck.verifyCodeSend">
+                   <label>{{messages.get('DIGITAL_CHECK_VERITY_ENTER_CODE_TEXT')}}</label>
+                <input class="form-control" title="Verification Code" placeholder="e.g.1234" type="text" name="phone_pin"
+                       formControlName="phone_pin" required maxlength="4" minlength="4" appNumbers autocomplete="off">
+                <div *ngIf="verifyPhoneFormGroup.get('phone_pin').errors &&
+                  (verifyPhoneFormGroup.get('phone_pin').dirty || verifyPhoneFormGroup.get('phone_pin').touched)" 
+                  class="help-block form-text with-errors form-control-feedback">
+                  <span *ngIf="verifyPhoneFormGroup.get('phone_pin').errors.required">
+                    Verification Code is required
+                  </span>
+                  <span *ngIf="verifyPhoneFormGroup.get('phone_pin').errors.minlength">
+                    Verification Code must be at least 4 digits long.
+                  </span>
+                </div>
+              </div>
+              <button style="color: #1071ef; text-decoration: underline;" type="button" class="btn btn-link" (click)="sendVerifyCode()" *ngIf="objDigitCheck.verifyCodeSend">
+                Re-send Code
+              </button>
+            </div>
+          </div>
+          <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+          <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+        </form>
+      </div>
+    </div><br><br><br><br><br><br>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" style="" (click)="openBackModal(depositCheckOnline)">Cancel</button>
+      <button class="slick-next slick-arrow" type="submit" style="" (click)="verifyPhoneCode(selectTypeAddFundingSource)" [disabled]="verifyPhoneFormGroup.get('phone_pin').errors">Submit & Verify</button>
+
+
+      <button type="button" class="btn btn-default pull-left" (click)="c('Close click')">Back</button>
+
+            <button class="btn btn-primary" type="button" (click)="verifyPhoneCode(selectTypeAddFundingSource)" [disabled]="verifyPhoneFormGroup.get('phone_pin').errors">
+              Verify
+            </button>
+    </div>
+  </div>
+</ng-template>-->
+
+
+<ng-template #settingUpAccount let-c="close" let-d="dismiss">
+  <div class="manual-verification">
+    <div class="modal-header">
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="manual-verification-title">
+        <h4 class="modal-title">{{messages.get('MANUALLY_VERIFY_YOUR_BANK_ACCOUNT')}}</h4>
+      </div>
+      <div class="modal-body">
+        <p class="mf-text">{{messages.get('ENTER_THE_DETAILS_OF_THE_ACCOUNT')}}</p>        
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <form name="form" #f="ngForm" autocomplete="nope" class="form-validation">
+          <div class="row" *ngIf="!hasLastName()">
+          <!--businessName-->
+          <!--<div class="row" *ngIf="objDigitCheck.accountType == 'personal'">-->
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">First Name</label>
+                <input class="form-control" placeholder="First Name" type="test" name="firstName" required
+                       [(ngModel)]="objDigitCheck.firstName" #firstName="ngModel">
+                       <div *ngIf="!firstName.valid && (firstName.dirty || firstName.touched)" 
+                       class="help-block form-text with-errors form-control-feedback">First Name is required</div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Last Name</label>
+                <input class="form-control" placeholder="Last Name" type="test" name="lastName" required
+                       [(ngModel)]="objDigitCheck.lastName" #lastName="ngModel">
+                       <div *ngIf="!lastName.valid && (lastName.dirty || lastName.touched)" 
+                       class="help-block form-text with-errors form-control-feedback">Last Name is required</div>
+              </div>
+            </div>
+          </div>
+<!--          <div class="row" *ngIf="objDigitCheck.accountType == 'business'">
+            <div class="col-sm-12">
+              <div class="form-group">
+                <label for="">Account Name (Optional)</label>
+                <input class="form-control" placeholder="Account Name" type="test" name="businessName"
+                       [(ngModel)]="objDigitCheck.businessName" #businessName="ngModel">
+              </div>
+            </div>
+          </div>-->
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{ 'has-error has-danger': !routingNumber.valid && (routingNumber.dirty || routingNumber.touched) }">
+
+                   <label>Routing Number</label>
+                <input class="form-control" title="Routing Number" placeholder="Routing Number" type="text" name="routingNumber"
+                       [(ngModel)]="objDigitCheck.routingNumber" #routingNumber="ngModel" required maxlength="9" minlength="9" appNumbers
+                       (change)="getBankRouting()" autocomplete="off">
+                       <div *ngIf="!routingNumber.valid && (routingNumber.dirty || routingNumber.touched)" 
+                       class="help-block form-text with-errors form-control-feedback">Routing Number is required</div>
+              </div> 
+            </div> 
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Bank Name</label>
+                <div *ngIf="objDigitCheck.bank_name" class="mv-bankName">{{objDigitCheck.bank_name}}</div>
+              </div>
+
+              <div class="form-group" style="display: none;">
+                <label for="">Bank Account Type</label>
+                <select class="form-control" placeholder="Bank Account Type" name="bankAccountType" required
+                        [(ngModel)]="objDigitCheck.bankAccountType" #bankAccountType="ngModel">
+                        <option value="checking" selected="true">Checking</option>
+                  <option value="saving">Saving</option>
+                </select>
+                <div *ngIf="!bankAccountType.valid && (bankAccountType.dirty || bankAccountType.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Bank Account Type is required</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Account Number</label>
+                <input class="form-control" placeholder="e.g. 489729074589" type="text" name="accountNumber" 
+                       appNumbers required maxlength="17"
+                       [(ngModel)]="objDigitCheck.accountNumber" #accountNumber="ngModel" autocomplete="off">
+                <div *ngIf="!accountNumber.valid && (accountNumber.dirty || accountNumber.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Account Number is required</div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Confirm Account Number</label>
+                <input class="form-control" placeholder="e.g. 489729074589" type="text" name="cAccountNumber" 
+                       appNumbers required maxlength="17" validateEqual="accountNumber"
+                       [(ngModel)]="objDigitCheck.cAccountNumber" #cAccountNumber="ngModel" autocomplete="off">
+                <div *ngIf="!cAccountNumber.valid && (cAccountNumber.dirty || cAccountNumber.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">
+                  <span *ngIf="cAccountNumber.errors.required">
+                    Confirm Account Number is required
+                  </span>
+                  <span *ngIf="!cAccountNumber.errors.validateEqual">
+                    Account Number mismatch
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="form-group">
+                <img style="width: 100%;" class="brnumber-img" src="assets/img/us-bank-routing-numbers.png">
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!--<mat-spinner mode="indeterminate" diameter="50" *ngIf="isLoading" style="margin: auto;"></mat-spinner>-->
+        <div *ngIf="isLoading" class="alert alert-warning" role="alert">
+          {{messages.get('DIGITAL_CHECK_SETTING_UP_ACCOUNT_IS_LOADING_TEXT')}}
+        </div>
+        <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+        <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div>  
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button [disabled]="isLoading" class="slick-prev slick-arrow" type="button" (click)="openBackModal(selectTypeAddFundingSource)">Cancel</button>
+      <button [disabled]="loading || !f.form.valid" class="slick-next slick-arrow" type="submit" (click)="signUpByPayLink(successReceivedMoney, settingUpAccount)">Submit & Verify</button>
+    </div>
+  </div>
+</ng-template>
+
+
+
+
+
+<ng-template #selectTypeAddFundingSource let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <!--<h4 class="modal-title">Add a bank account</h4>-->
+    <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+            <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="onboarding-media">
+    <img src="assets/img/undraw-vault-9-cmw.png" 
+         srcset="assets/img/undraw-vault-9-cmw@2x.png 2x, assets/img/undraw-vault-9-cmw@3x.png 3x" 
+         class="addFundingSourceImg">
+  </div>  
+  <div class="modal-body addFundingSourceBox"> 
+    <div class="modal-body">
+      <div class="onboarding-content with-gradient">
+        <h4 class="modal-title">{{messages.get('TITLE_ADD_FUNDING_SOURCE')}}</h4>
+        <p *ngIf="objDigitCheck.accountType == 'personal'">{{messages.get('ADD_AND_VERIFY_YOUR_BANK_ACCOUNT')}}</p>
+        <p *ngIf="objDigitCheck.accountType == 'business'">{{messages.get('ADD_AND_VERIFY_YOUR_BANK_ACCOUNT_FOR_BUSINESS')}}</p>
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <button id="instantVerificationBtn" class="btn btn-primary btn-lg btn-block btn-rounded" *ngIf="objDigitCheck.accountType == 'business'"
+                      title="Instant Verification" [disabled]="isLoading"
+                      type="button" (click)="openDialogPlaid(successReceivedMoney)">
+                Instant Verification
+              </button>
+              <button id="manualVerificationBtn" class="btn btn-primary btn-lg btn-block btn-rounded" *ngIf="objDigitCheck.accountType == 'personal'"
+                      type="button" [disabled]="isLoading"
+                      (click)="openModal(settingUpAccount, selectTypeAddFundingSource)" title="Manual Verification">
+                  Manual Verification
+              </button>
+            </div>
+            <div class="form-group">
+              <label [innerHTML]="messages.get('LOGIN_TO_YOUR_BANK_ACCOUNT_RECEIVE')" *ngIf="objDigitCheck.accountType == 'business'"></label>
+              <label [innerHTML]="messages.get('JUST_ENTER_YOUR_ROUTING_NUMBER')" *ngIf="objDigitCheck.accountType == 'personal'"></label>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <button id="manualVerificationBtn" class="btn btn-primary btn-lg btn-block btn-rounded" *ngIf="objDigitCheck.accountType == 'business'"
+                      type="button" [disabled]="isLoading"
+                      (click)="openModal(settingUpAccount, selectTypeAddFundingSource)" title="Manual Verification">
+                  Manual Verification
+              </button>
+              <button id="instantVerificationBtn" class="btn btn-primary btn-lg btn-block btn-rounded" *ngIf="objDigitCheck.accountType == 'personal'"
+                      title="Instant Verification" [disabled]="isLoading"
+                      type="button" (click)="openDialogPlaid(successReceivedMoney)">
+                Instant Verification
+              </button>
+            </div>
+            <div class="form-group">
+              <label [innerHTML]="messages.get('LOGIN_TO_YOUR_BANK_ACCOUNT_RECEIVE')" *ngIf="objDigitCheck.accountType == 'personal'"></label>
+              <label [innerHTML]="messages.get('JUST_ENTER_YOUR_ROUTING_NUMBER')" *ngIf="objDigitCheck.accountType == 'business'"></label>
+            </div>
+          </div>
+        </div>
+
+      <!--<br *ngIf="isLoading">-->
+      <!--<mat-spinner mode="indeterminate" diameter="50" *ngIf="isLoading" style="margin: auto;"></mat-spinner>-->
+      <br *ngIf="isLoading">
+      <div *ngIf="isLoading" class="alert alert-warning" role="alert">
+        {{messages.get('DIGITAL_CHECK_ADD_BANK_IS_LOADING_TEXT')}}
+      </div>
+      <!--      <div class="alert alert-success" role="alert">
+              <label class="info-message">
+                {{messages.get('DIGITAL_CHECK_ADD_BANK_INFO_MESSAGE_TEXT')}}
+              </label>
+            </div>-->
+      <br *ngIf="isLoading">
+
+    </div>
+    <div class="alert alert-danger" role="alert" *ngIf="errorService.isError" [innerHTML]=errorService.errorMessage></div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button class="slick-prev slick-arrow" type="button" [disabled]="isLoading" (click)="openBackModal(verifyPhone)">Cancel</button>
+  <!--  <button type="button" class="btn btn-default pull-left" [disabled]="isLoading" (click)="openModal(verifyPhone)">Back</button>
+    <button type="button" class="btn btn-secondary" (click)="c('Close click')" [disabled]="isLoading">Cancel</button>-->
+</div>
+</ng-template>
+
+
+
+
+<ng-template #printDepositCheck let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <!--<h4 class="modal-title">Check deposit options</h4>-->
+    <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="onboarding-media">
+    <img style="width: 310px;" src="assets/img/checkImg.png" class="addFundingSourceImg">
+  </div> 
+  <div class="modal-body addFundingSourceBox"> 
+    <div class="modal-body">
+      <div class="onboarding-content with-gradient">
+        <h4 class="modal-title">{{messages.get('CHECK_DEPOSIT_OPTIONS')}}</h4>
+        <p>A Check printed on any paper. 
+          <span *ngIf="!isCheckPrinted">However <b>Deposit Online</b> is faster, secure and will enable all future Checks to be Direct Deposited automatically in your bank account.</span>
+        </p>
+        <div class="alert alert-danger" role="alert" *ngIf="!isCheckPrinted">
+          Clicking on any of the Print Buttons will generate a 
+          <b>PDF image</b> of the Check and you will not be able to 
+          <b>Deposit Online</b>.
+        </div>
+        <div class="alert alert-danger" role="alert" *ngIf="isCheckPrinted">
+          This Check has already been printed. Clicking on one of the Print buttons will show a 
+          <b>PDF file</b> containing the Check.
+        </div>
+
+        <a href="{{host + '/check/payment-link/mobile/download/' + objPaymentLink.pl_token}}" (click)="isCheckPrinted = true;" 
+           class="btn btn-primary btn-block btn-rounded">
+          Print the Check for Mobile Deposit
+        </a>
+
+        <a href="{{host + '/check/payment-link/paper/download/' + objPaymentLink.pl_token}}" (click)="isCheckPrinted = true;" 
+           class="btn btn-primary btn-block btn-rounded">          
+          Print on Check Paper          
+        </a>        
+        <br [hidden]="!isCheckPrinted">
+        <div class="alert alert-warning" role="alert" [hidden]="!isCheckPrinted">
+          Please wait while the <b>PDF file</b> containing the Check is generated.
+        </div>
+      </div>
+      <div class="alert alert-danger" role="alert" *ngIf="errorService.isError" [innerHTML]=errorService.errorMessage></div>
+    </div>
+  </div>
+  <div class="modal-footer" *ngIf="!isCheckPrinted">
+    <button class="btn btn-success btn-block btn-rounded" type="button" [disabled]="isLoading" (click)="openModal(depositCheckOnline)">
+      I'd love to try secure Deposit Online&nbsp; 
+      <i aria-hidden="true" class="fa fa-question-circle" [matTooltipPosition]="'above'"
+         matTooltip="{{messages.get('TOOLTIP_DIGITAL_CHECK_PRINT_DEPOSIT_CHECK')}}">
+      </i>
+    </button>
+  </div>
+</ng-template>

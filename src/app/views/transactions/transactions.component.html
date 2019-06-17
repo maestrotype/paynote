@@ -1,0 +1,244 @@
+<div class="element-wrapper" style="padding-bottom: 0px;">
+  <h6 class="element-header" *ngIf="!isBilling">Transactions</h6>
+  <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div>
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-4">
+            <div id="dataTable1_filter" class="dataTables_filter text-left">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search transaction" 
+                       [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel" 
+                       (search)="listSendChecksTransactions(null)" (keyup)="listSendChecksTransactions(null)">
+              </label><br><br>
+              <button type="button" class="btn btn-danger" 
+                      *ngIf="userService.canVoidCheck() && !isBilling" [disabled]="!canVoidCheck" (click)="voidChecks()">
+                <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;VOID
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <table id="dataTable1" width="100%" class="table table-striped table-lightfont dataTable sendChecks responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th *ngIf="!isBilling">
+                    <input type="checkbox" [(ngModel)]="selectAllChecks" (click)="selectAllCheck()">
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('number', paginationService.sortDir, listSendChecksTransactions(null))">Number</a>
+                    <i *ngIf="paginationService.sortField == 'number' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'number' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('type', paginationService.sortDir, listSendChecksTransactions(null))">Type</a>
+                    <i *ngIf="paginationService.sortField == 'type' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'type' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    Email
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('amount', paginationService.sortDir, listSendChecksTransactions(null))">Amount</a>
+                    <i *ngIf="paginationService.sortField == 'amount' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'amount' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('status', paginationService.sortDir, listSendChecksTransactions(null))">Status</a>
+                    <i *ngIf="paginationService.sortField == 'status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">Name</th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, listSendChecksTransactions(null))">Date</a>                      
+                    <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>                  
+                  </th>
+                  <th scope="col">
+                    Description
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let sendChecks of lstSendChecks" (click)= "showCheckInfoPopup( sendChacksDialog, sendChecks )" >
+                    <td *ngIf="!isBilling">
+                    <input style="margin: 4px;" type="checkbox" [(ngModel)]="sendChecks.multiple" (click)="unCheckedChecks($event)"
+                           [disabled]="!transService.canVoidCheck(sendChecks.status, sendChecks.type)">
+                  </td>
+                  <td data-title="Number" scope="row">
+                    {{sendChecks.number || '&nbsp;'}}
+                  </td>
+                  <td data-title="Type">
+                    {{sendChecks.type || '&nbsp;'}}
+                  </td>
+                  <td data-title="Email">
+                    {{sendChecks.rec_email || '&nbsp;'}}
+                  </td>
+                  <td data-title="Amount">
+                    <span *ngIf="sendChecks.u_token != sendChecks.rec_token">-</span>
+                    {{sendChecks.amount | currency:sendChecks.currency:'symbol'|| '&nbsp;'}}
+                  </td>
+                  <td data-title="Status" class="text-capitalize" [innerHTML]="getStatus(sendChecks)"></td>
+                  <td data-title="Name">
+                    {{sendChecks.rec_name || '&nbsp;'}}
+                  </td>
+                  <td data-title="Date" class="col-md-100">
+                    {{userService.getDateFormat(sendChecks.created_at)}}
+                  </td>
+                  <td data-title="Description">
+                    {{sendChecks.description || '&nbsp;'}}
+                  </td>
+                </tr>
+              </tbody>
+            </table>             
+
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No transaction were found. Try changing your query...</span>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="listSendChecksTransactions($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<ng-template #sendChacksDialog let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content" style="padding: 0">
+  <div class="modal-header">
+    <h4 class="modal-title">Check Info</h4>
+    <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+            <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="checkWrapper">
+    <div class="check">
+      <div class="checkElement previewCurrentDate">
+        {{userService.getDateFormat(checkPopupInfo.created_at)}}
+      </div>
+      <div class="checkElement previewReceiver">
+        {{checkPopupInfo.rec_name}}
+      </div>
+      <div class="checkElement previewAmount">
+        {{checkPopupInfo.amount | currency: '' :''}}
+      </div>
+      <div class="checkElement previewAmountWord">
+        {{utility.toWords(checkPopupInfo.amount | currency: '' :'')}} //////
+      </div>
+      <div class="checkElement previewDesc">
+        {{checkPopupInfo.description}}
+      </div>
+      <div class="checkElement previewBankName">{{checkPopupInfo.bank_info.name}}</div>
+      <div class="checkElement previewSignWrapper">
+        <div class="previewWithOutSignWrapper">
+          <span *ngIf="checkPopupInfo.sender && checkPopupInfo.sender.u_token == userService.getToken()">
+            <span *ngIf="!userService.getSignature()" class="signatureName">{{userService.getFullName()}}</span>
+            <img *ngIf="userService.getSignature()" class="signature" src="{{userService.getSignature()}}">
+          </span>
+          <span  *ngIf="checkPopupInfo.sender && checkPopupInfo.sender.u_token != userService.getToken()">
+            <span class="signatureName">{{checkPopupInfo.sndr_name}}</span>
+          </span>
+        </div>
+      </div>
+      <div class="checkElement infoWrapper">
+        <div>
+          <div class="previewSenderName" *ngIf="checkPopupInfo.sender && checkPopupInfo.sndr_name">
+               {{checkPopupInfo.sndr_name}}
+        </div>
+        <div class="smallText" *ngIf="checkPopupInfo.sender && checkPopupInfo.sndr_email">
+             {{checkPopupInfo.sndr_email}}
+      </div>
+    </div>
+  </div>
+  <div class="checkElement routingNumber">A{{checkPopupInfo.account_bank.routing}}A</div>
+  <div class="checkElement accountNumber">******{{checkPopupInfo.account_bank.number}}</div>
+  <div class="checkElement userCheckNumber">{{checkPopupInfo.number}}</div>
+</div>
+</div>
+<div class="modal-body">
+  &nbsp;&nbsp;
+  <!--</div>-->
+  <div class="profile-tile">
+    <span class="profile-tile-box">
+      <div class="pt-avatar-w" style="border-radius: 0px;">
+        <i style="color:#aab7c8; font-size: 5em;" class="picons-thin-icon-thin-0414_money_cash_coins_payment"></i>
+      </div>
+    </span>
+
+    <div class="profile-tile-meta" style='font-size: 22px;'>
+      <ul>
+        <li>
+          <div>
+            <span class="added_withdrawn">Name:</span> 
+            <span class="added_withdrawn_source">&nbsp;
+              {{checkPopupInfo.rec_name}}
+            </span>
+          </div>            
+          <div>
+            <span class="added_withdrawn">Email</span> 
+            <span class="added_withdrawn_source">&nbsp;
+              {{checkPopupInfo.rec_email}}
+            </span>
+          </div>            
+        </li>
+        <li>
+          <i class="picons-thin-icon-thin-0026_time_watch_clock"></i>             
+          <span class="added_withdrawn_source">&nbsp;
+            {{userService.getDateFormat(checkPopupInfo.created_at)}}
+          </span>
+        </li>
+        <li>
+          &nbsp;
+
+        </li>
+        <li>
+          Number:&nbsp;<span class="added_withdrawn_source">
+            {{checkPopupInfo.number}}
+          </span>
+        </li>
+        <li>
+          Amount:&nbsp;<span class="added_withdrawn_source">
+            <span *ngIf="checkPopupInfo.u_token != checkPopupInfo.rec_token">-</span>
+            {{checkPopupInfo.amount | currency:'':'symbol'}}
+          </span>
+        </li>
+        <li>
+          Status:&nbsp;<span class="added_withdrawn_source">
+            {{checkPopupInfo.status}}
+          </span>
+        </li>
+        <li>
+          Description:&nbsp;<span class="added_withdrawn_source">
+            {{checkPopupInfo.description}}
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+   <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Close</button>
+</div>
+</div>
+</ng-template>

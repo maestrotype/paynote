@@ -1,0 +1,162 @@
+<div class="content-box">
+  <div class="element-wrapper">
+    <h6 class="element-header">Transactions</h6>
+    <div class="element-box">
+      <!--<h5 class="form-header">Powerful Datatables</h5>-->
+      <!--      <div class="form-desc">
+              DataTables is a plug-in for the jQuery Javascript library. It is a highly flexible tool, based upon the foundations of progressive enhancement, and will add advanced interaction controls to any HTML table.. 
+              <a href="https://www.datatables.net/" target="_blank">Learn More about DataTables</a>
+            </div>-->
+      <div class="table-responsive">
+        <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+          <div class="row">
+            <div class="col-sm-12 col-md-4">
+              <div class="dataTables_length" id="dataTable1_length">
+                <label>
+                  Show 
+                  <select name="dataTable1_length" id="dataTable1_length" aria-controls="dataTable1" class="form-control form-control-sm">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                  </select> entries</label>
+              </div>
+            </div>
+            <!--            <div class="col-sm-12 col-md-4 form-group">
+                          <label for="">Date Range Picker
+                            <input class="multi-daterange form-control" type="text" value="03/31/2017 - 04/06/2017">
+                          </label>
+                        </div>-->
+            <div class="col-sm-12 col-md-4">
+              <div id="dataTable1_filter" class="dataTables_filter">
+                <label>
+                  Search:
+                  <input type="search" class="form-control form-control-sm" placeholder="" aria-controls="dataTable1">
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <table id="dataTable1" width="100%" class="table table-striped table-lightfont dataTable" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+                <thead>
+                  <tr role="row">
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th class="text-right">Amount</th>
+                    <!--                    <th class="sorting" tabindex="0" aria-controls="dataTable1" rowspan="1" colspan="1" 
+                                            aria-label="Age: activate to sort column ascending" style="width: 71px;">Amount</th>-->
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    <th rowspan="1" colspan="1">Name</th>
+                    <th rowspan="1" colspan="1">Date</th>
+                    <th rowspan="1" colspan="1">Status</th>
+                    <th class="text-right" rowspan="1" colspan="1">Amount</th>
+                  </tr>
+                </tfoot>
+                <tbody>
+                  <tr role="row" *ngFor="let transaction of listTransactions" (click)="getTransactionsInfoPopup(transaction.id, merchantTransactionsInfoPopup)" >
+                      <!--<td>{{transaction.destination}}</td>-->
+                      <td><span class="from_to_transactions">{{transaction.method}}:</span>{{transaction.transactions_name}}</td>
+                    <td>{{userService.getDateFormat(transaction.created_at)}}</td>
+                    <td>{{transaction.status}}</td>
+                    <td style="color: #58b467;" class="text-right" *ngIf="transaction.method == 'from'">
+                      <div class="trans_symbol">+</div> {{transaction.amount.value | currency:transaction.amount.currency:'symbol' }}
+                    </td>
+                    <td  class="text-right"  *ngIf="transaction.method == 'to'">
+                      <div class="trans_symbol">-</div> {{transaction.amount.value | currency:transaction.amount.currency:'symbol' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>             
+                <div class="controls-below-table">
+                  <div class="table-records-info">Showing records 1 - 5</div>
+                  <div class="table-records-pages">
+                    <ul>
+                      <li><a href="#">Previous</a></li>
+                      <li><a class="current" href="#">1</a></li>
+                      <li><a href="#">2</a></li>
+                      <li><a href="#">3</a></li>
+                      <li><a href="#">4</a></li>
+                      <li><a href="#">Next</a></li>
+                    </ul>
+                  </div>
+                </div>
+            </div>
+          </div>
+      
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #merchantTransactionsInfoPopup let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">Transaction Info</h4>
+    <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+            <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="profile-tile">
+      <span class="profile-tile-box">
+        <div class="pt-avatar-w" style="border-radius: 0px;">
+          <i *ngIf="transactionInfo.method == 'from'" style="color:#aab7c8; font-size: 5em;"  class="picons-thin-icon-thin-0430_money_payment_dollar_coins_cash"></i>
+          <i *ngIf="transactionInfo.method == 'to'" style="color:#aab7c8; font-size: 5em;" class="picons-thin-icon-thin-0424_money_payment_dollar_cash"></i>
+        </div>
+      </span>
+      <div class="profile-tile-meta">
+        <ul>
+          <li>
+            <div *ngIf="transactionInfo.method == 'from'">
+              <span class="added_withdrawn">Added</span> 
+              <span class="added_withdrawn_amount">&nbsp;+ {{transactionInfo.amount.value | currency:transactionInfo.amount.currency:'symbol' }}</span>
+            </div>            
+            <div *ngIf="transactionInfo.method == 'to'">
+              <span class="added_withdrawn">Withdrawn</span> 
+            <span class="added_withdrawn_amount_">&nbsp;- {{transactionInfo.amount.value | currency:transactionInfo.amount.currency:'symbol' }}</span>
+            </div>            
+          </li>
+          <li>
+            <i class="picons-thin-icon-thin-0026_time_watch_clock"></i>             
+            <span>
+              {{userService.getDateFormat(transactionInfo.created.date, 'MMM d, y, h:mm:ss a')}}
+            </span>
+          </li>
+          <li>
+           &nbsp;
+            
+          </li>
+          <li>
+            From:&nbsp;<span style="font-weight: bold;">
+              {{transactionInfo.transactions_name_from}}
+            </span>
+          </li>
+          <li>
+            To:&nbsp;<span style="font-weight: bold;">
+              {{transactionInfo.transactions_name_to}}
+            </span>
+          </li>
+          <li>
+            Status:&nbsp;<span style="font-weight: bold;">
+              {{transactionInfo.status}}
+            </span>
+          </li>
+          <li>
+            Transaction id:&nbsp;<span style="font-weight: bold;">
+              {{transactionInfo.id}}
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="c('Close click')">Close</button>
+    <!--<button [disabled]="loading" class="btn btn-primary" type="button" >Remove</button>-->
+  </div>
+</ng-template>

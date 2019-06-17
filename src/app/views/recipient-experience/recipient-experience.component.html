@@ -1,0 +1,289 @@
+<div class="element-wrapper" style="padding-bottom: 0px;">
+<!--  <h6 class="element-header">Create a Payment Page to Accept a Check and Get Paid</h6>-->
+  <div class="element-box">
+    <form name="form" (ngSubmit)="f.form.valid && submitExperience()" #f="ngForm" autocomplete="nope">
+      <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+          <h4>Invoice Experience</h4>
+          <br>
+          <div class="form-group">
+            <label for="billLinkOptions">Payment Options:</label><br>
+            <mat-checkbox [(ngModel)]="objRecipientExperienceComp.formInvoice.is_instant_v" #is_instant_v="ngModel" style="font-size: 14px;"
+                          [ngModelOptions]="{standalone: true}" required [disabled]="true" id="billLinkOptions">
+              Instant Verification
+            </mat-checkbox>&nbsp;&nbsp;
+            <mat-checkbox [(ngModel)]="objRecipientExperienceComp.formInvoice.is_manual_v" #is_manual_v="ngModel" style="font-size: 14px;"
+                          [ngModelOptions]="{standalone: true}">
+              Manual Verification <i class="fa fa-question-circle" title="{{utility.getTrustHtml( messages.get('PP_MANUAL_VERIFICATION_TOOLTIP'))}}"></i>
+              - Selecting this may result in increased failed payments.
+            </mat-checkbox>
+            <div *ngIf="!is_instant_v.valid && (is_instant_v.dirty || is_instant_v.touched)"
+                 class="help-block form-text with-errors form-control-feedback">Instant Verification is required</div>
+            <br><br>
+            <mat-checkbox [(ngModel)]="objRecipientExperienceComp.formInvoice.is_two_auth" #is_two_auth="ngModel" style="font-size: 14px;"
+                          [ngModelOptions]="{standalone: true}">
+              Two Factor Authentication <i class="fa fa-question-circle" title="{{utility.getTrustHtml( messages.get('PP_TWO_F_A_TOOLTIP'))}}"></i>
+            </mat-checkbox>
+          </div>
+          <div class="form-group">
+            <label for="invoiceAppearance">Appearance:</label><br>
+            Logo&nbsp;&nbsp;<input type="file" (change)="fileChangeEvent($event, 'invoice')" [ngModelOptions]="{standalone: true}" id="invoiceAppearance"
+                                    [(ngModel)]="objRecipientExperienceComp.uploadFileInvoice" #uploadFileInvoice="ngModel" accept="image/jpeg,image/png" />
+            <image-cropper
+              [imageChangedEvent]="objRecipientExperienceComp.imageChangedEventInvoice"
+              [maintainAspectRatio]="true"
+              [aspectRatio]="23 / 9"
+              [resizeToWidth]="250"
+              format="png"
+              (imageCropped)="imageCropped($event, 'invoice')"
+              (imageLoaded)="imageLoaded()"
+              (loadImageFailed)="loadImageFailed()"
+            ></image-cropper>
+            <img *ngIf="objRecipientExperienceComp.formInvoice.logo" [src]="objRecipientExperienceComp.formInvoice.logo" />
+          </div>
+          <div class="form-group">
+            <label for="billLinkMessageInvoice">Slogan <small>(Max 120 chars)</small></label>
+            <input id="billLinkMessageInvoice" class="form-control" type="text" name="title-invoice" placeholder="Securely send and receive digital checks online."
+                   [(ngModel)]="objRecipientExperienceComp.formInvoice.title" #title="ngModel" maxlength="120">
+          </div>
+          <div class="form-group">
+            <label for="billLinkButton">Button</label>
+            <input id="billLinkButton" class="form-control" type="text" name="button" maxlength="25" placeholder="Send Check"
+                   [(ngModel)]="objRecipientExperienceComp.formInvoice.button" #button="ngModel">
+            <small>Max length 25 character's</small>
+          </div>
+          <div class="buttons-w form-group">
+            <button id="previewInvoiceExperience" [disabled]="isLoading" type="button"  (click)="previewExperience(previewInvoiceOnline, 'invoice')"
+                    class="btn btn-primary btn-rounded btn-lg">Preview</button>
+            <button id="saveInvoiceExperience" [disabled]="isLoading" type="submit"
+                    class="btn btn-primary btn-rounded btn-lg">Save</button>
+          </div>
+        </div>
+
+
+        <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+          <h4>Deposit Experience</h4>
+          <br>
+          <div class="form-group" [ngClass]="{ 'has-error has-danger': (!objRecipientExperienceComp.formCheck.is_online_deposit && !objRecipientExperienceComp.formCheck.is_print_deposit) }">
+            <label for="is_online_deposit">Deposit Options:</label><br>
+            <mat-checkbox [(ngModel)]="objRecipientExperienceComp.formCheck.is_online_deposit" #is_online_deposit="ngModel" style="font-size: 14px;"
+                          [ngModelOptions]="{standalone: true}" id="is_online_deposit" (ngModelChange)="checkDepositOnlineSelected('online_deposit')">
+              Online Deposit
+            </mat-checkbox><br>
+            <mat-checkbox [(ngModel)]="objRecipientExperienceComp.formCheck.is_print_deposit" #is_print_deposit="ngModel" style="font-size: 14px;"
+                          [ngModelOptions]="{standalone: true}" (ngModelChange)="checkDepositOnlineSelected('print_deposit')">Print and Deposit
+            </mat-checkbox>
+            <div *ngIf="!is_online_deposit.valid && (is_online_deposit.dirty || is_online_deposit.touched)"
+                 class="help-block form-text with-errors form-control-feedback">Online Deposit is required</div>
+            <div *ngIf="!objRecipientExperienceComp.formCheck.is_online_deposit && !objRecipientExperienceComp.formCheck.is_print_deposit"
+                 class="help-block form-text with-errors form-control-feedback">
+<!--              You must choose "Online Deposit" or "Print and Deposit"-->
+              Must be selected at least one Deposit Option
+            </div>
+            <br><br>
+            <mat-checkbox [(ngModel)]="objRecipientExperienceComp.formCheck.is_two_auth" #is_two_auth="ngModel" style="font-size: 14px;"
+                          [ngModelOptions]="{standalone: true}">
+              Two Factor Authentication <i class="fa fa-question-circle" title="{{utility.getTrustHtml( messages.get('PP_TWO_F_A_TOOLTIP'))}}"></i>
+            </mat-checkbox>
+
+          </div>
+          <div class="form-group">
+            <label for="checkAppearance">Appearance:</label><br>
+            Logo&nbsp;&nbsp;<input type="file" (change)="fileChangeEvent($event, 'check')" [ngModelOptions]="{standalone: true}" id="checkAppearance"
+                                   [(ngModel)]="objRecipientExperienceComp.uploadFileCheck" #uploadFileCheck="ngModel" accept="image/jpeg,image/png" />
+            <image-cropper
+              [imageChangedEvent]="objRecipientExperienceComp.imageChangedEventCheck"
+              [maintainAspectRatio]="true"
+              [aspectRatio]="23 / 9"
+              [resizeToWidth]="250"
+              format="png"
+              (imageCropped)="imageCropped($event, 'check')"
+              (imageLoaded)="imageLoaded()"
+              (loadImageFailed)="loadImageFailed()"
+            ></image-cropper>
+            <img *ngIf="objRecipientExperienceComp.formCheck.logo" [src]="objRecipientExperienceComp.formCheck.logo" />
+          </div>
+          <div class="form-group">
+            <label for="billLinkMessageCheck">Slogan <small>(Max 120 chars)</small></label>
+            <input id="billLinkMessageCheck" class="form-control" type="text" name="title" placeholder="Securely send and receive digital checks online."
+                   [(ngModel)]="objRecipientExperienceComp.formCheck.title" #title="ngModel" maxlength="120">
+          </div>
+          <div class="form-group">
+            <label for="onlineDepositButton">
+              Online Deposit
+              <i class="fa fa-question-circle" title="{{utility.getTrustHtml( messages.get('EXPERIENCE_ONLINE_DEPOSIT_TOOLTIP'))}}"></i>
+            </label>
+            <input id="onlineDepositButton" class="form-control" type="text" name="buttonDeposit" maxlength="25" placeholder="Button Title"
+                   [(ngModel)]="objRecipientExperienceComp.formCheck.buttonDeposit" #buttonDeposit="ngModel">
+            <small>Max length 25 character's</small>
+          </div>
+          <div class="form-group">
+            <label for="printAndDepositButton">
+              Print and Deposit
+              <i class="fa fa-question-circle" title="{{utility.getTrustHtml( messages.get('EXPERIENCE_PRINT_AND_DEPOSIT_TOOLTIP'))}}"></i>
+            </label>
+            <input id="printAndDepositButton" class="form-control" type="text" name="buttonPrint" maxlength="25" placeholder="Button Title"
+                   [(ngModel)]="objRecipientExperienceComp.formCheck.buttonPrint" #buttonPrint="ngModel">
+            <small>Max length 25 character's</small>
+          </div>
+          <div class="buttons-w form-group">
+            <button id="previewCheckExperience" [disabled]="isLoading" type="button" (click)="previewExperience(previewCheckOnline, 'check')"
+                    class="btn btn-primary btn-rounded btn-lg">Preview</button>
+            <button id="saveCheckExperience" [disabled]="( !objRecipientExperienceComp.formCheck.is_online_deposit && !objRecipientExperienceComp.formCheck.is_print_deposit) || isLoading" type="submit"
+                    class="btn btn-primary btn-rounded btn-lg">Save</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<ng-template #previewCheckOnline let-c="close" let-d="dismiss">
+  <div style="padding: 20px;">
+    <h6 class="element-header row" style="padding-bottom: 1rem; margin-bottom: 2rem;">
+      <div class="col-lg-4 col-md-12">
+        <img *ngIf="!haveLogo()" alt="" src="assets/img/Paynote_-_New_Blue@2x.png">
+        <img *ngIf="haveLogo()" alt="" [src]="getLogo()">
+      </div>
+      <div class="col-lg-8  col-md-12 text-right">
+        <p class="securely-digital-checks">{{getTitle()}}</p>
+      </div>
+    </h6>
+    <div class="row">
+      <div class="col-lg-4 col-md-12 col-sm-12">
+        <div class="Hey-Name"><p>Hey, Preview Name</p></div>
+        <div class="Hey-Name"><p>Deposit Your Check</p></div>
+        <p class="pay-link-text-body">
+          You have received a digital check for the sum of <b>${{34 | currency: 'USD' :''}}</b>
+          from <b>Preview Name</b>.
+        </p>
+        <p class="pay-link-text-body">
+          Deposit the check online for free by adding your account info using your online banking username and password.
+          If your bank isn't listed, you can enter your banks routing and account number.
+        </p>
+      </div>
+      <div class="col-lg-8 col-md-12 col-sm-12">
+        <div class="checkWrapper">
+          <div id="processedWaterMarkValid">{{messages.get('DIGITAL_CHECK_WATER_MARK')}}</div>
+          <div class="check">
+            <div class="checkElement previewCurrentDate">{{userService.getDateFormat( getPreviewDate() )}}</div>
+            <div class="checkElement previewReceiver">Preview Name</div>
+            <div class="checkElement previewAmount">{{34 | currency: '' :''}}</div>
+            <div class="checkElement previewAmountWord">{{utility.toWords(34 | currency: '' :'')}} //////</div>
+            <div class="checkElement previewDesc">Preview Description</div>
+            <div class="checkElement previewBankName">Preview Bank Name</div>
+            <div class="checkElement previewSignWrapper"><div class="previewWithOutSignWrapper"></div></div>
+            <div class="checkElement infoWrapper">
+              <div>
+                <div class="previewSenderName">Preview Name</div>
+                <div class="smallText">preview@email.com</div>
+              </div>
+            </div>
+            <div class="checkElement routingNumber">A00000000A</div>
+            <div class="checkElement userCheckNumber">0001</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-12 col-md-12 col-sm-12 col-12 digital-buttons">
+        <h3 class="text-center" style="margin: 0px 0px 30px 0px;" *ngIf="havePrintDeposit() && haveOnlineDeposit()">
+          Select how you want to deposit the Check
+        </h3>
+        <div class="row" style="margin-bottom: 30px;">
+          <div *ngIf="haveOnlineDeposit()" [ngClass]="{ 'col-lg-6 col-md-6 col-sm-12 text-right': haveOnlineDeposit() && havePrintDeposit(),
+                  'col-lg-12 col-md-12 col-sm-12 text-center': haveOnlineDeposit() && !havePrintDeposit() }">
+            <button class="btn btn-primary btn-rounded btn-lg" type="button">
+              <b>{{getLabelOnlineDeposit()}}</b><br>
+              <small>Free and Secure <i class="icon-feather-lock"></i></small>
+            </button>
+          </div>
+          <div *ngIf="havePrintDeposit()" [ngClass]="{ 'col-lg-6 col-md-6 col-sm-12 text-left': haveOnlineDeposit() && havePrintDeposit(),
+                  'col-lg-12 col-md-12 col-sm-12 text-center': !haveOnlineDeposit() && havePrintDeposit() }">
+            <button class="btn btn-outline-primary btn-rounded btn-lg" type="button" style="width: 100%">
+              <b>{{getLabelPrintDeposit()}}</b><br>
+              <small>Using your banks mobile app</small>&nbsp;
+              <i class="fa fa-question-circle"
+                 title="Print and Deposit the Check using your smartphone and your banks mobile app. No special paper, printer, or ink required."></i>
+            </button>
+          </div>
+        </div>
+        <div class="information-is-never-stored-on-servers text-center">
+          <i class="icon-feather-lock"></i> Bank login information is never stored on our servers.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Close</button>
+  </div>
+</ng-template>
+
+<ng-template #previewInvoiceOnline let-c="close" let-d="dismiss">
+  <div style="padding: 20px;">
+    <h6 class="element-header row" style="padding-bottom: 1rem; margin-bottom: 2rem;">
+      <div class="col-lg-4 col-md-12">
+        <img *ngIf="!haveLogo()" alt="" src="assets/img/Paynote_-_New_Blue@2x.png">
+        <img *ngIf="haveLogo()" alt="" [src]="getLogo()">
+      </div>
+      <div class="col-lg-8  col-md-12 text-right">
+        <p class="securely-digital-checks">{{getTitle()}}</p>
+      </div>
+    </h6>
+    <div class="row">
+      <div class="col-lg-4 col-md-12 col-sm-12">
+        <div class="Hey-Name"><p>Hey, Preview Name</p></div>
+        <div class="Hey-Name"><p>Send a Digital Check</p></div>
+        <p class="pay-link-text-body">You have received a
+          payment request for the sum of <b>${{23 | currency: 'USD' :''}}</b> from <b>Preview Name</b>.
+          To send this payment as a digital check, click the "Send Check" button. It’s free!
+        </p>
+        <p class="pay-link-text-body">
+          Add your account info instantly using your online banking username and password.
+          If your bank isn't listed, you can enter your banks routing and account number.
+        </p>
+        <br>
+        <br>
+      </div>
+      <div class="col-lg-8 col-md-12 col-sm-12">
+        <div class="checkWrapper">
+          <div class="check">
+            <div class="checkElement previewCurrentDate">{{userService.getDateFormat( getPreviewDate() )}}</div>
+            <div class="checkElement previewReceiver">Preview Name</div>
+            <div class="checkElement previewAmount">{{23 | currency: '' :''}}</div>
+            <div class="checkElement previewAmountWord">{{utility.toWords(23 | currency: '' :'')}} //////</div>
+            <div class="checkElement previewDesc">
+              Preview Description
+            </div>
+            <div class="checkElement previewSignWrapper">
+              <div class="previewWithOutSignWrapper">
+                <div class="signatureName"></div>
+              </div>
+            </div>
+            <div class="checkElement infoWrapper">
+              <div>
+                <div class="previewSenderName">Preview Name</div>
+                <div class="smallText">preview@email.com</div>
+              </div>
+            </div>
+            <div class="checkElement routingNumber">A000000000A</div>
+            <div class="checkElement accountNumber">000000000C</div>
+            <div class="checkElement userCheckNumber">004621</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-12 col-md-12 col-sm-12 col-12 digital-buttons">
+        <div class="button_submit_request_invoice text-center">
+          <button class="btn btn-primary btn-rounded btn-lg" type="button">
+            <b>{{getInvoiceButtonLabel()}}</b><br>
+            <small>Free and Secure <i class="icon-feather-lock"></i></small>
+          </button>
+        </div>
+        <div class="information-is-never-stored-on-servers text-center">
+          <i class="icon-feather-lock"></i> Bank login information is never stored on our servers.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Close</button>
+  </div>
+</ng-template>

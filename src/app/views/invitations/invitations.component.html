@@ -1,0 +1,136 @@
+<div class="element-wrapper">
+  <h6 class="element-header">Invitations</h6>
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-3">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search invitations" 
+                       [(ngModel)]="paginationService.searchQuery" (search)="getInvitationsList(null)" (keyup)="getInvitationsList(null)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="position: relative;margin-top: 40px;">
+          <hr>
+          <button class="btn btn-primary btn-rounded" type="button" title="Add"
+                  style="position: absolute;padding: 15px;font-weight: bold;font-size: 20px;right: 0px;top: -69px;"
+                  (click)="openDialog(addNewInvitations, null)">+</button>
+          <div class="col-sm-12">
+            <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    Email
+                  </th>
+                  <th scope="col">
+                    Attempt
+                  </th>
+                  <th scope="col">
+                    Status
+                  </th>
+                  <th scope="col">
+                    Data
+                  </th>
+                  <th scope="col">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let invitation of listInvitations">
+                    <td data-title="Email" scope="row">
+                    {{invitation.email || '&nbsp;'}}
+                  </td>
+                  <td data-title="Attempt">
+                    {{invitation.attempt}}
+                  </td>                  
+                  <td data-title="Status">
+                    <div *ngIf="invitation.delivered">
+                      <div class="status-pill green" data-title="Delivered" data-toggle="tooltip"></div>
+                      <span>Delivered</span>
+                    </div>
+                    <div *ngIf="!invitation.wait_sent && !invitation.delivered">
+                      <div class="status-pill red" data-title="Undelivered" data-toggle="tooltip"></div>
+                      <span>Undelivered</span>&nbsp; 
+                           <i [matTooltipPosition]="'above'" [matTooltipShowDelay]="100" matTooltip="{{invitation.error}}"  
+                              aria-hidden="true" class="fa fa-question-circle" placement="bottom"></i>
+                    </div>
+                    <div *ngIf="invitation.wait_sent">
+                      <div class="status-pill yellow" data-title="Pending" data-toggle="tooltip"></div>
+                      <span>Pending</span>
+                    </div>
+                  </td>                  
+                  <td data-title="Data">
+                    {{invitation.updated_at}}
+                  </td>                  
+                  <td data-title="Action">
+                    <a *ngIf="!invitation.u_token" title="Resent" (click)= "dialogResendInv(invitation)" class="resendInvitation" href="javascript:void(0)"><i class="fa fa-refresh"></i> Resend</a>
+                    &nbsp;
+                    <button *ngIf="!invitation.u_token" class="btn btn-link" type="button" (click)="copyLink(invitation.inv_token)"><i class="icon-feather-link"></i> Copy Link</button>
+                    <i *ngIf="invitation.u_token" class="fa fa-check" style="color:green"></i>
+                  </td>                  
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No invitations were found.</span>
+        </div>
+        <div class="row">          
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="getInvitationsList($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #addNewInvitations let-c="close" let-d="dismiss" let-create="mailStorage">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Add Invitations</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form  name="form" (ngSubmit)="f.form.valid && addInvitation(addNewInvitation)" #f="ngForm">
+           <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="form-group" [ngClass]="{'has-error has-danger': !invitation.valid && (invitation.dirty || invitation.touched)}">
+                 <label for="">Email(s)&nbsp;</label> <i [matTooltipPosition]="'above'" [matTooltipShowDelay]="100"
+                matTooltip="Add mail separated by comma, for example: test@mail.com, test2@mail.com"  
+                aria-hidden="true" class="fa fa-question-circle" placement="bottom"></i>
+              <textarea class="form-control" placeholder="" rows="6" type="text" [(ngModel)]="addNewInvitation.invitation" name="note" #invitation="ngModel"></textarea>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+      </div>
+      <div class="modal-footer">
+        <button class="slick-next slick-arrow" type="submit" [disabled]="isLoading || !f.form.valid">Send</button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+

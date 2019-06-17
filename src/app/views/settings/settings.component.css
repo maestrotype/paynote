@@ -1,0 +1,42 @@
+.settingsTab .nav-link.active i{
+  font-size: 18px;
+  color: #494f57;
+}
+
+.settingsLimits ul{
+  list-style: none;
+  padding: 15px 0px;
+}
+
+#signatureCanvas canvas{
+  border: 1px solid #c6c9ce;
+  margin: auto;
+  text-align: center;
+}
+.status-pill {
+    width: 10px;
+    height: 10px;
+    border-radius: 30px;
+    background-color: #eee;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.status-pill.red {
+    background-color: #c21a1a;
+}
+.status-pill.green {
+    background-color: #71c21a;
+}
+
+.m-signature-pad--footer button {
+  display: inline-block
+}
+
+.m-signature-pad--footer .clear {
+  float: left;
+}
+
+.m-signature-pad--footer .save {
+  float: right;
+}

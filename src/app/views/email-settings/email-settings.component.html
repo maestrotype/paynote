@@ -1,0 +1,435 @@
+<div class="element-wrapper">
+<!--  <h6 class="element-header">Email</h6>-->
+  <div class="element-content">
+    <div class="row">
+      <div class="col-sm-4 col-xxxl-4 col-4" *ngFor="let objEmailTemplate of objEmailSettingsComp.lstEmailSettings">
+        <a class="element-box el-tablo" href="javascript:void(0)" (click)="showEditTemplate(objEmailTemplate)" 
+           id="el_tablo_{{objEmailTemplate.template_id}}">
+          <div class="label">{{getTemplateName(objEmailTemplate.template_id)}}</div>
+<!--          <div class="value">57</div>
+          <div class="trending trending-up-basic"><span>12%</span><i class="os-icon os-icon-arrow-up2"></i></div>-->
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="element-wrapper" *ngIf="objEmailSettingsComp.canShowEditTemplate">
+  <h6 class="element-header">Edit Template <b>{{getTemplateName()}}</b></h6>
+  <div class="element-content">
+    <div class="row">
+      <div class="col-12 col-lg-6 col-md-5 col-sm-12">
+        <form autocomplete="off" name="form" (ngSubmit)="f.form.valid && saveEmailTemplate()" #f="ngForm" autocomplete="nope">
+          <!--[ngClass]="{ 'has-error has-danger': !reply_to.valid && (reply_to.dirty || reply_to.touched) }"-->
+          <div class="form-group">
+            <label for="">Reply-To</label>
+            <input autocomplete="off" id="reply_to" class="form-control" placeholder="Reply-To" type="text" name="reply_to"
+                   [(ngModel)]="objEmailSettingsComp.objEmailTemplate.reply_to" #reply_to="ngModel" >
+<!--            <div *ngIf="!reply_to.valid && (reply_to.dirty || reply_to.touched) && reply_to.errors.required" 
+              class="help-block form-text with-errors form-control-feedback">Reply-To is required
+            </div>-->
+          </div>
+          <div class="form-group">
+            <label for="">Slogan <small>(Max 120 chars)</small></label>
+            <input autocomplete="off" id="reply_to" class="form-control" placeholder="Message" type="text" name="message"
+                   [(ngModel)]="objEmailSettingsComp.objEmailTemplate.data.message" #message="ngModel" maxlength="120">
+<!--            <div *ngIf="!message.valid && (message.dirty || message.touched) && message.errors.required" -->
+<!--              class="help-block form-text with-errors form-control-feedback">Message is required-->
+<!--            </div>-->
+          </div>
+          <div class="form-group" *ngIf="objEmailSettingsComp.objEmailTemplate.template_id != 34">
+            <label for="button_title">Button <small>(Max 120 chars)</small></label>
+            <input autocomplete="off" id="button_title" class="form-control" placeholder="Button" type="text" name="button_title"
+                   [(ngModel)]="objEmailSettingsComp.objEmailTemplate.data.button_title" #button_title="ngModel" maxlength="120">
+          </div>
+          <div class="form-group" [ngClass]="{ 'has-error has-danger': !footer.valid && (footer.dirty || footer.touched) }">
+            <label for="footer">Message</label>&nbsp;<small>(Max 2048 chars, HTML included)</small>&nbsp;
+            <small><a href="javascript:void(0)" (click)="showMailMerge()">Mail merge</a>
+              &nbsp;<i aria-hidden="true" class="fa fa-question-circle" title="Use merge variables in the Footer" ></i></small>
+            <app-ngx-editor [placeholder]="'Enter text here...'" [spellcheck]="true" [(ngModel)]="objEmailSettingsComp.objEmailTemplate.data.footer"  
+              #footer="ngModel" [ngModelOptions]="{standalone: true}" [config]="objEmailSettingsComp.editorConfig" maxlength="2048"></app-ngx-editor>
+            <div *ngIf="footer.errors && footer.errors.maxlength" class="help-block form-text with-errors form-control-feedback">
+              Footer Max 2048 chars
+            </div>
+          </div>
+          <div class="form-group col-12 col-lg-12 col-md-12 col-sm-12" style="padding: 0;"
+               *ngIf="objEmailSettingsComp.objEmailTemplate.template_id != 34 && objEmailSettingsComp.objEmailTemplate.template_id != 36">
+            <label for="expiration">Expires in
+              <small>
+                <i aria-hidden="true" class="fa fa-question-circle" title="Define the period you allow the recipient to deposit the check (max. 180 days)" ></i>
+              </small>
+            </label>
+            <div class="row">
+            <input [ngClass]="{'errorInputEmailSettings':isInputError}"  type="nubmer" autocomplete="off" id="expiration" class="form-control col-6 col-lg-6 col-md-6 col-sm-6" placeholder="Max. 180 days" min="1" max="180"
+                    name="expiration" pattern="[0-9]*"  maxlength="3" required [(ngModel)]="objEmailSettingsComp.objEmailTemplate.data.expiration"
+                   #expiration="ngModel" (keyup)="onChangeExpInput($event)">
+            <div class="col-6 col-lg-6 col-md-6 col-sm-6" style="padding-top: 5px;">days</div>
+            </div>
+            <div *ngIf="!expiration.valid && (expiration.dirty || expiration.touched) && expiration.errors.required"
+                  class="help-block form-text with-errors form-control-feedback">Expires field is required
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="emailAppearance">Logo</label><br>
+            <input id="emailAppearance" type="file" (change)="fileChangeEvent($event)" [ngModelOptions]="{standalone: true}"
+                  [(ngModel)]="objEmailSettingsComp.uploadFile" #uploadFile="ngModel" accept="image/jpeg,image/png" />
+            <image-cropper
+                [imageChangedEvent]="objEmailSettingsComp.imageChangedEvent"
+                [maintainAspectRatio]="true"
+                [aspectRatio]="3 / 2"
+                [resizeToWidth]="250"
+                format="png"
+                (imageCropped)="imageCropped($event)"
+                (imageLoaded)="imageLoaded()"
+                (loadImageFailed)="loadImageFailed()"
+            ></image-cropper>
+            <img *ngIf="objEmailSettingsComp.tempCroppedFile" [src]="objEmailSettingsComp.tempCroppedFile" />
+          </div>
+          <div class="form-group" style="margin-top: 30px;">
+            <button class="btn btn-primary btn-lg btn-rounded" type="submit" [disabled]="!footer.valid || isLoading">Update</button>
+          </div>
+        </form>
+      </div>
+      <div class="col-12 col-lg-6 col-md-7 col-sm-12">
+        <!-- /////    template 33   //////  -->
+        <div *ngIf="objEmailSettingsComp.objEmailTemplate.template_id == 33" id="mail_template_33">
+          <div style="max-width: 600px; margin: 0px auto; background-color: #fff; box-shadow: 0px 20px 50px rgba(0,0,0,0.05);">
+            <table style="width: 100%;">
+              <tbody>
+                <tr>
+                  <td style="background-color: #fff;">
+                    <img style="width: 200px; padding: 20px;" *ngIf="!objEmailSettingsComp.objEmailTemplate.data.logo" 
+                        src="https://paynote.seamlesschex.com/storage/images/Seamless-Chex-Final-Blue.png" alt="">
+                    <img style="width: 200px; padding: 20px;" *ngIf="objEmailSettingsComp.objEmailTemplate.data.logo" 
+                        src="{{objEmailSettingsComp.objEmailTemplate.data.logo}}" alt="">
+                  </td>
+                  <td style="padding-left: 50px; text-align: right; padding-right: 20px;white-space: normal;word-break: break-all;">
+<!--                    <a style="color: #261d1d; text-decoration: underline; font-size: 14px; letter-spacing: 1px;" 
+                       href="https://paynote.seamlesschex.com/login" *ngIf="!objEmailSettingsComp.objEmailTemplate.data.message">Sign In</a>-->
+                    <label *ngIf="!objEmailSettingsComp.objEmailTemplate.data.message">Securely Send and Receive Digital Checks.</label>
+                    <label *ngIf="objEmailSettingsComp.objEmailTemplate.data.message">{{objEmailSettingsComp.objEmailTemplate.data.message}}</label>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="padding: 60px 70px; border-top: 1px solid rgba(0,0,0,0.05);">
+              <h4 style="margin-top: 0px;font-size: 15px;">[[SENDER_NAME]]&nbsp;has sent you a check in the amount of 
+                $[[AMOUNT]], for&nbsp;[[DESCRIPTION]].</h4>
+              <br>
+              <div style="text-align: center;">
+                  <div style="width: 100%; height: 182px; margin: 0px auto; background-size: contain;
+                       background-image: url('https://paynote.seamlesschex.com/assets/img/check.png');
+                       background-repeat: no-repeat;background-position: center;">
+                    <img src="[[CHECK_IMG]]" alt="" width="100%" height="100%">
+                  </div>
+                  <p>&nbsp;</p>
+                  <a style="padding: 8px 20px; background-color: #4b72fa; color: #fff; font-weight: bolder; font-size: 16px; 
+                     display: inline-block; margin: 20px 0px; border-radius: 40px; text-decoration: none;" href="[[ACTION_URL]]">
+                    <span *ngIf="!objEmailSettingsComp.objEmailTemplate.data.button_title">
+                      Click to deposit online or to print this check
+                    </span>
+                    <span *ngIf="objEmailSettingsComp.objEmailTemplate.data.button_title">
+                      {{objEmailSettingsComp.objEmailTemplate.data.button_title}}
+                    </span>
+                  </a>
+              </div>
+              
+              <div>
+                <div style="color: red; font-size: 12px;">
+                    <p>Please <strong>do not print </strong>or take pictures of this email. 
+                      The image&nbsp;is incomplete and does not contain all the information needed to cash this check. 
+                      Click on the blue button above to deposit this check.</p>
+                </div>
+                <p style="text-align: center; color: gray;">
+                  <small>This check will expire in <strong>{{inputValue}} days</strong> from the date printed on it.</small>
+                </p>
+              </div>
+              <p></p>
+              <div *ngIf="objEmailSettingsComp.objEmailTemplate.data.footer" [innerHTML]="objEmailSettingsComp.objEmailTemplate.data.footer"></div>
+              <p></p>
+              <p>This email was sent to you via Paynote because you've transacted with <b>{{userService.getFullName()}}</b>. 
+                <b>{{userService.getFullName()}}</b> partners with Paynote to provide secure payment processing.</p>
+              <br>
+              <p>Contact <a href="mailto:paynote@seamlesschex.com">paynote@seamlesschex.com</a> or 
+                <a href="https://www.seamlesschex.com/paynote/">chat</a> with any questions.
+              </p>
+<!--              <h4 style="margin-bottom: 10px;">Need Help?</h4>
+              <div style="color: #a5a5a5; font-size: 12px;">
+                <p>If you have any questions you can simply reply to this email or contact us at&nbsp;<a style="text-decoration: underline; color: #4b72fa;" href="mailto:paynote@seamlesschex.com">paynote@seamlesschex.com</a>.</p>
+              </div>-->
+            </div>
+            <div style="background-color: #f5f5f5; padding: 40px; text-align: center;">
+                <div style="margin-bottom: 20px;"><a style="text-decoration: underline; font-size: 14px; letter-spacing: 1px; margin: 0px 15px; color: #261d1d;" href="https://www.seamlesschex.com/#contact">Contact Us</a><a style="text-decoration: underline; font-size: 14px; letter-spacing: 1px; margin: 0px 15px; color: #261d1d;" href="https://www.seamlesschex.com/privacy-policy/">Privacy Policy</a> <a style="text-decoration: underline; font-size: 14px; letter-spacing: 1px; margin: 0px 15px; color: #261d1d;" href="https://www.seamlesschex.com/terms-of-service/">Terms of Service</a></div>
+                <div style="color: #a5a5a5; font-size: 12px; margin-bottom: 20px; padding: 0px 50px;">Need a little help or have a question for us? Send us a note and our team will get back to you as soon as we can. We are available Monday through Friday, and will usually respond to you within 24 hours. If you have any immediate questions or would
+                    like to speak with a Seamless Chex representative right now, feel free to call us at 1-888-998-2439(CHEX).</div>
+            </div>
+          </div>
+        </div>
+        <!--  ////////     template 34    //////// -->
+        <div *ngIf="objEmailSettingsComp.objEmailTemplate.template_id == 34" id="mail_template_34">
+          <div style="max-width: 600px; margin: 0px auto; background-color: #fff; box-shadow: 0px 20px 50px rgba(0,0,0,0.05);">
+            <table style="width: 100%;">
+              <tbody>
+                <tr>
+                  <td style="background-color: #fff;">
+                    <img style="width: 200px; padding: 20px;" *ngIf="!objEmailSettingsComp.objEmailTemplate.data.logo"
+                         src="https://paynote.seamlesschex.com/storage/images/Seamless-Chex-Final-Blue.png" alt="">
+                    <img style="width: 200px; padding: 20px;" *ngIf="objEmailSettingsComp.objEmailTemplate.data.logo" 
+                        src="{{objEmailSettingsComp.objEmailTemplate.data.logo}}" alt="">
+                  </td>
+                  <td style="padding-left: 50px; text-align: right; padding-right: 20px;white-space: normal;word-break: break-all;">
+<!--                    <a style="color: #261d1d; text-decoration: underline; font-size: 14px; letter-spacing: 1px;" 
+                       href="https://paynote.seamlesschex.com/login"
+                       *ngIf="!objEmailSettingsComp.objEmailTemplate.data.message">Sign In</a>-->
+                    <label *ngIf="!objEmailSettingsComp.objEmailTemplate.data.message">Securely Send and Receive Digital Checks.</label>
+                    <label *ngIf="objEmailSettingsComp.objEmailTemplate.data.message">{{objEmailSettingsComp.objEmailTemplate.data.message}}</label>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="padding: 60px 70px; border-top: 1px solid rgba(0,0,0,0.05);">
+              <h4 style="margin-top: 0px;font-size: 15px;">[[SENDER_NAME]]&nbsp;has sent you a check in the amount of&nbsp;$[[AMOUNT]], 
+                for&nbsp;[[DESCRIPTION]].</h4>
+              <br>
+              <div style="text-align: center;">
+                <div style="width: 100%; height: 182px; margin: 0px auto; background-size: contain;
+                     background-image: url('https://paynote.seamlesschex.com/assets/img/check.png');
+                     background-repeat: no-repeat;background-position: center;">
+                  <img src="[[CHECK_IMG]]" alt="" width="100%" height="100%">
+                </div>
+              </div>
+              <p>&nbsp;</p>
+              <div style="color: gray; margin-top:20px;">
+                  <p> This check will be automatically deposited to your [[BANK_NAME]]&nbsp;account ending in [[ACCOUNT_MASKED]]&nbsp;
+                    on or before [[BEFORE_DATE]].</p>
+              </div>
+
+              <p style="color: red;">No further action is required on your part. You can check the balance by logging in to your bank account 
+                on [[BEFORE_DATE]]. If you wish to cancel this transaction, please login to paynote, 
+                select the check you wish to cancel and click void.
+              </p>
+              <div *ngIf="objEmailSettingsComp.objEmailTemplate.data.footer" [innerHTML]="objEmailSettingsComp.objEmailTemplate.data.footer"></div>
+              <p>&nbsp;</p>
+              <p>This email was sent to you via Paynote because you've transacted with <b>{{userService.getFullName()}}</b>. 
+                <b>{{userService.getFullName()}}</b> partners with Paynote to provide secure payment processing.</p>
+              <br>
+              <p>Contact <a href="mailto:paynote@seamlesschex.com">paynote@seamlesschex.com</a> or 
+                <a href="https://www.seamlesschex.com/paynote/">chat</a> with any questions.
+              </p>
+<!--              <h4 style="margin-bottom: 10px;">Need Help?</h4>
+              <div style="color: #a5a5a5; font-size: 12px;">
+                <p>If you have any questions you can simply reply to this email or find our contact information below. Also contact us at <a style="text-decoration: underline; color: #4b72fa;" href="mailto:paynote@seamlesschex.com">paynote@seamlesschex.com</a></p>
+              </div>-->
+            </div>
+            <div style="background-color: #f5f5f5; padding: 40px; text-align: center;">
+              <div style="margin-bottom: 20px;"><a style="text-decoration: underline; font-size: 14px; letter-spacing: 1px; margin: 0px 15px; color: #261d1d;" href="https://www.seamlesschex.com/#contact">Contact Us</a><a style="text-decoration: underline; font-size: 14px; letter-spacing: 1px; margin: 0px 15px; color: #261d1d;" href="https://www.seamlesschex.com/privacy-policy/">Privacy Policy</a> <a style="text-decoration: underline; font-size: 14px; letter-spacing: 1px; margin: 0px 15px; color: #261d1d;" href="https://www.seamlesschex.com/terms-of-service/">Terms of Service</a></div>
+              <div style="color: #a5a5a5; font-size: 12px; margin-bottom: 20px; padding: 0px 50px;">Need a little help or have a question for us? Send us a note and our team will get back to you as soon as we can. We are available Monday through Friday, and will usually respond to you within 24 hours. If you have any immediate questions or would
+                  like to speak with a Seamless Chex representative right now, feel free to call us at 1-888-998-2439 (CHEX).</div>
+            </div>
+          </div>
+        </div>
+        <!--   /////////    template 36     ///////    -->
+        <div *ngIf="objEmailSettingsComp.objEmailTemplate.template_id == 36" id="mail_template_36">
+          <div style="max-width: 600px; margin: 0px auto; background-color: #fff; box-shadow: 0px 20px 50px rgba(0,0,0,0.05);">
+            <table style="width: 100%;">
+              <tbody>
+                <tr>
+                  <td style="background-color: #fff;">
+                    <img style="width: 200px; padding: 20px;" *ngIf="!objEmailSettingsComp.objEmailTemplate.data.logo"
+                         src="https://paynote.seamlesschex.com/storage/images/Seamless-Chex-Final-Blue.png" alt="">
+                    <img style="width: 200px; padding: 20px;" *ngIf="objEmailSettingsComp.objEmailTemplate.data.logo" 
+                        src="{{objEmailSettingsComp.objEmailTemplate.data.logo}}" alt="">
+                  </td>
+                  <td style="padding-left: 50px; text-align: right; padding-right: 20px;white-space: normal;word-break: break-all;">
+<!--                    <a style="color: #261d1d; text-decoration: underline; font-size: 14px; letter-spacing: 1px;" 
+                       *ngIf="!objEmailSettingsComp.objEmailTemplate.data.message"
+                       href="https://paynote.seamlesschex.com/login">Sign In</a>-->
+                    <label *ngIf="!objEmailSettingsComp.objEmailTemplate.data.message">Securely Send and Receive Digital Checks.</label>
+                    <label *ngIf="objEmailSettingsComp.objEmailTemplate.data.message">{{objEmailSettingsComp.objEmailTemplate.data.message}}</label>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="padding: 60px 70px; border-top: 1px solid rgba(0,0,0,0.05);">
+              <table width="100%">
+                <tbody>
+                  <tr>
+                    <td>[[RECEIVER_NAME]]<br>[[RECEIVER_EMAIL]]</td>
+                    <td style="text-align:right">Invoice #[[INVOICE]]<br>[[DATE]]</td>
+                  </tr>
+                  <tr><td colspan="2"><br><hr color="#dddddd"></td></tr>
+                  <tr>
+                    <td>[[INVOICE_DESC]]</td>
+                    <td style="text-align:right">$[[AMOUNT]]</td>
+                  </tr>
+                  <tr><td colspan="2"><hr color="black"></td></tr>
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td style="text-align:right">Total: $[[AMOUNT]]</td>
+                  </tr>
+                  <tr><td colspan="2"><hr color="black"></td></tr>
+                </tbody>
+              </table>
+              <div style="color: #636363; font-size: 14px;">
+                  <p>&nbsp;</p>
+                  <p>Click on the 
+                    <span *ngIf="!objEmailSettingsComp.objEmailTemplate.data.button_title">
+                    Pay Invoice
+                    </span>
+                    <span *ngIf="objEmailSettingsComp.objEmailTemplate.data.button_title">
+                      {{objEmailSettingsComp.objEmailTemplate.data.button_title}}
+                    </span>
+                    button to send a Digital Check to [[RECEIVER_NAME]] via secure electronic bank transfer
+                  </p>
+              </div>
+              <div style="text-align: center;">
+                <a style="padding: 8px 20px; background-color: #4b72fa; color: #fff; font-weight: bolder; font-size: 16px; 
+                   display: inline-block; margin: 20px 0px; margin-right: 20px; border-radius: 40px; text-decoration: none;" 
+                   href="[[ACTION_URL]]">
+                  <span *ngIf="!objEmailSettingsComp.objEmailTemplate.data.button_title">
+                    Pay Invoice
+                  </span>
+                  <span *ngIf="objEmailSettingsComp.objEmailTemplate.data.button_title">
+                    {{objEmailSettingsComp.objEmailTemplate.data.button_title}}
+                  </span>
+                </a>
+              </div>
+<!--              <p>&nbsp;</p>
+              <p>For questions about this invoice, please contact [[CONTACT_EMAIL]].</p>-->
+              <div *ngIf="objEmailSettingsComp.objEmailTemplate.data.footer" [innerHTML]="objEmailSettingsComp.objEmailTemplate.data.footer"></div>
+              <p>&nbsp;</p>
+              <p>This email was sent to you via Paynote because you've transacted with <b>{{userService.getFullName()}}</b>. 
+                <b>{{userService.getFullName()}}</b> partners with Paynote to provide secure payment processing.</p>
+              <br>
+              <p>Contact <a href="mailto:paynote@seamlesschex.com">paynote@seamlesschex.com</a> or 
+                <a href="https://www.seamlesschex.com/paynote/">chat</a> with any questions.
+              </p>
+<!--              <p>&nbsp;</p>
+              <h4 style="margin-bottom: 10px;">Need Help?</h4>
+              <div style="color: #a5a5a5; font-size: 12px;">
+                  <p>If you have any questions you can simply reply to this email or find our contact information below. 
+                    Also contact us at <a style="text-decoration: underline; color: #4b72fa;" 
+                                          href="mailto:paynote@seamlesschex.com">paynote@seamlesschex.com</a>
+                  </p>
+              </div>-->
+            </div>
+            <div style="background-color: #f5f5f5; padding: 40px; text-align: center;">
+              <div style="margin-bottom: 20px;"><a style="text-decoration: underline; font-size: 14px; letter-spacing: 1px; margin: 0px 15px; color: #261d1d;" href="https://www.seamlesschex.com/#contact">Contact Us</a><a style="text-decoration: underline; font-size: 14px; letter-spacing: 1px; margin: 0px 15px; color: #261d1d;" href="https://www.seamlesschex.com/privacy-policy/">Privacy Policy</a> <a style="text-decoration: underline; font-size: 14px; letter-spacing: 1px; margin: 0px 15px; color: #261d1d;" href="https://www.seamlesschex.com/terms-of-service/">Terms of Service</a></div>
+              <div style="color: #a5a5a5; font-size: 12px; margin-bottom: 20px; padding: 0px 50px;">Need a little help or have a question for us? Send us a note and our team will get back to you as soon as we can. We are available Monday through Friday, and will usually respond to you within 24 hours. If you have any immediate questions or would
+                  like to speak with a Seamless Chex representative right now, feel free to call us at 1-888-998-2439 (CHEX).</div>
+            </div>
+          </div>          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #viewMailMerge33 let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">How to use mail merge</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <div>
+          You can use the variables in the email footer that are replaced by the corresponding values when sending a 
+          check. <br><br> 
+          The possible variables are: 
+          <br><b><span>[[SENDER_NAME]]</span></b> - The check sender's name 
+          <br><b><span>[[AMOUNT]]</span></b> - The check amount 
+          <br><b><span>[[DESCRIPTION]]</span></b> - The check description
+        </div>
+      </div>
+      <div class="form-group">
+        <div> For example: 
+          <br><i>[[SENDER_NAME]] has sent you a check in the amount of $[[AMOUNT]], for [[DESCRIPTION]].</i>
+          <br><br>And you send a check to Jon, then the slogan in the email will be: 
+          <br><i>Jon has sent you a check in the amount of $11, for Invoice #1111.</i>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" (click)="c('Close click')">Close</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #viewMailMerge34 let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">How to use mail merge</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <div>
+          You can use the variables in the email footer that are replaced by the corresponding values when sending a 
+          check. <br><br> 
+          The possible variables are: 
+          <br><b><span>[[SENDER_NAME]]</span></b> - The check sender's name 
+          <br><b><span>[[AMOUNT]]</span></b> - The check amount 
+          <br><b><span>[[DESCRIPTION]]</span></b> - The check description
+          <br><b><span>[[BANK_NAME]]</span></b> - The check bank name
+          <br><b><span>[[ACCOUNT_MASKED]]</span></b> - The check last 4 digits account number
+          <br><b><span>[[BEFORE_DATE]]</span></b> - The check before date
+        </div>
+      </div>
+      <div class="form-group">
+        <div> For example: 
+          <br><i>[[SENDER_NAME]] has sent you a check in the amount of $[[AMOUNT]], for [[DESCRIPTION]].</i>
+          <br><br>And you send a check to Jon, then the slogan in the email will be: 
+          <br><i>Jon has sent you a check in the amount of $11, for Invoice #1111.</i>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" (click)="c('Close click')">Close</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #viewMailMerge36 let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">How to use mail merge</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <div>
+          You can use the variables in the email footer that are replaced by the corresponding values when sending a 
+          check. <br><br> 
+          The possible variables are: 
+          <br><b><span>[[RECEIVER_NAME]]</span></b> - The invoice receiver's name
+          <br><b><span>[[RECEIVER_EMAIL]]</span></b> - The invoice receiver's email
+          <br><b><span>[[AMOUNT]]</span></b> - The invoice amount 
+          <br><b><span>[[INVOICE]]</span></b> - The invoice number
+          <br><b><span>[[INVOICE_DESC]]</span></b> - The invoice description
+          <br><b><span>[[DATE]]</span></b> - The invoice date
+          <br><b><span>[[CONTACT_EMAIL]]</span></b> - The invoice contact name
+        </div>
+      </div>
+      <div class="form-group">
+        <div> For example: 
+          <br><i>[[RECEIVER_NAME]] has sent you a request in the amount of $[[AMOUNT]], for [[INVOICE_DESC]].</i>
+          <br><br>And you send a check to Jon, then the slogan in the email will be: 
+          <br><i>Jon has sent you a request in the amount of $11, for Invoice #1111.</i>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" (click)="c('Close click')">Close</button>
+    </div>
+  </div>
+</ng-template>

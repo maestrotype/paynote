@@ -1,0 +1,164 @@
+<div class="element-wrapper">
+  <h6  class="element-header">Rules for Transactions</h6>
+  <div class="element-box">
+    <div class="row">
+      <div class="col-lg-12">
+        <form>
+          <h5 class="form-header">Status Transactions Queue</h5>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-4 col-md-4 col-sm-4" for="status_signup_queue">
+              <span *ngIf="objRule.enabled == 1">Enabled</span>
+              <span *ngIf="objRule.enabled == 0">Disabled</span>
+            </label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <button type="button" id="update_rules_for_sign_up" class="btn btn-primary btn-rounded btn-lg" 
+                [disabled]="isLoading" (click)="updateStatusSignUpRule()">
+                <span *ngIf="objRule.enabled == 0">Enable</span>
+                <span *ngIf="objRule.enabled == 1">Disable</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-lg-6">
+        <form>
+          <h5 class="form-header">Transactions Review Queue</h5>
+          <!--<div class="form-desc"></div>-->
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="maxmind_risk_score_review">Maxmind Risk Score</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" placeholder="0" type="text" id="maxmind_risk_score_review"
+                     [(ngModel)]="objSignUpRules.maxmind_risk_score.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="maxmind_ip_score_review">Maxmind IP Score</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" placeholder="0" type="text" id="maxmind_ip_score_review"
+                     [(ngModel)]="objSignUpRules.maxmind_ip_score.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="high_risk_country_review">High Risk Country</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="high_risk_country_review"
+                     [(ngModel)]="objSignUpRules.high_risk_country.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="maxmind_carder_email_review">Maxmind Carder Email</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="maxmind_carder_email_review"
+                     [(ngModel)]="objSignUpRules.maxmind_carder_email.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="amount_more_limits_review">
+              Transaction amount
+              <i class="fa fa-question-circle" [matTooltipPosition]="'right'" [matTooltipShowDelay]="100"
+                  matTooltip="Transaction Limit %"></i>
+            </label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="text" id="amount_more_limits_review"
+                     [(ngModel)]="objSignUpRules.amount_more_limits.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="same_bank_acc_review">Last 4 of bank account</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="same_bank_acc_review"
+                     [(ngModel)]="objSignUpRules.same_bank_acc.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="same_ip_review">Same IP</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="same_ip_review"
+                     [(ngModel)]="objSignUpRules.same_ip.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="same_fingerprint_review">Same Fingerprint</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="same_fingerprint_review"
+                     [(ngModel)]="objSignUpRules.same_fingerprint.review" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="col-lg-6">
+        <form>
+          <h5 class="form-header">Transactions Lock Queue</h5>
+          <!--<div class="form-desc"></div>-->
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="maxmind_risk_score_lock">Maxmind Risk Score</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" placeholder="0" type="text" id="maxmind_risk_score_lock"
+                     [(ngModel)]="objSignUpRules.maxmind_risk_score.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="maxmind_ip_score_lock">Maxmind IP Score</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" placeholder="0" type="text" id="maxmind_ip_score_lock"
+                     [(ngModel)]="objSignUpRules.maxmind_ip_score.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="high_risk_country_lock">High Risk Country</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="high_risk_country_lock"
+                     [(ngModel)]="objSignUpRules.high_risk_country.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="maxmind_carder_email_lock">Maxmind Carder Email</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="maxmind_carder_email_lock"
+                     [(ngModel)]="objSignUpRules.maxmind_carder_email.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="amount_more_limits_lock">
+              Transaction amount
+              <i class="fa fa-question-circle" [matTooltipPosition]="'right'" [matTooltipShowDelay]="100"
+                  matTooltip="Transaction Limit %"></i>
+            </label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="text" id="amount_more_limits_lock"
+                     [(ngModel)]="objSignUpRules.amount_more_limits.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="same_bank_acc_lock">Last 4 of bank account</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="same_bank_acc_lock"
+                     [(ngModel)]="objSignUpRules.same_bank_acc.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="same_ip_lock">Same IP</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="same_ip_lock"
+                     [(ngModel)]="objSignUpRules.same_ip.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-form-label col-lg-7 col-md-8 col-sm-8" for="same_fingerprint_lock">Same Fingerprint</label>
+            <div class="col-lg-3 col-md-3 col-sm-3">
+              <input class="form-control" type="checkbox" id="same_fingerprint_lock"
+                     [(ngModel)]="objSignUpRules.same_fingerprint.lock" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="buttons-w text-center" style="width: 100%;">            
+        <button type="button" id="update_rules_for_sign_up" class="btn btn-primary btn-rounded btn-lg" 
+                [disabled]="isLoading" (click)="updateSignUpRules()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,61 @@
+.subImg i{
+  font-size: 10em;
+}
+
+.sendPaynote{
+  text-transform: uppercase;
+}
+.plan-price {
+    font-size: 2.5rem;
+    font-weight: 900;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.plan-price-symbol {
+    font-size: .6em;
+    vertical-align: super;
+}
+.plan-price {
+    font-size: 2.5rem;
+    font-weight: 900;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.plan-price-period {
+    font-size: .7em;
+    display: inline-block;
+    padding: 0;
+    opacity: .7;
+}
+.sendNumber{
+  font-size: 21px;
+}
+.planVerify{
+  font-size: 16px;
+    font-weight: bold;
+}
+.planOver{
+  font-size: 14px;
+    font-weight: bold;
+}
+div.dataTables_wrapper div.dataTables_filter {
+    text-align: left !important;
+}
+.settingsLimits ul{
+  list-style: none;
+  padding: 15px 0px;
+}
+.settingsLimits li{
+  margin-bottom: 9px;
+}
+.settingsLimits li:before{
+    content: '✔';
+    position: relative; 
+    top: 0; 
+    left: -5px;
+    color: #1a7bf8;
+}

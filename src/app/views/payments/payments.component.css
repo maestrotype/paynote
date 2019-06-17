@@ -1,0 +1,41 @@
+.added_withdrawn_source{
+  font-weight: bold;
+  text-transform: initial;
+}
+.profile-tile-meta ul{
+  font-size: 0.9rem !important;
+}
+div.dataTables_wrapper div.dataTables_filter {
+    text-align: left;
+}
+.ssg-nothing-found i{
+  float: left;
+    margin-right: 15px;
+}
+@media only screen and (min-width: 480px){
+  .previewSignWrapper {
+    top: 137px;
+    left: 307px;
+  }
+}
+.signature{
+  width: 195px;
+}
+.signatureName{
+  font-family: journal;
+}
+.previewWithOutSignWrapper {
+    font-size: 3em;
+    line-height: 1.3;
+}
+.paymentAmountColorVoid {
+  color: gray;
+  text-decoration: line-through;
+}
+.paymentAmountColorPaid {
+  color: black;
+  font-weight: bold !important;
+}
+.paymentAmountColorFailed {
+  color: #ff0011;
+}

@@ -1,0 +1,119 @@
+<div class="element-wrapper">
+  <h6 class="element-header">Payments Sent</h6>
+  <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div>
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-4">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search payment" 
+                       [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel" 
+                       (search)="paymentLinkList(null)" (keyup)="paymentLinkList(null)">
+                <button type="button" class="btn-default btn-sm btn-rounded btn" (click)="resetFilter()">
+                  <i class="icon-feather-x"></i>
+                  <span class="visible-md-inline-block visible-lg-inline-block hidden-mobile"> Clear</span>
+                </button>
+              </label><br><br>
+              <!--              <button type="button" class="btn btn-primary" *ngIf="userService.canVoidCheck()" [disabled]="!canVoidIncoice" (click)="resendNotifications()">
+                              <i class="fa fa fa-bell-o" aria-hidden="true"></i>&nbsp;RESEND
+                            </button>-->
+              <button type="button" class="btn btn-danger" 
+                      *ngIf="userService.canVoidCheck()" [disabled]="!canVoidIncoice" (click)="voidChecks()">
+                <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;VOID
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable sendChecks responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    <input style="margin: 5px;" type="checkbox" [(ngModel)]="selectAllNotifications" (click)="selectAllCheck()">
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('number', paginationService.sortDir, paymentLinkList(null))">Number</a>
+                    <i *ngIf="paginationService.sortField == 'number' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'number' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    Address
+                  </th>
+                  <th scope="col">                      
+                    Amount
+                  </th>
+                  <th scope="col">                      
+                    Status
+                  </th>
+                  <th scope="col">                      
+                    Name
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, paymentLinkList(null))">Date</a>
+                    <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let payLink of paymentLinks" >
+                    <td data-title="">
+                    <input style="margin: 5px;" type="checkbox" [(ngModel)]="payLink.multiple" 
+                           (click)="unCheckedInvoices($event)" [disabled]="payLink.c_token">
+                  </td>
+                  <td data-title="Number" scope="row">{{payLink.metadata.number}}</td>
+                  <td data-title="Address" style="word-break: break-all">{{payLink.email}}</td>
+                  <td data-title="Amount">{{payLink.amount | currency:payLink.currency:'symbol'}}</td> 
+                  <td data-title="Status" class="text-capitalize">
+                    <span *ngIf="!payLink.c_token">Unpaid</span>
+                    <span *ngIf="payLink.c_token">{{payLink.status}}</span>
+                  </td>
+                  <td data-title="Name">{{payLink.name}}</td>
+                  <td data-title="Date" class="col-md-100">
+                    {{userService.getDateFormat(payLink.created_at)}}
+                  </td>
+                  <td data-title="Description">{{payLink.metadata.description || '&nbsp;'}}</td>
+                  <td data-title="Action">
+                    <button title="Resend Notification" style="margin: 6px;" *ngIf="!payLink.c_token" 
+                            class="btn btn-primary btn-sm btn-rounded btn-rounded-margin" type="button" 
+                            (click)="resendNotification(payLink)">
+                      <i class="fa fa-bell-o"></i>
+                    </button>
+                    &nbsp;
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No payment were found...</span>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="paymentLinkList($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,168 @@
+<div aria-hidden="true" class="onboarding-modal modal fade animated" role="dialog" tabindex="-1" [ngClass]="{ 'show-on-load': isShowOnLoad() }">
+     <div class="modal-dialog modal-centered" role="document">
+
+    <div class="modal-content text-center">
+      <div class="modal-header">
+        <h4 class="modal-title">Sign Up</h4>
+        <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+          <span class="close-label"></span><span class="os-icon os-icon-close"></span>
+        </button>
+      </div>
+      <div *ngIf="!showSignUpForm">
+        <form name="form" autocomplete="nope" (ngSubmit)="f.form.valid && signUpVerifyPhone()" [formGroup]="signUpForm"
+              #f="ngForm" class="form-validation">
+              <div class="modal-body">     
+            <div class="modal-body">     
+
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="form-group" [ngClass]="{ 'has-error has-danger': signUpForm.get('name').errors 
+                       && (signUpForm.get('name').dirty || signUpForm.get('name').touched) }">
+                       <label for="">Full Name</label>
+                    <input name="name" class="form-control" placeholder="Full Name" type="text"
+                           formControlName="name" required>
+                    <!--<span class="pre-icon os-icon os-icon-user-male-circle"></span>-->
+                    <div *ngIf="signUpForm.get('name').errors &&
+                      (signUpForm.get('name').dirty || signUpForm.get('name').touched)" 
+                      class="help-block form-text with-errors form-control-feedback">
+                      <span *ngIf="signUpForm.get('name').errors.validFullName">
+                        Last name must be at least two characters.
+                      </span>
+                      <span *ngIf="signUpForm.get('name').errors.required">
+                        Full Name is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="form-group" [ngClass]="{ 'has-error has-danger': signUpForm.get('email').errors 
+                       && (signUpForm.get('email').dirty || signUpForm.get('email').touched) }">
+                       <label for="">Email Address</label>
+                    <input name="email" class="form-control" placeholder="Email Address" type="email" 
+                           formControlName="email" required autocomplete="nope">
+                    <!--<div class="pre-icon os-icon os-icon-email-2-at"></div>-->
+                    <div *ngIf="signUpForm.get('email').errors &&
+                      (signUpForm.get('email').dirty || signUpForm.get('email').touched)" 
+                      class="help-block form-text with-errors form-control-feedback">
+                      <span *ngIf="signUpForm.get('email').errors.validFullName">
+                        Last name must be at least two characters.
+                      </span>
+                      <span *ngIf="signUpForm.get('email').errors.required">
+                        Full Name is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="form-group" [ngClass]="{ 'has-error has-danger': signUpForm.get('phone').errors 
+                       && (signUpForm.get('phone').dirty || signUpForm.get('phone').touched) }">
+                       <label for="">Phone</label>
+                    <input name="phone" class="form-control" placeholder="Phone" type="text" 
+                           formControlName="phone"  required [textMask]="{mask: utility.maskPhone}">
+                           <!--<div class="pre-icon os-icon os-icon-phone"></div>-->
+                           <div *ngIf="signUpForm.get('phone').errors &&
+                           (signUpForm.get('phone').dirty || signUpForm.get('phone').touched)" 
+                           class="help-block form-text with-errors form-control-feedback">
+                           <span *ngIf="signUpForm.get('phone').errors.validPhone">
+                        Phone must be at least 10 digits long.
+                      </span>
+                      <span *ngIf="signUpForm.get('phone').errors.required">
+                        Phone is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>        
+
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="form-group" [ngClass]="{ 'has-error has-danger': signUpForm.get('password').errors 
+                       && (signUpForm.get('password').dirty || signUpForm.get('password').touched) }">
+                       <label for="">Password</label>
+                    <input name="password" class="form-control" placeholder="Password" type="password" 
+                           formControlName="password" required autocomplete="nope">
+                    <!--<div class="pre-icon os-icon os-icon-fingerprint"></div>-->
+                    <div *ngIf="signUpForm.get('password').errors &&
+                      (signUpForm.get('password').dirty || signUpForm.get('password').touched)" 
+                      class="help-block form-text with-errors form-control-feedback">
+                      <span *ngIf="signUpForm.get('password').errors.minLength">
+                        Password must be at least 8 characters long.
+                      </span>
+                      <span *ngIf="signUpForm.get('password').errors.required">
+                        Password is required
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="form-group" [ngClass]="{ 'has-error has-danger': signUpForm.get('cpassword').errors 
+                       && (signUpForm.get('cpassword').dirty || signUpForm.get('cpassword').touched) }">
+                       <label for="">Confirm Password</label>
+                    <input name="cpassword" class="form-control" placeholder="Confirm Password" type="password" 
+                           formControlName="cpassword" required autocomplete="off" validateEqual="password">
+                    <!--<div class="pre-icon os-icon os-icon-fingerprint"></div>-->
+                    <div *ngIf="signUpForm.get('cpassword').errors &&
+                      (signUpForm.get('cpassword').dirty || signUpForm.get('cpassword').touched)" 
+                      class="help-block form-text with-errors form-control-feedback">
+                      Password mismatch
+                  </div>
+                </div>
+              </div>
+            </div>    
+            <br>
+            <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+            <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div>
+            <div class="buttons-w">
+              <button [disabled]="loading || !signUpForm.valid" class="btn btn-primary pull-right">Register</button>
+              <button class="btn btn-default" routerLink="/login">Login</button>              
+            </div>
+          </div>          
+        </div>
+      </form>
+    </div>
+
+    <div *ngIf="showPhoneVerifyForm">
+      <h4 class="auth-header">
+        Verify your phone
+      </h4>
+      <form name="form2FA" (ngSubmit)="f2FA.form.valid && signUp()" #f2FA="ngForm" autocomplete="off" [formGroup]="verifyPhoneForm">
+            <div class="modal-body">     
+          <div class="modal-body">
+            <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div>
+            <div class="form-group" [ngClass]="{ 'has-error has-danger': verifyPhoneForm.get('phone_pin').errors 
+                 && (verifyPhoneForm.get('phone_pin').dirty || verifyPhoneForm.get('phone_pin').touched) }">
+                 <label for="">Pin Code</label>
+              <input name="phone_pin" class="form-control" placeholder="Pin Code" type="text" maxlength="4" appNumbers
+                     formControlName="phone_pin" required>
+              <!--<div class="pre-icon"><i class="icon-feather-hash"></i></div>-->
+              <div *ngIf="verifyPhoneForm.get('phone_pin').errors &&
+                (verifyPhoneForm.get('phone_pin').dirty || verifyPhoneForm.get('phone_pin').touched)" 
+                class="help-block form-text with-errors form-control-feedback">
+                <span *ngIf="verifyPhoneForm.get('phone_pin').errors.required">
+                  Pin Code is required
+                </span>
+                <span *ngIf="verifyPhoneForm.get('phone_pin').errors.minlength">
+                  Pin Code must be at least 4 digits long.
+                </span>
+              </div>
+            </div>
+            <br>
+            <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+            <div class="buttons-w">
+              <button [disabled]="loading || !verifyPhoneForm.valid" class="btn btn-primary">Submit</button>
+              &nbsp;
+              <button [disabled]="loading" class="btn btn-default" (click)="sendVerifyPhoneCode()">Resend Code</button>
+              <button [disabled]="loading" class="btn btn-default pull-right" (click)="backToSignUpForm()">Back</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>

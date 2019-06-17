@@ -1,0 +1,11 @@
+.added_withdrawn_source{
+  font-weight: bold;
+  text-transform: initial;
+}
+
+.profile-tile-meta ul{
+  font-size: 0.9rem !important;
+}
+.mailSubj img{
+  width: 100% !important;
+}

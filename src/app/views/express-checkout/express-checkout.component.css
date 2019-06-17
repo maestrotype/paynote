@@ -1,0 +1,16 @@
+html {
+  height: auto; 
+}
+
+button.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    float: none;
+    z-index: 999;
+    color: #111;
+    opacity: 1;
+    text-shadow: none;
+}
+
+.auth-box-w .auth-header:after { background-color: transparent; }

@@ -1,0 +1,385 @@
+<div class="element-wrapper">
+  <h6 class="element-header">Dashboard Analytics</h6>
+<!--  <div class="element-content">-->
+<!--    <div class="row">-->
+<!--      <div class="col-sm-4 col-xxxl-3">-->
+<!--        <a class="element-box el-tablo" href="#">-->
+<!--          <div class="label">Products Sold</div>-->
+<!--          <div class="value">57</div>-->
+<!--          <div class="trending trending-up-basic">-->
+<!--            <span>12%</span>-->
+<!--            <i class="os-icon os-icon-arrow-up2"></i>-->
+<!--          </div>-->
+<!--        </a>-->
+<!--      </div>-->
+<!--      <div class="col-sm-4 col-xxxl-3">-->
+<!--        <a class="element-box el-tablo" href="#">-->
+<!--          <div class="label">Gross Profit</div>-->
+<!--          <div class="value">$457</div>-->
+<!--          <div class="trending trending-down-basic">-->
+<!--            <span>12%</span><i class="os-icon os-icon-arrow-down"></i>-->
+<!--          </div>-->
+<!--        </a>-->
+<!--      </div>-->
+<!--      <div class="col-sm-4 col-xxxl-3">-->
+<!--        <a class="element-box el-tablo" href="#">-->
+<!--          <div class="label">New Customers</div>-->
+<!--          <div class="value">125</div>-->
+<!--          <div class="trending trending-down-basic">-->
+<!--            <span>9%</span><i class="os-icon os-icon-arrow-down"></i>-->
+<!--          </div>-->
+<!--        </a>-->
+<!--      </div>-->
+<!--      <div class="d-none d-xxxl-block col-xxxl-3">-->
+<!--        <a class="element-box el-tablo" href="#">-->
+<!--          <div class="label">Refunds Processed</div>-->
+<!--          <div class="value">$294</div>-->
+<!--          <div class="trending trending-up-basic">-->
+<!--            <span>12%</span><i class="os-icon os-icon-arrow-up2"></i>-->
+<!--          </div>-->
+<!--        </a>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+
+  <input type="text" ngxDaterangepickerMd startKey="start" endKey="end" [ranges]="objDashboardAnalyticsComp.dateRanges"
+         [alwaysShowCalendars]="true" [linkedCalendars]="true" [showClearButton]="true" (choosedDate)="choosedDate($event)"
+         (datesUpdated)="choosedDate($event)" [(ngModel)]="objDashboardAnalyticsComp.dateRangeSelected" [showRangeLabelOnInput]="true"
+          style="background: white url(/assets/img/organizer.png) left no-repeat; border: none; border-bottom: 1px solid #9e9e9e; border-radius: 0;
+                  outline: 0; height: 3rem; width: 100%; font-size: 16px; margin: 0 0 8px; padding: 0px 10px 0px 50px; box-shadow: none;
+                  transition: box-shadow .3s,border .3s;cursor: pointer;">
+  <div class="row" style="margin-top: 20px;">
+    <div class="col-lg-4 col-md-6 col-12">
+      <div class="">
+        <div class="element-box">
+          <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+              </div>
+            </div>
+            <div class="chartjsTopStyle">Active Merchants<span class="graphAmount">{{objDashboardAnalyticsComp.activeMerchants.amount_total }}</span></div>
+            <canvas *ngIf="objDashboardAnalyticsComp.activeMerchants.list" baseChart
+                    [datasets]="objDashboardAnalyticsComp.activeMerchants.barChartData"
+                    [labels]="objDashboardAnalyticsComp.activeMerchants.list.interval"
+                    [options]="objDashboardAnalyticsComp.activeMerchants.barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="true"
+                    [chartType]="'line'">
+            </canvas>
+            <div class="chartjsBottomStyle"><a href="javascript:void(0);" (click)="openModal(GraphDialog, objDashboardAnalyticsComp.activeMerchantsForPopup, 'Active Merchants')">View more ></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6 col-12">
+      <div class="">
+        <div class="element-box">
+          <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+              </div>
+            </div>
+            <div class="chartjsTopStyle">Current MRR<span class="graphAmount">{{objDashboardAnalyticsComp.revenueSubscriptions.amount_total }}</span></div>
+            <canvas *ngIf="objDashboardAnalyticsComp.revenueSubscriptions.list" baseChart
+                    [datasets]="objDashboardAnalyticsComp.revenueSubscriptions.barChartData"
+                    [labels]="objDashboardAnalyticsComp.revenueSubscriptions.list.interval"
+                    [options]="objDashboardAnalyticsComp.revenueSubscriptions.barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="true"
+                    [chartType]="'line'">
+            </canvas>
+            <div class="chartjsBottomStyle"><a href="javascript:void(0);" (click)="openModal(GraphDialog, objDashboardAnalyticsComp.revenueSubscriptionsForPopup, 'Current MRR')">View more ></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 col-md-6 col-12">
+      <div class="">
+        <div class="element-box">
+          <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+              </div>
+            </div>
+            <div class="chartjsTopStyle">Processing Revenue<span class="graphAmount">{{objDashboardAnalyticsComp.processingRevenue.amount_total }}</span></div>
+            <canvas *ngIf="objDashboardAnalyticsComp.processingRevenue.list" baseChart
+                    [datasets]="objDashboardAnalyticsComp.processingRevenue.barChartData"
+                    [labels]="objDashboardAnalyticsComp.processingRevenue.list.interval"
+                    [options]="objDashboardAnalyticsComp.processingRevenue.barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="true"
+                    [chartType]="'line'">
+            </canvas>
+            <div class="chartjsBottomStyle"><a href="javascript:void(0);" (click)="openModal(GraphDialog, objDashboardAnalyticsComp.processingRevenueForPopup, 'Processing Revenue')">View more ></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6 col-md-6 col-12">
+      <div class="">
+        <div class="element-box">
+          <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+              </div>
+            </div>
+            <div class="chartjsTopStyle">Processing Volume<span class="graphAmount">{{objDashboardAnalyticsComp.processingVolume.amount_total }}</span></div>
+            <canvas *ngIf="objDashboardAnalyticsComp.processingVolume.list" baseChart
+                    [datasets]="objDashboardAnalyticsComp.processingVolume.barChartData"
+                    [labels]="objDashboardAnalyticsComp.processingVolume.list.interval"
+                    [options]="objDashboardAnalyticsComp.processingVolume.barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="true"
+                    [chartType]="'line'">
+            </canvas>
+            <div class="chartjsBottomStyle"><a href="javascript:void(0);" (click)="openModal(GraphDialog, objDashboardAnalyticsComp.processingVolumeForPopup, 'Processing Volume')">View more ></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 col-md-6 col-12">
+      <div class="">
+        <div class="element-box">
+          <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+              </div>
+            </div>
+            <div class="chartjsTopStyle">Plaid Authentication<span class="graphAmount">{{objDashboardAnalyticsComp.plaidAuth.amount_total }}</span></div>
+            <canvas *ngIf="objDashboardAnalyticsComp.plaidAuth.list" baseChart
+                    [datasets]="objDashboardAnalyticsComp.plaidAuth.barChartData"
+                    [labels]="objDashboardAnalyticsComp.plaidAuth.list.interval"
+                    [options]="objDashboardAnalyticsComp.plaidAuth.barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="true"
+                    [chartType]="'line'">
+            </canvas>
+            <div class="chartjsBottomStyle"><a href="javascript:void(0);" (click)="openModal(GraphDialog, objDashboardAnalyticsComp.plaidAuthForPopup, 'Plaid Authentication')">View more ></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 col-md-6 col-12">
+      <div class="">
+        <div class="element-box">
+          <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+              </div>
+            </div>
+            <div class="chartjsTopStyle">Dwolla CIP Personal<span class="graphAmount">{{objDashboardAnalyticsComp.cipPersonal.amount_total }}</span></div>
+            <canvas *ngIf="objDashboardAnalyticsComp.cipPersonal.list" baseChart
+                    [datasets]="objDashboardAnalyticsComp.cipPersonal.barChartData"
+                    [labels]="objDashboardAnalyticsComp.cipPersonal.list.interval"
+                    [options]="objDashboardAnalyticsComp.cipPersonal.barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="true"
+                    [chartType]="'line'">
+            </canvas>
+            <div class="chartjsBottomStyle"><a href="javascript:void(0);" (click)="openModal(GraphDialog, objDashboardAnalyticsComp.cipPersonalForPopup, 'Dwolla CIP Personal')">View more ></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6 col-12">
+      <div class="">
+        <div class="element-box">
+          <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+              </div>
+            </div>
+            <div class="chartjsTopStyle">Return Fees<span class="graphAmount">{{objDashboardAnalyticsComp.failedPaymentFees.amount_total }}</span></div>
+            <canvas *ngIf="objDashboardAnalyticsComp.failedPaymentFees.list" baseChart
+                    [datasets]="objDashboardAnalyticsComp.failedPaymentFees.barChartData"
+                    [labels]="objDashboardAnalyticsComp.failedPaymentFees.list.interval"
+                    [options]="objDashboardAnalyticsComp.failedPaymentFees.barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="true"
+                    [chartType]="'line'">
+            </canvas>
+            <div class="chartjsBottomStyle"><a href="javascript:void(0);" (click)="openModal(GraphDialog, objDashboardAnalyticsComp.failedPaymentFeesForPopup, 'Return Fees')">View more ></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6 col-12">
+      <div class="">
+        <div class="element-box">
+          <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+              </div>
+            </div>
+            <div class="chartjsTopStyle">Total Revenue<span class="graphAmount">{{objDashboardAnalyticsComp.totalRevenue.amount_total }}</span></div>
+            <canvas *ngIf="objDashboardAnalyticsComp.totalRevenue.list" baseChart
+                    [datasets]="objDashboardAnalyticsComp.totalRevenue.barChartData"
+                    [labels]="objDashboardAnalyticsComp.totalRevenue.list.interval"
+                    [options]="objDashboardAnalyticsComp.totalRevenue.barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="true"
+                    [chartType]="'line'">
+            </canvas>
+            <div class="chartjsBottomStyle"><a href="javascript:void(0);" (click)="openModal(GraphDialog, objDashboardAnalyticsComp.totalRevenueForPopup, 'Total Revenue')">View more ></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!--    Analytics Expenses-->
+
+
+    <div class="col-lg-4 col-md-6 col-12">
+      <div class="">
+        <div class="element-box">
+          <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+              </div>
+            </div>
+            <div class="chartjsTopStyle">Plaid Balance<span class="graphAmount">{{objDashboardAnalyticsComp.plaidBalance.amount_total }}</span></div>
+            <canvas *ngIf="objDashboardAnalyticsComp.plaidBalance.list" baseChart
+                    [datasets]="objDashboardAnalyticsComp.plaidBalance.barChartData"
+                    [labels]="objDashboardAnalyticsComp.plaidBalance.list.interval"
+                    [options]="objDashboardAnalyticsComp.plaidBalance.barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="true"
+                    [chartType]="'line'">
+            </canvas>
+            <div class="chartjsBottomStyle"><a href="javascript:void(0);" (click)="openModal(GraphDialog, objDashboardAnalyticsComp.plaidBalanceForPopup, 'Plaid Balance')">View more ></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6 col-12">
+      <div class="">
+        <div class="element-box">
+          <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+              </div>
+            </div>
+            <div class="chartjsTopStyle">Returns<span class="graphAmount">{{objDashboardAnalyticsComp.failedPayments.amount_total }}</span></div>
+            <canvas *ngIf="objDashboardAnalyticsComp.failedPayments.list" baseChart
+                    [datasets]="objDashboardAnalyticsComp.failedPayments.barChartData"
+                    [labels]="objDashboardAnalyticsComp.failedPayments.list.interval"
+                    [options]="objDashboardAnalyticsComp.failedPayments.barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="true"
+                    [chartType]="'line'">
+            </canvas>
+            <div class="chartjsBottomStyle"><a href="javascript:void(0);" (click)="openModal(GraphDialog, objDashboardAnalyticsComp.failedPaymentsForPopup, 'Returns')">View more ></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6 col-12">
+      <div class="">
+        <div class="element-box">
+          <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+              </div>
+            </div>
+            <div class="chartjsTopStyle">Dwolla CIP Business<span class="graphAmount">{{objDashboardAnalyticsComp.cipBusiness.amount_total }}</span></div>
+            <canvas *ngIf="objDashboardAnalyticsComp.cipBusiness.list" baseChart
+                    [datasets]="objDashboardAnalyticsComp.cipBusiness.barChartData"
+                    [labels]="objDashboardAnalyticsComp.cipBusiness.list.interval"
+                    [options]="objDashboardAnalyticsComp.cipBusiness.barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="true"
+                    [chartType]="'line'">
+            </canvas>
+            <div class="chartjsBottomStyle"><a href="javascript:void(0);" (click)="openModal(GraphDialog, objDashboardAnalyticsComp.cipBusinessForPopup, 'Dwolla CIP Business')">View more ></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!--***********************************************************************************  POPUP   ************************************************************************************ -->
+<ng-template #GraphDialog let-c="close" let-d="dismiss" let-create="addWebhook">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title"></h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="col-lg-12 col-md-12 col-12">
+      <div class="">
+        <div class="element-box">
+          <div class="el-chart-w">
+            <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+              <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+              </div>
+              <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+              </div>
+            </div>
+            <div class="chartjsTopStyle">{{graphAnalyticsName.graphNameInPopup}}<span class="graphAmount">{{graphAnalyticsName.graphName.amount_total }}</span></div>
+            <canvas *ngIf="graphAnalyticsName.graphName.list" baseChart
+                    [datasets]="graphAnalyticsName.graphName.barChartData"
+                    [labels]="graphAnalyticsName.graphName.list.interval"
+                    [options]="graphAnalyticsName.graphName.barChartOptions"
+                    [colors]="lineChartColors"
+                    [legend]="true"
+                    [chartType]="'line'">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ng-template>

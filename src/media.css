@@ -1,0 +1,210 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Jan 25, 2019, 7:21:33 PM
+    Author     : andrey
+*/
+
+@media (min-width: 1700px) {
+  .check-payment-received .checkWrapper {
+    transform: scale(1.60); 
+    -ms-transform: scale(1.60);
+    -webkit-transform: scale(1.60);
+    transform-origin: center center;
+    margin-top: 80px;
+  }
+  .invoice-recuring-wrapp { margin-top: 115px; }
+  .check-digital .digital-buttons { margin-top: 110px; }
+  .invoice-digital .digital-buttons { margin-top: 105px; }
+  .invoice-digital .digital-buttons.has-recuring-wrapp { margin-top: 20px; }
+}
+
+@media (max-width: 1350px) {
+/*  .check-payment-received .checkWrapper {
+    transform: scale(0.80); 
+    -ms-transform: scale(0.80);
+    -webkit-transform: scale(0.80);
+    transform-origin: left top;
+  }*/
+  .element-wrapper.account-settings dt {
+    min-width: auto;
+  }
+  .element-wrapper.account-settings dd {
+    word-break: break-all;
+  }
+}
+
+@media (max-width: 1254px) and (min-width: 1024px)  {
+  .element-content-widgets .col-lg-3 { flex: 0 0 50%; max-width: 50%; }
+}
+
+@media (max-width: 1024px) {
+/*  .check-payment-received .checkWrapper {
+    transform: scale(0.90); 
+    -ms-transform: scale(0.90);
+    -webkit-transform: scale(0.90);
+  }*/
+  .element-header.row img { width: 100%; }
+}
+@media (max-width: 991px) {
+  .check-payment-received .checkWrapper {
+    transform: scale(1); 
+    -ms-transform: scale(1);
+    -webkit-transform: scale(1);
+  }
+  .row.wrap-filters>div:last-child { border-right: 1px solid gainsboro; }
+  .invoice-recuring-wrapp { margin-left: 0px !important; margin-top: 30px; }
+  .securely-digital-checks { margin-top: 20px }
+  .check-digital .digital-buttons { margin-top: 30px; }
+  .invoice-digital .digital-buttons { margin-top: 30px; }
+  .element-header.row img { width: auto; }
+}
+@media (max-width: 900px) {
+  .digital-buttons button { width: 100% !important; max-width: 100%!important; }
+}
+
+@media (max-width: 767px) {
+  .express-checkout-body {
+      margin-top: 30px;
+      padding: 0 8% 30px;
+      width: 100%;
+      background-color: #fff;
+  }
+  .buttonBackOnHeader .icon-feather-chevron-left { font-size: 30px; }
+  .form-control.form-control-sm.transaction-fast-filter-select { display: block; }
+}
+
+@media (max-width: 630px) {
+  .check-payment-received .checkWrapper {
+    transform: scale(0.80); 
+    -ms-transform: scale(0.80);
+    -webkit-transform: scale(0.80);
+    -webkit-transform-origin: left top; 
+    transform-origin: left top;
+  }
+  .checkWrapper #processedWaterMarkValid {
+    font-size: 1.2em;
+    top: 100px;
+  }
+  .digital-buttons h3 { margin: 10px 0px 30px 0px !important; }
+}
+
+
+@media (max-width: 575px) {
+  .row.wrap-filters>div, .row.wrap-filters>div:last-child { border-right: none }
+}
+@media (max-width: 568px) {
+  .check-payment-received .checkWrapper {
+    transform: scale(0.87); 
+    -ms-transform: scale(0.87);
+    -webkit-transform: scale(0.87);
+    -webkit-transform-origin: left top; 
+    transform-origin: left top;
+  }
+}
+
+@media (max-width: 500px) {
+  ng-pagination select {
+    width: 100% !important;
+  }
+  ng-pagination li.page-item {
+    font-size: 11px !important;
+  }
+  ng-pagination nav.d-flex { display: block !important; }
+  ng-pagination ul.pagination {
+    width: 100% !important;
+    margin: 0px !important;
+    margin-top: 10px !important;
+  }
+  .element-box .table-responsive ng-pagination nav {
+    height: 90px;
+    display: block !important;
+    padding: 0px !important;
+  }
+  .check-payment-received img { width: 100%; }
+  .content-box.check-payment-received { padding: 1px; }
+  .checkWrapper #processedWaterMarkValid {
+    font-size: 1.0em;
+    top: 40px;
+  }
+  .securely-digital-checks { font-size: 25px; }
+  #tab_billing .dataTables_filter input { display: block;margin-left: 0px; width: 100%; }
+  #tab_billing .dataTables_filter label { width: 100%; }
+  #tab_billing .element-box { padding: 5px; }
+  .modal-body .profile-tile .profile-tile-box { display: none }
+  .modal-body .profile-tile .profile-tile-meta { padding-left: 0px; }
+  .element-box .os-tabs-controls .nav { padding-left: 1rem; padding-right: 0.5rem; }
+}
+
+@media (max-width: 414px) {
+  .check-payment-received .checkWrapper {
+    transform: scale(1.00); 
+    -ms-transform: scale(1.00);
+    -webkit-transform: scale(1.00);
+    -webkit-transform-origin: left top; 
+    transform-origin: left top;
+  }
+  .profile-tile-box { display: none !important; }
+  .profile-tile-meta { padding-left: 0px !important; }
+  .tab-pane.active.show { padding: 0px !important; }
+  .user-search-form, .user-filter-form { width: 100% !important; max-width: 100% !important; flex: inherit; }
+  .user-search-form input.form-control { width: 100% !important; }
+}
+
+@media (max-width: 400px) {
+  .element-box .table-responsive ng-pagination nav ul li:first-child > button,
+  .element-box .table-responsive ng-pagination nav ul li:nth-child(9) > button {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+  
+  .element-box .table-responsive ng-pagination nav ul li > button {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .slick-prev{ left: 30px !important; }
+  .slick-next{ right: 30px !important; }
+  .onboarding-modal .modal-title { font-size: 18px; text-align: left !important; }
+  .digital-buttons button { font-size: 1rem !important; min-width: inherit !important; }
+  .element-header.row img { width: 100%; }
+  .check .checkElement.previewBankName { width: 50%; }
+}
+
+@media (max-width: 375px) {
+  .check-payment-received .checkWrapper {
+    transform: scale(1.00); 
+    -ms-transform: scale(1.00);
+    -webkit-transform: scale(1.00);
+    -webkit-transform-origin: left top; 
+    transform-origin: left top;
+  }
+  .auth-box-w form .form-group .pre-icon { left: -30px; }
+  .auth-box-w form { padding: 20px 35px !important; }
+}
+
+@media (max-width: 320px) {
+  .checkWrapper {
+    transform: scale(0.82); 
+    -ms-transform: scale(0.82);
+    -webkit-transform: scale(0.82);
+    transform-origin: left top;
+  }
+  .check-payment-received .checkWrapper {
+    transform: scale(0.90); 
+    -ms-transform: scale(0.90);
+    -webkit-transform: scale(0.90);
+    transform-origin: left top;
+  }
+  .content-i>.content-box { padding: 5px; }
+  .modal-blue-bg.onboarding-content .checkWrapper {
+    transform: scale(0.90);
+    -ms-transform: scale(0.90);
+    -webkit-transform: scale(0.90);
+    -webkit-transform-origin: 25% top;
+    transform-origin: 25% top;
+  }
+}

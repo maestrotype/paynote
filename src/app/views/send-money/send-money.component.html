@@ -1,0 +1,261 @@
+<div class="element-wrapper">
+  <h6 class="element-header">Send a Check</h6>
+  <div class="element-box">
+    <div class="clear-block clearfix"></div>
+    <div class="row">
+      <div class="col-lg-5 col-md-6">
+        <form autocomplete="off" name="form" (ngSubmit)="f.form.valid && checkEmailAddress()" #f="ngForm" autocomplete="nope">
+          <div class="form-group" style="position: relative;" [ngClass]="{ 'has-error has-danger': !name.valid && (name.dirty && name.touched) }">
+            <input type="hidden" name="name" [(ngModel)]="objSend.name" #name="ngModel" required>
+            <label for="">Payee's name</label>
+            <input class="form-control payment_customer_name" placeholder="Payee's name" type="text" name="name" id="payee_s_name"
+                   [(ngModel)]="objSend.name" #name="ngModel" required  *ngIf="!arrayCustomers.length" (blur)="test(name)">
+            <ng-select class="customers_autocomplite" [items]="arrayCustomers" [addTag]="true" addTagText="Add New Payee's name" name="name"
+                        bindLabel="name" [(ngModel)]="objSend.name" #name="ngModel" [selectOnTab]="true"
+                        autofocus (change)="handleResultSelected($event, name)" placeholder="{{objSendMoneyComp.form.name_placeholder}}"
+                        bindValue="id" required id="sendMoneyPayeesName" (blur)="blurSelect()"
+                        (search)="searchSelect($event)" *ngIf="arrayCustomers.length">
+            </ng-select>
+            <div *ngIf="!name.valid && (name.dirty || name.touched)" 
+              class="help-block form-text with-errors form-control-feedback">Payee's name is required</div>
+          </div>
+          <div id="sendMoneyPayeesEmail" class="form-group"  [ngClass]="{ 'has-error has-danger': !email.valid && (email.dirty || email.touched) }">
+               <label for="">Payee's email</label>
+            <input class="form-control" placeholder="Payee's email" type="email" name="email" id="payee_s_email"
+                   [(ngModel)]="objSend.email" #email="ngModel" required pattern="[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$">   
+            <div *ngIf="!email.valid && (email.dirty || email.touched)" 
+              class="help-block form-text with-errors form-control-feedback">Payee's email is required</div>
+          </div>
+          <div class="row">
+            <div class="col-sm-4">
+              <div class="form-group"  [ngClass]="{ 'has-error has-danger': !amount.valid && (amount.dirty || amount.touched) }">
+                <label for="">Amount</label>
+                <input autocomplete="off" id="sendMoneyAmount" class="form-control" placeholder="Amount" type="text" name="amount" currencyMask
+                       [(ngModel)]="objSend.amount" #amount="ngModel" required min="{{userService.getMinSendAmount()}}"
+                       (change)="checkSourceAccount()" (blur)="checkSourceAccount()" >
+                <div *ngIf="!amount.valid && (amount.dirty || amount.touched) && amount.errors.required" 
+                  class="help-block form-text with-errors form-control-feedback">Amount is required
+                </div>
+                <div *ngIf="!amount.valid && (amount.dirty || amount.touched) && amount.errors.min" 
+                  class="help-block form-text with-errors form-control-feedback">The minimum amount you can send is {{userService.getMinSendAmount() | currency}}
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="form-group"  [ngClass]="{ 'has-error has-danger': !fs_token.valid && (fs_token.dirty || fs_token.touched) }">
+                <label for="">Bank Account</label>
+                <select id="sendMoneyBankAccount" class="form-control" placeholder="Bank Account" name="fs_token" (change)="selectSourceBankAccount()"
+                        [(ngModel)]="objSend.fs_token" #fs_token="ngModel" required style="width: 100%;">
+                  <option *ngFor="let objFundSource of lstFundSources" value="{{objFundSource.id}}">
+                    <span *ngIf="objFundSource.type == 'bank'">
+                      {{objFundSource.bankName}}, {{objFundSource.name}} {{objFundSource.bankAccountType}}
+                      <span *ngIf="objFundSource.account && objFundSource.account.number">
+                        , **** {{objFundSource.account.number}}
+                    </span>
+                    </span>
+                    <span *ngIf="objFundSource.type == 'balance'">
+                      {{objFundSource.name}} {{objFundSource.balance.value | currency:objFundSource.balance.currency:'symbol' }}
+                    </span>
+                  </option>
+              <option value="add" *ngIf="!lstFundSources.length || lstFundSources.length < 2">Add Bank Account</option>
+            </select>
+            <div *ngIf="!fs_token.valid && (fs_token.dirty || fs_token.touched)" 
+              class="help-block form-text with-errors form-control-feedback">Source Bank Account is required</div>
+            <div *ngIf="isNotHaveFunds" class="help-block form-text with-errors form-control-feedback">{{textNotHaveFunds}}</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" [ngClass]="{ 'has-error has-danger': !description.valid && (description.dirty || description.touched) }">
+        <label for="">Description <i class="fa fa-question-circle" [matTooltipPosition]="'right'" [matTooltipShowDelay]="100"
+                                                   matTooltip="{{messages.get('SEND_RECEIVE_DESCRIPTION_MAX_LENGTH')}}"></i></label>
+        <input id="sendMoneyDescription" class="form-control" placeholder="Description" type="text" name="description" required
+               maxlength="75" [(ngModel)]="objSend.description" #description="ngModel">
+               <div *ngIf="!description.valid && (description.dirty || description.touched)" 
+               class="help-block form-text with-errors form-control-feedback">Description is required</div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          <fieldset class="form-group" touranchor="tour-recurring-checks" style="margin-top: 0;">
+            <label for="" style="margin-bottom: 0.8em;">Make recurring</label>
+            <div class="input-group"> &nbsp;&nbsp; 
+              <label class="switch switch-default switch-pill switch-primary">
+                <mat-slide-toggle
+                  id="sendMoneyMakeRecurring"
+                  class="example-margin"
+                  (change)="onChangeReccuring($event)"
+                  color="primary"
+                  [(ngModel)]="objSend.recurring" [ngModelOptions]="{standalone: true}">
+                  Billing cycle
+              </mat-slide-toggle>
+            </label>
+          </div>
+        </fieldset>
+      </div>
+      <div class="col-6 pull-right">
+        <label for="">Billing cycle</label>
+        <select id="sendMoneyBillingCycle" class="form-control" placeholder="Make recurring " name="recurringPeriod" style="width: 100%;"
+                [(ngModel)]="objSend.billing_cycle" #billing_cycle="ngModel" [disabled]="!makeRecurringToggle">
+          <option value="day" *ngIf="subDomen != 'paynote'">Daily</option>
+          <option value="week" selected>Weekly</option>
+          <option value="month">Monthly</option>
+        </select>
+      </div>
+      <div  class="col-sm-12 col-md-12 col-lg-12 col-xl-8" style='margin-bottom: 10px;'>    
+        <label>Attach a file</label>        
+        <input id="sendCheckInput" name="sendCheckInput" type="file" 
+               accept="application/pdf" (change)="onImageChangeFromFile($event)" 
+               [ngClass]="{ 'errorFileType': errorFileType || errorFileSize}">
+        <span style="font-size: 11px;color:#68a7f7;display: block;margin-top: 5px;">PDF 5MB Max</span>
+      </div>
+    </div>
+    <br>
+    <div class="buttons-w row">            
+      <div class="col-lg-6">
+        <button id="sendMoneySendCheckButton" class="btn btn-primary btn-rounded btn-block btn-lg" style="margin-bottom: 14px;" 
+                [disabled]="!f.form.valid || isNotHaveFunds || isLoading || errorFileSize">Send Check</button>
+      </div>
+      <div class="col-lg-6">
+        <button id="sendMoneyDirectDepositButton" [disabled]="!f.form.valid || isLoading || errorFileSize" 
+                class="btn btn-secondary btn-rounded btn-block btn-lg" style="margin-bottom: 14px;" type="button" 
+                (click)="prepareDirectDeposit(settingUpAccount)">
+                Direct Deposit
+                &nbsp; 
+                <i class="fa fa-question-circle" [matTooltipPosition]="'above'" [matTooltipShowDelay]="100"
+           matTooltip="{{messages.get('TOOLTIP_SEND_MONEY_DIRECT_DEPOSIT_BTN')}}"></i>
+        </button>
+      </div>
+    </div>
+    <div id="send_money_url" style="display: none;"></div>
+  </form>
+</div>
+<div class="col-lg-7 col-md-6">
+  <div class="checkWrapper">
+    <div class="check">
+      <div class="checkElement previewCurrentDate">{{dateToday}}</div>
+      <div class="checkElement previewReceiver">{{objSend.name}}</div>
+      <div class="checkElement previewAmount">{{objSend.amount | currency: '' :''}}</div>
+      <div class="checkElement previewAmountWord text-capitalize">{{utility.toWords(objSend.amount | currency: '' :'')}} //////</div>
+      <div class="checkElement previewDesc" *ngIf="objSend.description">
+        {{objSend.description}}
+      </div>
+      <div class="checkElement previewBankName">{{objSend.bank_name}}</div>
+      <div class="checkElement previewSignWrapper">
+        <div class="previewWithOutSignWrapper">
+          <span *ngIf="!userService.getSignature()" class="signatureName">{{userService.getFullName()}}</span>
+          <img *ngIf="userService.getSignature()" class="signature" src="{{userService.getSignature()}}">
+        </div>
+      </div>
+      <div class="checkElement infoWrapper">
+        <div>
+          <div class="previewSenderName">{{userService.getFullName()}}</div>
+          <div class="smallText">{{userService.getEmail()}}</div>
+        </div>
+      </div>
+      <div class="checkElement routingNumber">A{{objSend.routing_number}}A</div>
+      <div class="checkElement accountNumber">{{objSend.account_number}}C</div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<app-payment-links [countNewPayLink]="countNewPayLink"></app-payment-links>
+
+<ng-template #settingUpAccount let-c="close" let-d="dismiss">
+  <div class="manual-verification">
+    <div class="modal-header">
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="manual-verification-title">
+        <h4 class="modal-title">Direct Deposit</h4>
+      </div>
+      <div class="modal-body">
+        <p class="mf-text">
+          {{messages.get('SEND_MONEY_SETTING_UP_ACCOUNT_POPUP_TEXT')}}      
+        </p>
+        <form name="form" #f="ngForm" autocomplete="nope" class="form-validation">
+          <div class="form-group" *ngIf="objLoadedCustomer.list">
+            <label for="">Account</label>
+            <select class="form-control" placeholder="Account" name="bankAccount" style="width: 100%;"
+                    [(ngModel)]="objDirectDeposit.bankAccount" #bankAccount="ngModel" (change)="getFundSourceByID()">
+              <option value="">New</option>
+              <option *ngFor="let fundSource of objLoadedCustomer.list" value="{{fundSource.id}}">{{fundSource.bankName}}</option>
+            </select>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{ 'has-error has-danger': !routingNumber.valid && (routingNumber.dirty || routingNumber.touched) }">
+                <label>Routing Number</label>
+                <input class="form-control" title="Routing Number" placeholder="Type in the recipient's routing number" type="text" name="routingNumber"
+                       [(ngModel)]="objDirectDeposit.routingNumber" #routingNumber="ngModel" required maxlength="9" minlength="9"
+                       (change)="getBankRouting()" autocomplete="off" onlyNumbers>
+                       <div *ngIf="!routingNumber.valid && (routingNumber.dirty || routingNumber.touched)" 
+                       class="help-block form-text with-errors form-control-feedback">Routing Number is required</div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Bank Name</label>
+                <div *ngIf="objDirectDeposit.name" class="mv-bankName">{{objDirectDeposit.name}}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" style="display: none;">
+            <label for="">Account Type</label>
+            <select class="form-control" placeholder="Account Type" name="bankAccountType" required style="width: 100%;"
+                    [(ngModel)]="objDirectDeposit.bankAccountType" #bankAccountType="ngModel">
+              <option value="checking" selected="true">Checking</option>
+              <option value="saving">Saving</option>
+            </select>
+            <div *ngIf="!bankAccountType.valid && (bankAccountType.dirty || bankAccountType.touched)" 
+              class="help-block form-text with-errors form-control-feedback">Account Type is required</div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Account Number</label>
+                <input class="form-control" placeholder="Account Number" type="text" placeholder="e.g. 489729074589" name="accountNumber" 
+                       onlyNumbers required maxlength="17"
+                       [(ngModel)]="objDirectDeposit.accountNumber" #accountNumber="ngModel" autocomplete="off">
+                <div *ngIf="!accountNumber.valid && (accountNumber.dirty || accountNumber.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Account Number is required</div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label for="">Confirm Account Number</label>
+                <input class="form-control" placeholder="Confirm Account Number" type="text" placeholder="e.g. 489729074589" 
+                       name="cAccountNumber" onlyNumbers required maxlength="17"
+                       [(ngModel)]="objDirectDeposit.cAccountNumber" #cAccountNumber="ngModel" autocomplete="off"
+                       validateEqual="accountNumber">
+                <div *ngIf="!cAccountNumber.valid && (cAccountNumber.dirty || cAccountNumber.touched)" 
+                  class="help-block form-text with-errors form-control-feedback">Confirm Account Number is required</div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="form-group">
+                <img style="width: 100%;" class="brnumber-img" src="assets/img/us-bank-routing-numbers.png">
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button [disabled]="isLoading" class="slick-prev slick-arrow" type="button" (click)="c('Close click'); prepareCreatePayLink();">
+        {{utility.getMessageUsability('back_to_digital_check')}}
+      </button>
+      <button [disabled]="loading || !f.form.valid" class="slick-next slick-arrow" type="submit" (click)="directDeposit(successReceivedMoney)">
+        {{utility.getMessageUsability('confirm_send_money')}}
+      </button>
+    </div>
+  </div>
+</ng-template>

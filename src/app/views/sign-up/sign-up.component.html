@@ -1,0 +1,185 @@
+<!-- Google Tag Manager (noscript) -->
+<noscript>
+  <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W7RK4F" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+<!-- End Google Tag Manager (noscript) -->
+<ng-http-loader 
+    [backgroundColor]="'#ff0000'"
+    [spinner]="spinkit.skWave"
+    [debounceDelay]="100"
+    [minDuration]="300">
+</ng-http-loader>
+<div class="all-wrapper menu-side with-pattern">
+  <div class="auth-box-w">
+    <div class="logo-w">
+      <a href="/"><img alt="" src="assets/img/Paynote_-_New_Blue.svg"></a>
+    </div>
+    <div [hidden]="!showSignUpForm">
+      <h4 class="auth-header">
+        Sign Up
+      </h4>
+      <form name="form" autocomplete="nope" (ngSubmit)="f.form.valid && signUpValidate()" [formGroup]="signUpForm"
+            #f="ngForm" class="form-validation">
+
+        <div class="form-group" [ngClass]="{ 'has-error has-danger': signUpForm.get('name').errors 
+           && (signUpForm.get('name').dirty || signUpForm.get('name').touched) }">
+          <label for="">Full Name</label>
+          <input name="name" class="form-control" placeholder="Full Name" type="text"
+                 formControlName="name" required>
+          <span class="pre-icon os-icon os-icon-user-male-circle"></span>
+          <div *ngIf="signUpForm.get('name').errors &&
+            (signUpForm.get('name').dirty || signUpForm.get('name').touched)" 
+            class="help-block form-text with-errors form-control-feedback">
+            <span *ngIf="signUpForm.get('name').errors.validFullName">
+              Full name not valid. Enter your Full Name or Company Name.
+            </span>
+            <span *ngIf="signUpForm.get('name').errors.required">
+              Full Name is required
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group" [ngClass]="{ 'has-error has-danger': signUpForm.get('email').errors 
+             && (signUpForm.get('email').dirty || signUpForm.get('email').touched) }">
+             <label for="">Email Address</label>
+          <input name="email" class="form-control" placeholder="Email Address" type="email" 
+                 formControlName="email" required autocomplete="nope">
+          <div class="pre-icon os-icon os-icon-email-2-at"></div>
+          <div *ngIf="signUpForm.get('email').errors &&
+            (signUpForm.get('email').dirty || signUpForm.get('email').touched)" 
+            class="help-block form-text with-errors form-control-feedback">
+            <span *ngIf="signUpForm.get('email').errors.required">
+              Email is required
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group" [ngClass]="{ 'has-error has-danger': signUpForm.get('phone').errors 
+             && (signUpForm.get('phone').dirty || signUpForm.get('phone').touched) }">
+             <label for="">Phone</label>
+          <input id="signUpPhoneInput" name="phone" class="form-control" placeholder="Phone" type="text"
+                 formControlName="phone"  required [textMask]="{mask: utility.maskPhone}">
+                 <div class="pre-icon os-icon os-icon-phone"></div>
+          <div *ngIf="signUpForm.get('phone').errors &&
+            (signUpForm.get('phone').dirty || signUpForm.get('phone').touched)" 
+            class="help-block form-text with-errors form-control-feedback">
+            <span *ngIf="signUpForm.get('phone').errors.validPhone">
+              Phone must be at least 10 digits long.
+            </span>
+            <span *ngIf="signUpForm.get('phone').errors.required">
+              Phone is required
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group" [ngClass]="{ 'has-error has-danger': signUpForm.get('password').errors 
+             && (signUpForm.get('password').dirty || signUpForm.get('password').touched) }">
+             <label for="">Password <i [matTooltipPosition]="'above'" [matTooltipShowDelay]="100"
+                        matTooltip="{{messages.get('PASSWORD_REQUIREMENTS')}}"  
+                        aria-hidden="true" class="fa fa-question-circle" placement="bottom"></i></label>
+          <input name="password" class="form-control" placeholder="Password" type="password" 
+                 formControlName="password" required minlength="8" autocomplete="nope">
+          <div class="pre-icon os-icon os-icon-fingerprint"></div>
+          <div *ngIf="signUpForm.get('password').errors &&
+            (signUpForm.get('password').dirty || signUpForm.get('password').touched)" 
+            class="help-block form-text with-errors form-control-feedback">
+            <span *ngIf="signUpForm.get('password').errors.minlength">
+              Password must be at least 8 characters long.
+            </span>
+            <span *ngIf="signUpForm.get('password').errors.required">
+              Password is required
+            </span>
+          </div>
+          <ng2-password-strength-bar
+            [passwordToCheck]="signUpForm.value.password"
+            [barLabel]="barLabel"
+            [barColors]="myColors">
+          </ng2-password-strength-bar>
+        </div>
+
+        <div class="form-group" [ngClass]="{ 'has-error has-danger': signUpForm.get('cpassword').errors 
+             && (signUpForm.get('cpassword').dirty || signUpForm.get('cpassword').touched) }">
+             <label for="">Confirm Password</label>
+          <input name="cpassword" class="form-control" placeholder="Confirm Password" type="password" 
+                 formControlName="cpassword" required autocomplete="off" validateEqual="password">
+          <div class="pre-icon os-icon os-icon-fingerprint"></div>
+          <div *ngIf="signUpForm.get('cpassword').errors &&
+            (signUpForm.get('cpassword').dirty || signUpForm.get('cpassword').touched)" 
+            class="help-block form-text with-errors form-control-feedback">
+            Password mismatch
+          </div>
+        </div>
+
+        <div class="text-left">
+          <label style="font-size: 14px;color: black;">
+            <input formControlName="acceptPolicy" required type="checkbox" class="form-control">&nbsp;&nbsp;
+            I have read and accept the Paynote 
+            <a href="https://www.seamlesschex.com/terms-of-service/" target="_blank">
+              <b>Terms of Service</b>
+            </a> and 
+            <a href="https://www.seamlesschex.com/privacy-policy/" target="_blank">
+              <b>Privacy Policy</b>
+            </a>, as well as our partner Dwolla’s 
+            <a href="https://www.dwolla.com/legal/tos/" target="_blank">
+              <b>Terms of Service</b>
+            </a> and 
+            <a href="https://www.dwolla.com/legal/privacy/" target="_blank">
+              <b>Privacy Policy</b>
+            </a>.
+          </label>
+        </div>
+
+        <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+        <div class="buttons-w">
+          <button [disabled]="loading || !signUpForm.valid" class="btn btn-primary btn-rounded btn-rounded-margin">Sign Up</button>
+          <button class="btn btn-default pull-right btn-rounded btn-rounded-margin" routerLink="/login">Login</button>
+        </div>
+
+      </form>
+    </div>
+
+    <div [hidden]="!showPhoneVerifyForm">
+      <h4 class="auth-header" style="padding-right: 40px;font-size: 20px;">
+        <span *ngIf="isVoiceCode()">Please answer your phone and enter the code provided to complete your sign up</span>
+        <span *ngIf="!isVoiceCode()">Verify your phone</span>
+      </h4>
+      <form name="form2FA" (ngSubmit)="f2FA.form.valid && signUp()" #f2FA="ngForm" autocomplete="off" [formGroup]="verifyPhoneForm">
+            <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div>
+        <div class="form-group" [ngClass]="{ 'has-error has-danger': verifyPhoneForm.get('phone_pin').errors 
+             && (verifyPhoneForm.get('phone_pin').dirty || verifyPhoneForm.get('phone_pin').touched) }">
+          <label for="phone_pin">
+            <span *ngIf="isVoiceCode()">Voice Code</span>
+            <span *ngIf="!isVoiceCode()">Pin Code</span>
+          </label>
+          <input name="phone_pin" class="form-control" placeholder="Code" type="text" maxlength="4" appNumbers
+                 formControlName="phone_pin" required id="phone_pin">
+          <div class="pre-icon"><i class="icon-feather-hash"></i></div>
+          <div *ngIf="verifyPhoneForm.get('phone_pin').errors &&
+            (verifyPhoneForm.get('phone_pin').dirty || verifyPhoneForm.get('phone_pin').touched)" 
+            class="help-block form-text with-errors form-control-feedback">
+            <span *ngIf="verifyPhoneForm.get('phone_pin').errors.required">
+              Code is required
+            </span>
+            <span *ngIf="verifyPhoneForm.get('phone_pin').errors.minlength">
+              Code must be at least 4 digits long.
+            </span>
+          </div>
+        </div>
+        <button style="padding-left: 0;" [disabled]="loading" type="button" class="btn btn-link" (click)="sendVerifyPhoneCode()">
+          <span *ngIf="isVoiceCode()">Resend Voice Code</span>
+          <span *ngIf="!isVoiceCode()">Resend Code</span>
+        </button>
+        <button style="padding-left: 0;" type="button" [disabled]="loading" class="btn btn-link" (click)="backToSignUpForm()">
+          Change Phone Number
+        </button>
+        <br>
+        <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>      
+        <div class="buttons-w">        
+          <button [disabled]="loading" type="button" class="btn btn-default btn-rounded" (click)="backToSignUpForm()">Back</button>
+          &nbsp;
+          <button type="submit" [disabled]="loading || !verifyPhoneForm.valid" class="btn btn-primary pull-right btn-rounded">Submit & Verify</button> 
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

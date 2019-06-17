@@ -1,0 +1,118 @@
+<div class="content-box">
+  <div class="element-wrapper">
+    <h6 class="element-header">Transfer money</h6>
+    <div class="element-box">
+      <h5 class="form-header">{{messages.get('TRANSFER_MONEY_TITLE')}}</h5>
+      <div class="form-desc">
+        {{messages.get('TRANSFER_MONEY_DESCRIPTION')}}
+      </div>
+      <div class="col-lg-6">
+        <div class="os-tabs-w">
+          <div class="os-tabs-controls" style="display: none;">
+            <ul class="nav nav-tabs bigger">
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#tab_transfer_money_from" id="show_tab_transfer_from"></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#tab_transfer_money_to" id="show_tab_transfer_to"></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#tab_transfer_money" id="show_tab_transfer"></a>
+              </li>
+            </ul>
+          </div>
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab_transfer_money">
+              <div class="pipelines-w">
+                <div class="pipeline white">
+                  <div class="pipeline-body">
+                    <div class="pipeline-item" (click)="jqueryService.showTabBySelector('#show_tab_transfer_from')">
+                      <div class="pi-controls">
+                        <a href="javascript:void(0)" style="text-decoration: none;color: black;" (click)="jqueryService.showTabBySelector('#show_tab_transfer_from')">
+                          <i class="icon-feather-chevron-right"></i>
+                        </a>
+                      </div>
+                      <div class="pi-body">
+                        <div class="pi-info">
+                          <div class="pi-sub">
+                            <span>&nbsp;</span>
+                            <span></span>
+                          </div>
+                          <div class="h6 pi-name">
+                            <span>From</span>
+                            <span></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pipeline-item">
+                      <div class="pi-controls">
+                        <a href="javascript:void(0)" style="text-decoration: none;color: black;">
+                          <i class="icon-feather-chevron-right"></i>
+                        </a>
+                      </div>
+                      <div class="pi-body">
+                        <div class="pi-info">
+                          <div class="pi-sub">
+                            <span>&nbsp;</span>
+                            <span></span>
+                          </div>
+                          <div class="h6 pi-name">
+                            <span>To</span>
+                            <span></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pipeline-item">
+                      <input type="text" class="form-control" style="border-color: transparent;padding: 15px 5px 15px 15px;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane" id="tab_transfer_money_from">
+              <div class="pipeline white">
+                <div class="pipeline-header">
+                  <div class="pipeline-name">
+                    <a href="javascript:void(0)" (click)="jqueryService.showTabBySelector('#show_tab_transfer')"
+                       style="text-decoration:none;text-transform: none;letter-spacing: initial;">
+                      <i class="icon-feather-chevron-left"></i>Back
+                    </a>
+                  </div>
+                  <br>
+                  <div class="pipeline-header-numbers">
+                    <div class="pipeline-value">
+                      <h3 class="pull-left">From</h3>
+                    </div>
+                    <div class="pipeline-count">
+                      <a href="javascript:void(0)" (click)="jqueryService.showTabBySelector('#show_tab_transfer')"
+                         style="text-decoration:none;">Reset</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="pipeline-body">
+                  <div class="pipeline-item" *ngFor="let objFundSource of lstFundSources">
+                    <div class="pi-body">
+                      <div class="pi-info">
+                        <div class="h6 pi-name" *ngIf="objFundSource.type == 'bank'">
+                          {{objFundSource.bankName}}, {{objFundSource.name}} {{objFundSource.bankAccountType}}
+                        </div>
+                        <div class="h6 pi-name" *ngIf="objFundSource.type == 'balance'">
+                          {{objFundSource.name}} {{objFundSource.balance.value | currency:objFundSource.balance.currency:'symbol' }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane" id="tab_transfer_money_to">
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,353 @@
+<div class="element-wrapper">
+  <h6 class="element-header">Merchant Details</h6>
+  <div class="alert alert-success" role="alert" [hidden]="!isSuccess">
+    <button aria-label="Close" class="close" data-dismiss="alert" type="button"><span aria-hidden="true"> ×</span></button>
+    {{successMessage}}
+  </div>
+  <div class="element-box" *ngIf="objCustomer">
+    <div class="row">
+      <div class="col-lg-6 text-left">
+        <h5 class="form-header">{{objCustomer.first_name}} {{objCustomer.last_name}}</h5>
+      </div>
+      <div class="col-lg-6 text-right">
+<!--        <a class="btn btn-primary btn-sm" href="javascript:void(0)" (click)="deactivateCustomer(objCustomer.id)">
+          <i class="os-icon os-icon-link-3"></i>
+          <span>Send funds</span>
+        </a>-->
+        <a class="btn btn-secondary btn-sm" href="javascript:void(0)" (click)="openDialogDeactivateModal(confermDeactivationDialog)">
+          <!--<i class="os-icon os-icon-email-forward"></i>-->
+          <span>Deactivate customer</span>
+        </a>
+      </div>
+    </div>
+    <div class="form-desc">
+      <div *ngIf="isVerified()" class="status-pill green" data-title="Complete" data-toggle="tooltip" data-original-title="" title=""></div>
+      <div *ngIf="!isVerified()" class="status-pill red" data-title="Cancelled" data-toggle="tooltip" data-original-title="" title=""></div>
+      <span class="text-capitalize">{{objCustomer.status}}</span>
+    </div>
+    <div class="os-tabs-w">
+      <div class="os-tabs-controls">
+        <ul class="nav nav-tabs bigger">
+          <li class="nav-item">
+            <a class="nav-link active" (click)="getCustomerDetail(objCustomer.id)" data-toggle="tab" href="#tab_details">Details</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" (click)="getCustomerTransactions(objCustomer.id)" data-toggle="tab" href="#tab_transactions">Transactions</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" (click)="getCustomerFundSources(objCustomer.id)" data-toggle="tab" href="#tab_funding_sources">Funding Sources</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" (click)="getCustomerDocuments(objCustomer.id)" data-toggle="tab" href="#tab_documents">Documents</a>
+          </li>
+        </ul>
+      </div>
+      <div class="tab-content">
+        <div class="tab-pane active" id="tab_details">
+          <h6>Customer Info</h6>
+          <hr>
+          <div>
+            <dl>
+              <dt class="text-uppercase">Customer Type</dt><dd class="text-capitalize">{{objCustomer.type}}</dd>
+              <dt class="text-uppercase">Customer Id</dt><dd class="text-capitalize">{{objCustomer.id}}</dd>
+              <dt class="text-uppercase">Created</dt><dd class="text-capitalize">{{userService.getDateFormat(objCustomer.created)}}</dd>
+            </dl>
+          </div>
+          <div class="clearfix"></div>
+          <hr>
+          <h6>Contact Info</h6>
+          <hr>
+          <div>
+            <dl>
+              <dt class="text-uppercase">Email</dt><dd class="text-capitalize">{{objCustomer.email}}</dd>
+              <dt class="text-uppercase">Address 1</dt><dd class="text-capitalize">{{objCustomer.address1}}</dd>
+              <dt class="text-uppercase">City</dt><dd class="text-capitalize">{{objCustomer.city}}</dd>
+              <dt class="text-uppercase">State</dt><dd class="text-capitalize">{{objCustomer.state}}</dd>
+              <dt class="text-uppercase">Zip</dt><dd class="text-capitalize">{{objCustomer.postal_code}}</dd>
+            </dl>
+          </div>
+          <div class="clearfix"></div>
+        </div>
+        <div class="tab-pane" id="tab_transactions">
+          <div class="form-desc" *ngIf="lstCustTransaction">{{lstCustTransaction.length}} Transactions</div>
+          <table id="dataTable1" width="100%" class="table table-striped table-lightfont dataTable" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+            <thead>
+              <tr role="row">
+                <th>Name</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th class="text-right">Amount</th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th rowspan="1" colspan="1">Name</th>
+                <th rowspan="1" colspan="1">Date</th>
+                <th rowspan="1" colspan="1">Status</th>
+                <th class="text-right" rowspan="1" colspan="1">Amount</th>
+              </tr>
+            </tfoot>
+            <tbody>
+              <tr role="row" *ngFor="let transaction of lstCustTransaction">
+                <td>
+                  <span *ngIf="transaction.destination">
+                    <span>TO:</span>
+                    {{transaction.destination.name}}
+                  </span>
+                  <span *ngIf="transaction.source">
+                    <span>FROM:</span>
+                    {{transaction.source.name}}
+                  </span>
+                </td>
+                <td>{{userService.getDateFormat(transaction.created)}}</td>
+                <td>{{transaction.status}}</td>
+                <td  class="text-right font-weight-bold" [ngClass]="{'amount-green': transaction.source}">
+                     {{transaction.amount.value | currency:transaction.amount.currency:'symbol' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      <div class="tab-pane" id="tab_funding_sources">
+        <div class="form-desc" *ngIf="lstCustFundSources && !lstCustFundSources.length">This customer currently doesn’t have any active funding sources.</div>
+        <div class="element-box-tp" *ngIf="lstCustFundSources">
+          <div *ngFor="let fundSources of lstCustFundSources">
+            <div class="profile-tile" *ngIf="fundSources.type == 'balance'">
+              <div class="profile-tile-box">
+                <div class="pt-avatar-w" style="border-radius: 0px;">
+                  <img alt="" src="assets/img/balance.svg">
+                </div>
+              </div>
+              <div class="profile-tile-meta">
+                <ul>
+                  <li>
+                    <span style="font-weight: bold;">
+                      DWOLLA {{fundSources.name}}
+                    </span>
+                  </li>
+                  <li>
+                    <span style="font-size: 20px; font-weight: bold;">
+                      {{fundSources.balance.value | currency:fundSources.balance.currency:'symbol'}}
+                    </span>
+                  </li>
+                  <li>
+                    ID:&nbsp;<span>{{fundSources.id}}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div style="position: relative;margin-top: 80px;">
+            <hr>
+            <button class="btn btn-primary btn-rounded" type="button" title="Add"
+                    style="position: absolute;padding: 15px;font-weight: bold;font-size: 20px;right: 0px;top: -28px;"
+                    (click)="openAddSourceModal(contentAddFundSource)">+</button>
+            <div *ngFor="let fundSources of lstCustFundSources">
+              <div class="profile-tile" *ngIf="fundSources.type == 'bank'">
+                <a class="profile-tile-box" href="users_profile_small.html">
+                  <div class="pt-avatar-w" style="border-radius: 0px;">
+                    <img alt="" src="assets/img/bank.svg">
+                  </div>
+                </a>
+                <div class="profile-tile-meta">
+                  <ul>
+                    <li>
+                      <span style="font-weight: bold;">
+                        {{fundSources.name}}
+                      </span>
+                    </li>
+                    <li>
+                      <span *ngIf="fundSources.status == 'verified'" class="text-capitalize amount-green">
+                        {{fundSources.status}}
+                      </span>
+                      <span *ngIf="fundSources.status == 'unverified'" class="text-capitalize" style="color: #ff9800">
+                        {{fundSources.status}}
+                      </span>
+                    </li>
+                    <li>
+                      Added:&nbsp;<span>{{userService.getDateFormat(fundSources.created)}}</span>
+                    </li>
+                    <li>
+                      ID:&nbsp;<span>{{fundSources.id}}</span>
+                    </li>
+                  </ul>
+                  <div class="pt-btn">
+                    <a class="btn btn-secondary btn-sm" style="color: white;" (click)="removeFundSource( objCustomer.id, fundSources.id )" >Remove</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane" id="tab_documents">
+        <div class="form-desc" *ngIf="lstCustDocuments && lstCustDocuments.length">
+          <table id="dataTable1" width="100%" class="table table-striped table-lightfont dataTable" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+            <thead>
+              <tr role="row">
+                <th>Name</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th class="text-right">Amount</th>
+              </tr>
+            </thead>
+            <tfoot>
+              <tr>
+                <th rowspan="1" colspan="1">Name</th>
+                <th rowspan="1" colspan="1">Date</th>
+                <th rowspan="1" colspan="1">Status</th>
+                <th class="text-right" rowspan="1" colspan="1">Amount</th>
+              </tr>
+            </tfoot>
+            <tbody>
+              <tr role="row" *ngFor="let transaction of lstCustTransaction">
+                <td>
+                  <span *ngIf="transaction.destination">
+                    <span>TO:</span>
+                    {{transaction.destination.name}}
+                  </span>
+                  <span *ngIf="transaction.source">
+                    <span>FROM:</span>
+                    {{transaction.source.name}}
+                  </span>
+                </td>
+                <td>{{userService.getDateFormat(transaction.created)}}</td>
+                <td>{{transaction.status}}</td>
+                <td  class="text-right font-weight-bold" [ngClass]="{'amount-green': transaction.source}">
+                     {{transaction.amount.value | currency:transaction.amount.currency:'symbol' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="form-desc" *ngIf="!lstCustDocuments || !lstCustDocuments.length">No customer documents have been uploaded.</div>
+      </div>
+      <div class="tab-pane" id="tab_conversion"></div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #confermDeactivationDialog let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">Deactivate customer?</h4>
+    <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    {{messages.get('DIACTIVATE_CUSTOMER')}}
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+    <button class="btn btn-primary" type="button" (click)="deactivateCustomer(objCustomer.id)">Deactivate</button>
+  </div>
+</ng-template>
+
+<ng-template #contentAddFundSource let-c="close" let-d="dismiss" let-create="addFundSources">
+  <div class="modal-header">
+    <h4 class="modal-title">Manual verification</h4>
+    <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="modal-body">
+      <p>To verify your bank account manually, we need to send 2 deposits and 2 withdrawals over the next 3 days.</p>
+      <p>To avoid any overdraft or other bank fees, make sure you have at least $2 in your bank account.</p>
+      <form name="form" #f="ngForm">
+        <div class="form-group" [ngClass]="{'has-error has-danger': !name.valid && (name.dirty || name.touched)}">
+          <label for="">Account Name</label>
+          <input class="form-control" placeholder="Account Name" type="text" [(ngModel)]="modelNewFundSource.name" 
+                 name="name" required #name="ngModel">
+          <div class="help-block form-text text-muted form-control-feedback" 
+               *ngIf="!name.valid && (name.dirty || name.touched)">
+            <span *ngIf="name.errors.required">
+              Account Name is required
+            </span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="">Account Type</label>
+          <select id="account-type" name="accountType" class="form-control" [(ngModel)]="modelNewFundSource.bankAccountType" name="bankAccountType">
+            <option value="checking">Checking</option>
+            <option value="savings">Savings</option>
+          </select>
+        </div>
+        <div class="form-group" [ngClass]="{'has-error has-danger': !routingNumber.valid && (routingNumber.dirty || routingNumber.touched)}">
+          <label for="">Routing Number</label>
+          <input appNumbers class="form-control" placeholder="Routing Number" type="text" 
+                 name="routingNumber" required  minlength="9"
+                 [(ngModel)]="modelNewFundSource.routingNumber" 
+                 #routingNumber="ngModel">
+          <div class="help-block form-text text-muted form-control-feedback" 
+               *ngIf="!routingNumber.valid && (routingNumber.dirty || routingNumber.touched)">
+            <span *ngIf="routingNumber.errors.required">
+              Routing Number is required
+            </span>
+            <span *ngIf="routingNumber.errors.minlength">
+              Routing Number must be at least 9 digits long.
+            </span>
+          </div>
+        </div>
+        <div class="form-group" [ngClass]="{'has-error has-danger': !accountNumber.valid && (accountNumber.dirty || accountNumber.touched)}">
+          <label for="">Account Number</label>
+          <input appNumbers class="form-control" placeholder="Account Number" type="text" 
+                 name="accountNumber" minlength="4" maxlength="17" required
+                 [(ngModel)]="modelNewFundSource.accountNumber"
+                 #accountNumber="ngModel">
+          <div class="help-block form-text text-muted form-control-feedback" 
+               *ngIf="!accountNumber.valid && (accountNumber.dirty || accountNumber.touched)">
+            <span *ngIf="accountNumber.errors.required">
+              Account Number is required
+            </span>
+            <span *ngIf="accountNumber.errors.minlength">
+              Account Number must be at least 4 digits long.
+            </span>
+            <span *ngIf="accountNumber.errors.maxlength">
+              Account Number must be at max 17 digits long.
+            </span>
+          </div>
+        </div>
+        <div class="form-group" [ngClass]="{'has-error has-danger': !re_account_number.valid && (re_account_number.dirty || re_account_number.touched)}">
+          <label for="">Re-enter Account Number</label>
+          <input appNumbers class="form-control" placeholder="Re-enter Account Number" type="text" required name="re_account_number"
+                 [(ngModel)]="modelNewFundSource.re_account_number" 
+                 #re_account_number="ngModel">
+          <div class="help-block form-text text-muted form-control-feedback" 
+               *ngIf="!re_account_number.valid && (re_account_number.dirty || re_account_number.touched)">
+            <span *ngIf="re_account_number.errors.required">
+              Re-enter Account Number is required
+            </span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="form-group">
+              <img style="width: 100%;" class="brnumber-img" src="assets/img/us-bank-routing-numbers.png">
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-danger" role="alert" *ngIf="isModalError">
+          {{errorModalMessage}}
+        </div>
+<!--        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for=""> Password</label><input class="form-control" placeholder="Password" type="password">
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="">Confirm Password</label><input class="form-control" placeholder="Password" type="password">
+            </div>
+          </div>
+        </div>-->
+      </form>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+    <button [disabled]="!f.form.valid" class="btn btn-primary" type="button" (click)="addFundSources()">Create</button>
+  </div>
+</ng-template>

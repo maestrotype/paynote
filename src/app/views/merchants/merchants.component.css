@@ -1,0 +1,15 @@
+.added_withdrawn_source{
+  font-weight: bold;
+  text-transform: initial;
+}
+.profile-tile-meta ul{
+  font-size: 0.9rem !important;
+}
+a.editTemplate:hover i{
+  /*font-size: 17px;*/
+  color: #000000;
+  text-decoration: none !important;
+}
+ h4.modal-title{
+  margin-left: 20px;
+}

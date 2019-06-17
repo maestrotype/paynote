@@ -1,0 +1,288 @@
+<div class="row">
+  <div class="col-12" style="margin-bottom: 30px;" *ngIf="userService.isAdmin() || userService.isSuperAdmin()">
+    <h4 class="box-title">Status</h4>
+    <section class="">
+      <mat-checkbox class="" [(ngModel)]="objApiManageComp.objExternApp.is_active" (change)="handleApiStatus()">
+        Active API
+      </mat-checkbox>
+    </section>
+  </div>
+  <div class="col-12" style="margin-bottom: 30px;" *ngIf="!userService.isAdmin() && !userService.isSuperAdmin()">
+    <h4 class="box-title">
+      API Status is 
+      <span *ngIf="objApiManageComp.objExternApp.is_active">Active</span>
+      <span *ngIf="!objApiManageComp.objExternApp.is_active">Inactive</span>
+    </h4>
+    <a href="{{objApiManageComp.apiDocumentation}}" target="_blank"><i class="icon-feather-external-link"></i>API Documentation</a>
+    <br>
+    <a href="{{objApiManageComp.checkoutJsDocumentation}}" target="_blank"><i class="icon-feather-external-link"></i>Web Integration Documentation</a>
+    <br>
+    Demo page for <a href="https://demo-payment-page.seamlesschex.com/checkout2.html" target="_blank">
+      <i class="icon-feather-external-link"></i>Checkout with instantly verified digital checks</a>.
+      There are 2 quick and easy methods of integration Paynote API/SDK based.
+  </div>
+  <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+    <div class="box box-success">
+      <div class="box-header with-border">
+        <h4 class="box-title">
+          Live&nbsp;
+          <button type="button" class="btn btn-primary btn-sm" (click)="regenerateApiKeys(true)" title="Regenerate Live Keys"
+                  *ngIf="userService.isAdmin() || userService.isSuperAdmin()">
+            <i class="fa fa-refresh" aria-hidden="true"></i>
+          </button>
+        </h4>
+      </div>
+      <div class="box-body row">
+        <label class="col-lg-12 col-md-12 col-sm-12 col-xs-12">API Endpoint</label>
+        <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
+          <input class="form-control" type="text" [(ngModel)]="objApiManageComp.objExternApp.live_endpoint" disabled="">
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+          <button ngxClipboard [cbContent]="objApiManageComp.objExternApp.live_endpoint" (cbOnSuccess)="handlerCopy($event)" 
+                  class="btn btn-primary btn-rounded" id="live_endpoint"><i class="icon-feather-copy"></i></button>
+      </div><br>
+      <label class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px">Publishable key</label>
+      <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
+        <input class="form-control" type="text" [(ngModel)]="objApiManageComp.objExternApp.live_public_key" disabled="">
+      </div>
+      <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+        <button ngxClipboard [cbContent]="objApiManageComp.objExternApp.live_public_key" (cbOnSuccess)="handlerCopy($event)" 
+                class="btn btn-primary btn-rounded" id="live_publish_key"><i class="icon-feather-copy"></i></button>
+    </div><br>
+    <label class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px">Secret key</label>
+    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
+      <input class="form-control" type="text" [(ngModel)]="objApiManageComp.objExternApp.live_secret_key" disabled="">
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+      <button ngxClipboard [cbContent]="objApiManageComp.objExternApp.live_secret_key" (cbOnSuccess)="handlerCopy($event)" 
+              class="btn btn-primary btn-rounded" id="live_private_key"><i class="icon-feather-copy"></i></button>
+    </div><br>
+    <label class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px">WebHook Url</label>
+    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9" style="margin-bottom: 10px">
+      <input class="form-control" type="text" [(ngModel)]="objApiManageComp.objExternApp.live_webhook_url"
+             [disabled]="!objApiManageComp.objExternApp.is_active">
+      <div *ngIf="objApiManageComp.objLiveWebhookUrlResponse" style="margin-top: 20px;">
+        <div *ngIf="objApiManageComp.objLiveWebhookUrlResponse.code == 200" class="alert alert-success" role="alert">
+          <strong>Well done! </strong>You WebHook Url working.
+        </div>
+        <div *ngIf="objApiManageComp.objLiveWebhookUrlResponse.code != 200" class="alert alert-warning" role="alert">
+          <strong>Code Error: {{objApiManageComp.objLiveWebhookUrlResponse.code}} </strong>
+          {{objApiManageComp.objLiveWebhookUrlResponse.message}}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+      <button (click)="updateApiWebHook()" class="btn btn-primary btn-rounded"
+        [disabled]="!objApiManageComp.objExternApp.is_active">Save</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+  <div class="box box-success">
+    <div class="box-header with-border">
+      <h4 class="box-title">
+        Sandbox
+        <button type="button" class="btn btn-primary btn-sm" (click)="regenerateApiKeys(false)" 
+                title="Regenerate Sandbox Keys" *ngIf="userService.isAdmin() || userService.isSuperAdmin()">
+          <i class="fa fa-refresh" aria-hidden="true"></i>
+        </button>
+      </h4>
+    </div>
+    <div class="box-body row">
+      <label class="col-lg-12 col-md-12 col-sm-12 col-xs-12">API Endpoint</label>
+      <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
+        <input class="form-control" type="text" [(ngModel)]="objApiManageComp.objExternApp.sandbox_endpoint" disabled="">
+      </div>
+      <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+          <button ngxClipboard [cbContent]="objApiManageComp.objExternApp.sandbox_endpoint" (cbOnSuccess)="handlerCopy($event)" 
+                  class="btn btn-primary btn-rounded" id="live_endpoint"><i class="icon-feather-copy"></i></button>
+      </div><br>
+      <label class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px">Publishable key</label>
+      <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
+        <input class="form-control" type="text" [(ngModel)]="objApiManageComp.objExternApp.test_public_key" disabled="">
+      </div>
+      <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+        <button ngxClipboard [cbContent]="objApiManageComp.objExternApp.test_public_key" (cbOnSuccess)="handlerCopy($event)" 
+                class="btn btn-primary btn-rounded" id="test_publish_key"><i class="icon-feather-copy"></i></button>
+      </div><br>
+      <label class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px">Secret key</label>
+      <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9">
+        <input class="form-control" type="text" [(ngModel)]="objApiManageComp.objExternApp.test_secret_key" disabled="">
+      </div>
+      <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+        <button ngxClipboard [cbContent]="objApiManageComp.objExternApp.test_secret_key" (cbOnSuccess)="handlerCopy($event)" 
+                class="btn btn-primary btn-rounded" id="test_private_key"><i class="icon-feather-copy"></i></button>
+      </div><br>
+      <label class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px">WebHook Url</label>
+      <div class="col-lg-10 col-md-10 col-sm-10 col-xs-9" style="margin-bottom: 10px">
+        <input class="form-control" type="text" [(ngModel)]="objApiManageComp.objExternApp.test_webhook_url"
+               [disabled]="!objApiManageComp.objExternApp.is_active">
+        <div *ngIf="objApiManageComp.objTestWebhookUrlResponse" style="margin-top: 20px;">
+          <div *ngIf="objApiManageComp.objTestWebhookUrlResponse.code == 200" class="alert alert-success" role="alert">
+            <strong>Well done! </strong>You WebHook Url working.
+          </div>
+          <div *ngIf="objApiManageComp.objTestWebhookUrlResponse.code != 200" class="alert alert-warning" role="alert">
+            <strong>Code Error: {{objApiManageComp.objTestWebhookUrlResponse.code}} </strong>
+            {{objApiManageComp.objTestWebhookUrlResponse.message}}
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+        <button (click)="updateApiWebHook()" class="btn btn-primary btn-rounded"
+          [disabled]="!objApiManageComp.objExternApp.is_active">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 20px;">
+  <button (click)="goToSandBoxMode()" *ngIf="objApiManageComp.objExternApp.is_active && !userService.isAdmin() && !userService.isSuperAdmin() && !userService.isApiSandBoxMode()" 
+    title="SANDBOX mode allows you to test how the system works" class="btn btn-warning btn-rounded">
+    GO TO SANDBOX <i class="fa fa-question-circle"></i>
+  </button>
+  <button class="btn btn-warning btn-rounded" (click)="userService.goToLiveMode()" 
+          *ngIf="objApiManageComp.objExternApp.is_active && !userService.isAdmin() && !userService.isSuperAdmin() && userService.isApiSandBoxMode()">
+    GO <b>LIVE</b>
+  </button>
+</div>
+</div>
+<br><br><br>
+<h6 class="element-header">WebHook Logs & Events</h6>
+<div class="row">
+  <div class="col-12 col-lg-3 col-md-4 col-sm-6">
+    <!--<div id="dataTable1_filter" class="dataTables_filter">-->
+      <label>
+        Search:
+        <input type="search" class="form-control form-control-sm" placeholder="Search" style="display: inline-block;width: auto;"
+               [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel" 
+               (search)="getListLogs(null)" (keyup)="getListLogs(null)">
+      </label>
+    <!--</div>-->
+  </div>
+  <div class="col-12 col-lg-3 col-md-4 col-sm-6">
+    <label>
+      Status:
+      <select name="status" class="form-control form-control-sm rounded widthSelect" style="display: inline-block;width: auto;"
+              [(ngModel)]="objApiManageComp.objFilter.status" #status="ngModel" (change)="getListLogs(null)">
+        <option value="all">All</option>
+        <option value="error">Error</option>
+        <option value="success">Success</option>
+      </select>
+    </label>
+  </div>
+  <div class="col-12 col-lg-3 col-md-4 col-sm-6">
+    <label>
+      Event:
+      <select name="event" class="form-control form-control-sm rounded widthSelect" style="display: inline-block;width: auto;"
+              [(ngModel)]="objApiManageComp.objFilter.event" #event="ngModel" (change)="getListLogs(null)">
+        <option value="all">All</option>
+        <option value="endpoint.test">endpoint.test</option>
+        <option value="check.created">check.created</option>
+        <option value="check.changed">check.changed</option>
+        <option value="check.voided">check.voided</option>
+        <option value="user.created">user.created</option>
+        <option value="user.changed">user.changed</option>
+      </select>
+    </label>
+  </div>
+</div>
+<div class="table-responsive">
+  <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+    <div class="row">
+      <div class="col-sm-12">
+        <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable sendChecks responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+          <thead>
+            <tr role="row">
+              <th scope="col">Event</th>
+              <th scope="col">                      
+                <a href="javascript:void(0);" (click)="paginationService.applySort('status', paginationService.sortDir, getListLogs(null))">Status</a>
+                <i *ngIf="paginationService.sortField == 'status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                <i *ngIf="paginationService.sortField == 'status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+              </th>
+              <th scope="col">                      
+                <a href="javascript:void(0);" (click)="paginationService.applySort('attempts', paginationService.sortDir, getListLogs(null))">Attempts</a>
+                <i *ngIf="paginationService.sortField == 'attempts' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                <i *ngIf="paginationService.sortField == 'attempts' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+              </th>
+              <th scope="col">Request/Response</th>
+              <th scope="col">                      
+                <a href="javascript:void(0);" (click)="paginationService.applySort('next_hook', paginationService.sortDir, getListLogs(null))">Next Hook</a>
+                <i *ngIf="paginationService.sortField == 'next_hook' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                <i *ngIf="paginationService.sortField == 'next_hook' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+              </th>
+              <th scope="col">                      
+                <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, getListLogs(null))">Created At</a>                      
+                <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>                  
+              </th>
+<!--                  <th scope="col">Action</th>-->
+            </tr>
+          </thead>
+          <tbody>
+            <tr role="row" *ngFor="let apiLog of objApiManageComp.lstApiLogs" >
+              <td data-title="Event">{{apiLog.event || '&nbsp;'}}</td>
+              <td data-title="Status">{{apiLog.status || '&nbsp;'}}</td> 
+              <td data-title="Attempts">{{apiLog.attempts || '0'}}</td>
+              <td data-title="Request/Response">
+                <button class="btn btn-sm btn-primary btn-rounded" *ngIf="apiLog.response"
+                        (click)="viewResponse(apiLog, templateViewResponseLog)">View</button>
+              </td>
+              <td data-title="Next Hook">{{userService.getDateFormat(apiLog.next_hook, 'MMM D, YYYY hh:mm:ss A')}}</td>
+              <td data-title="Created At">{{userService.getDateFormat(apiLog.created_at, 'MMM D, YYYY hh:mm:ss A')}}</td>
+<!--                  <td data-title="Action">
+                <button title="Disable" style="margin: 6px;" class="btn btn-primary btn-sm btn-rounded btn-rounded-margin" type="button" 
+                        (click)="disablePayLink(payLink)">
+                  <span *ngIf="payLink.enabled">Disable</span>
+                  <span *ngIf="!payLink.enabled">Enable</span>
+                </button>
+                &nbsp;
+              </td>-->
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+    <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+      <div class="icon-w">
+        <i class="os-icon os-icon-eye-off"></i>
+      </div>
+      <span>No request were found...</span>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-12">
+        <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+          <div class="showentries">Show entries</div>
+          <ng-pagination 
+            [position]="'left'" 
+            [pageSize]="paginationService.pageSize"                     
+            [itemsCount]="paginationService.itemsCount" 
+            (getPageData)="getListLogs($event)">                      
+          </ng-pagination>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #templateViewResponseLog let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">View Log</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <label>Request</label>
+      <pre style="word-spacing: normal;word-break: break-all;white-space: pre-wrap;">{{objApiManageComp.objResponseLog.request | json}}</pre>
+      <label>Response</label>
+      <pre style="word-spacing: normal;word-break: break-all;white-space: pre-wrap;">{{objApiManageComp.objResponseLog.response | json}}</pre>
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+    </div>
+  </div>
+</ng-template>

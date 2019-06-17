@@ -1,0 +1,379 @@
+<div class="element-wrapper">
+  <h6 class="element-header">
+    Users&nbsp;
+    <a href="javascript:void(0)" title="Trends" style="font-size: 20px;" (click)="toogleChart()" *ngIf="canShowChart()">
+      <i class="picons-thin-icon-thin-0382_graph_columns_statistics"></i>
+    </a>
+  </h6>
+  <app-charts *ngIf="objUserUsersComp.isVisibleChart" [graphicDataObj]="objUserUsersComp.lstGraphicsObj"></app-charts>
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-8 col-xs-6 col-sm-6 col-md-6 col-lg-4 user-search-form">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <form class="example-form">
+                <label>Search:</label>
+                <input type="search" class="form-control form-control-sm" placeholder="Search user" [ngModelOptions]="{standalone: true}"
+                         [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel"
+                         (search)="getListMerchants(null)" (keyup)="getListMerchants(null, true)" style="width: 70%; margin-bottom: 4px;">
+              </form>
+            </div>
+          </div>
+          <div class="col-4 col-xs-6 col-sm-6 col-md-6 col-lg-8 user-filter-form" style="position: relative;">
+            <button type="button" class="btn-default btn-rounded btn pull-right" (click)="resetFilter()" style="margin-left: 10px;">
+              <i class="icon-feather-x"></i>
+              <span class="visible-md-inline-block visible-lg-inline-block hidden-mobile"> Clear</span>
+            </button>
+            <div class="floated-customizer-btn third-floated-btn btn-primary btn-sm">
+<!--            <div class="btn-primary btn-sm button-filters btn-rounded btn">-->
+              <div class="icon-w"><i class="fa fa-filter"></i></div>
+              <span>Filters</span>
+            </div>
+            <div class="floated-customizer-panel">
+              <div class="fcp-content">
+                <form class="form-inline justify-content-sm-end" *ngIf="userService.isAdmin() || userService.isSuperAdmin()">
+                      <div class="close-customizer-btn"><i class="os-icon os-icon-x"></i></div>
+                  <div class="fcp-group">
+                    <div class="fcp-group-header">Menu Filters</div>
+                    <div class="fcp-group-contents">
+                      <div class="fcp-field">
+                        <label >Status:</label>
+                        <select name="status" class="form-control form-control-sm rounded widthSelect"
+                                [(ngModel)]="objFilter.status" #status="ngModel" (change)="getListMerchants()">
+                          <option value="All">All</option>
+                          <option value="Locked">Locked</option>
+                          <option value="Active">Unlocked</option>
+                        </select>
+                      </div>
+                      <div class="fcp-field">
+                        <label >Role:</label>
+                        <select name="role" class="form-control form-control-sm rounded widthSelect"
+                                [(ngModel)]="objFilter.role" #role="ngModel" (change)="getListMerchants()">
+                          <option value="All">All</option>
+                          <option value="Merchant">Merchant</option>
+                          <option value="Client">Client</option>
+                        </select>
+                      </div>
+                      <div class="fcp-field">
+                        <label >Type:</label>
+                        <select name="type" class="form-control form-control-sm rounded widthSelect"
+                                [(ngModel)]="objFilter.type" #type="ngModel" (change)="getListMerchants()">
+                          <option value="All">All</option>
+                          <option value="business">Business</option>
+                          <option value="personal">Personal</option>
+                        </select>
+                      </div>
+                      <div class="fcp-field with-image-selector-w">
+                        <label >Dwolla Status</label>
+                        <select name="dwl_status" class="form-control form-control-sm rounded widthSelect"
+                                [(ngModel)]="objFilter.dwl_status" #dwl_status="ngModel" (change)="getListMerchants()">
+                          <option value="All">All</option>
+                          <option value="verified">Verified</option>
+                          <option value="unverified">Unverified</option>
+                          <option value="document">Document</option>
+                          <option value="retry">Retry</option>
+                          <option value="suspended">Suspended</option>
+                        </select>
+                      </div>
+                      <div class="fcp-field">
+                        <label >Bank:</label>
+                        <select name="bank" class="form-control form-control-sm rounded widthSelect"
+                                [(ngModel)]="objFilter.bank" #bank="ngModel" (change)="getListMerchants()">
+                          <option value="All">All</option>
+                          <option value="Instant Verified">Instant Verified</option>
+                          <option value="Manual Verified">Manual Verified</option>
+                          <option value="unverified">Unverified</option>
+                        </select>
+                      </div>
+                      <div class="fcp-field">
+                        <label >Plan:</label>
+                        <select name="plan_status" class="form-control form-control-sm rounded widthSelect"
+                                [(ngModel)]="objFilter.plan_status" #plan_status="ngModel" (change)="getListMerchants()">
+                          <option value="All">All</option>
+                          <option value="pending">Receive Only</option>
+                          <option value="cancelled">Unpaid</option>
+                          <option *ngFor="let plan of listPlans" value="{{plan.name}}">{{plan.name}}</option>
+                        </select>
+                      </div>
+                      <div class="fcp-field">
+                        <label >Labels:</label>
+                        <select name="labels" class="form-control form-control-sm rounded widthSelect"
+                                [(ngModel)]="objFilter.labels" #labels="ngModel" (change)="getListMerchants()">
+                          <option value="All">All</option>
+                          <option value="Same Bank Transfer">Same Bank Transfer</option>
+                          <option value="Same Fingerprint">Same Fingerprint</option>
+                          <option value="Same IP">Same IP</option>
+                          <option value="Personal Signup Lock">Personal Signup Lock</option>
+                          <option value="Review">Review</option>
+                          <option value="Voice Code">Voice Code</option>
+<!--                          <option value="Maxmind Risk Score">Maxmind Risk Score</option>-->
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+<!--          <div class="col-xs-6 col-sm-6 col-md-2 col-lg-2" style="position: relative;">-->
+<!--            -->
+<!--          </div>-->
+        </div>
+
+        <div class="row" style="position: relative;">
+          <hr>
+          <div class="col-sm-12 table-responsive">
+            <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    Name / Email /
+                  <!--</th>
+                  <th scope="col">-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('phone', paginationService.sortDir, getListMerchants(null))">Phone</a>
+                    <i *ngIf="paginationService.sortField == 'phone' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'phone' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('role', paginationService.sortDir, getListMerchants(null))">Role</a>
+                    <i *ngIf="paginationService.sortField == 'role' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'role' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  <!--</th>
+                  <th scope="col">-->
+                    /
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('type', paginationService.sortDir, getListMerchants(null))">Type</a>
+                    <i *ngIf="paginationService.sortField == 'type' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'type' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('dwl_status', paginationService.sortDir, getListMerchants(null))">Dwolla Status</a>
+                    <i *ngIf="paginationService.sortField == 'dwl_status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'dwl_status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                    /
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('dwl_status', paginationService.sortDir, getListMerchants(null))"> Ben Owner</a>
+                     <i *ngIf="paginationService.sortField == 'dwl_status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                     <i *ngIf="paginationService.sortField == 'dwl_status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <!--<th scope="col">Ben Owner</th>-->
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('bank', paginationService.sortDir, getListMerchants(null))">Bank</a>
+                    <i *ngIf="paginationService.sortField == 'bank' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'bank' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('plan_status', paginationService.sortDir, getListMerchants(null))">Plan</a>
+                    <i *ngIf="paginationService.sortField == 'plan_status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'plan_status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('status', paginationService.sortDir, getListMerchants(null))">Status</a>
+                    <i *ngIf="paginationService.sortField == 'status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Created-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, getListMerchants(null))">Created</a>
+                    <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let customer of listMerchants" #tdContainer >
+                  <td data-title="Name" scope="row" class="td-container" >
+
+                    <span class="indication" (click)="openPopup(popupTemplate, customer)">
+                    <mat-icon class="indication-icon" [ngClass]="selectIndication(customer)" aria-hidden="false" aria-label="Example home icon">fiber_manual_record</mat-icon>
+                    </span>
+                    <div class="customer">
+                    <div class="name">
+                      {{customer.name || '&nbsp;'}}
+                    </div>
+                    <div class="mail">
+                     {{customer.email || '&nbsp;'}}
+                    </div>
+                    <div data-tiTtle="Phone">
+                                <!--<span style="white-space: pre;">{{customer.phone || '&nbsp;' | phone}}</span><br>-->
+                             <span style="white-space: pre;">{{customer.phone || '&nbsp;'}}</span><br>
+                             <span *ngIf="customer.phone_type">
+                           <span class="badge badge-warning text-capitalize">{{customer.phone_type}}</span>
+
+                      </span>
+                    </div>
+
+                    <ng-template #popupTemplate let-c="close" let-d="dismiss" >
+                    <div class="popup-labels" >
+                    <span *ngIf="customer.labels && customer.labels.length">
+                      <span *ngFor="let label of customer.labels">
+                        <a class="badge badge-warning" href="javascript:void(0)" *ngIf="userService.labelIsSameFingerprint(label)" style="margin-left: 3px;"
+                           (click)="getListSameFingerprint(customer.u_token)">
+                          {{label}}
+                        </a>
+                        <a class="badge badge-warning" href="javascript:void(0)" *ngIf="userService.labelIsSameIp(label)" style="margin-left: 3px;"
+                           (click)="getListSameIP(customer.u_token)">
+                          {{label}}
+                        </a>
+                        <a class="badge badge-warning" href="javascript:void(0)" *ngIf="userService.labelIsSameBank(label)" style="margin-left: 3px;"
+                           (click)="getListSameBankAccount(customer.u_token)">
+                          {{label}}
+                        </a>
+                        <span *ngIf="userService.labelIsNotForShowInPopup(label)" style="margin-left: 3px;" class="badge badge-warning">{{label}}</span>
+                      </span>
+                    </span>
+                    <span *ngIf="customer.ip_risk && customer.ip_risk < 20">
+                      <span class="badge badge-light">Maxmind Risk Score {{customer.ip_risk}}%</span>
+                    </span>
+                    <span *ngIf="customer.ip_risk && customer.ip_risk < 50 && customer.ip_risk > 20">
+                      <span class="badge badge-warning">Maxmind Risk Score {{customer.ip_risk}}%</span>
+                    </span>
+                    <span *ngIf="customer.ip_risk && customer.ip_risk >= 50">
+                      <span class="badge badge-danger">Maxmind Risk Score {{customer.ip_risk}}%</span>
+                    </span>
+                    </div>
+                  </ng-template>
+                  </div>
+                  </td>
+                  <td data-title="Role">
+                    <span>{{customer.role || '&nbsp;'}} </span>
+                  <!--</td>-->
+                    <span>{{ customer.role && customer.type ? '/' : '&nbsp;'}}</span>
+                    <span data-title="Type" class="text-capitalize">
+                      {{customer.type || '&nbsp;'}}
+                    </span>
+                  </td>
+                  <td data-title="Dwolla Status" class="text-capitalize">
+                    <span>{{getDwollaStatus(customer) || '&nbsp;'}} </span>
+                  <!--</td>-->
+                    {{ customer.dwl_require == '&nbsp;' ? '/' : '&nbsp;'}}
+
+                    <span data-title="Ben Owner" class="text-capitalize">
+                      <span *ngIf="customer.dwl_require" [innerHTML]="getDwlRequire( customer.dwl_require ) || '&nbsp;'"></span>
+                      <span *ngIf="!customer.dwl_require">&nbsp;</span>
+                    </span>
+                  </td>
+                  <td data-title="Bank" class="text-capitalize">{{getBankInfo(customer) || '&nbsp;'}}</td>
+                  <td data-title="Plan">{{getStatusPlanString(customer.plan_status || '&nbsp;')}}</td>
+                <td data-title="Status">
+                  <mat-slide-toggle
+                    title="{{customer.status || '&nbsp;'}}"
+                    class="adminStatus example-margin"
+                    color="primary"
+                    (change)="onToggleMerchantStatus($event, customer)"
+                    [checked] = "customer.status == 'Active' ? true : false">
+                  </mat-slide-toggle>
+                </td>
+                <td data-title="Created">
+                  <span style="white-space: pre;">{{userService.getDateFormat(customer.created_at)}}</span><br>
+                  <span *ngIf="canShowChart()" class="" [ngStyle]="{'color': getColorForFraudRisk(customer)}" style="font-size: 13px;" [innerHTML]="getLabelFraudRisk(customer)"></span>
+                </td>
+                <td data-title="Action" style="min-width: 65px;" class="actions text-right">
+                  <a href="javascript:void(0);" (click)="userService.ghostLogin(customer.u_token)" title="Ghost Login"
+                     class="action-gost-login" *ngIf="customer.dwl_token" style="margin-bottom: 5px; position: relative;">
+                    <i class="os-icon os-icon-user-male-circle"></i>
+                  </a>
+                  <a href="javascript:void(0);" (click)="toogleFraud(customer)" title="{{ customer.fraud == 1 ? 'Fraud / Mark as normal' : 'Normal / Mark as fraud'}}"
+                     class="action-toogle-fraud" *ngIf="canShowFraudButton()" style="margin-bottom: 5px; position: relative;">
+                    <i class="icon-feather-alert-triangle" style="color: #bbbaba" [ngClass]="{ 'has-fraud': customer.fraud == 1 }"></i>
+                  </a>
+                  <a href="/users/{{customer.dwl_token}}/{{customer.u_token}}" title="Edit"
+                     class="action-edit-merchant" *ngIf="customer.dwl_token"
+                     style="margin-bottom: 5px; position: relative; display: inline-block;">
+                    <i class="picons-thin-icon-thin-0001_compose_write_pencil_new"></i>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No user were found. Try changing your query...</span>
+        </div>
+      <div class="row">
+        <div class="col-sm-12 col-md-12">
+          <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+            <div class="showentries">Show entries</div>
+            <ng-pagination
+              [position]="'left'"
+              [pageSize]="paginationService.pageSize"
+              [itemsCount]="paginationService.itemsCount"
+              (getPageData)="getListMerchants($event)">
+            </ng-pagination>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+
+<ng-template #templateListSameFingerprint let-c="close" let-d="dismiss">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Same Fingerprints</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+        <thead>
+          <tr role="row">
+            <th scope="col">Name / Email</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Role</th>
+            <!--<th scope="col">Type</th>-->
+            <!--<th scope="col">Dwolla Status</th>-->
+            <!--<th scope="col">Plan</th>-->
+            <th scope="col">Status</th>
+            <th scope="col">Created</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr role="row" *ngFor="let sameFingerprint of listSameFingerprints">
+            <td data-title="Name" scope="row">
+              {{sameFingerprint.name || '&nbsp;'}}<br>
+              {{sameFingerprint.email || '&nbsp;'}}
+            </td>
+            <td data-title="Phone">{{sameFingerprint.phone || '&nbsp;'}}</td>
+            <td data-title="Role">{{sameFingerprint.role || '&nbsp;'}}</td>
+            <!--<td data-title="Type" class="text-capitalize">{{sameFingerprint.type || '&nbsp;'}}</td>-->
+            <!--<td data-title="Dwolla Status" class="text-capitalize">{{sameFingerprint.dwl_status || '&nbsp;'}}</td>-->
+            <!--<td data-title="Plan">{{getStatusPlanString(sameFingerprint.plan_status || '&nbsp;')}}</td>-->
+            <td data-title="Status">
+              <mat-slide-toggle
+                title="{{sameFingerprint.status || '&nbsp;'}}"
+                class="adminStatus example-margin"
+                color="primary"
+                (change)="onToggleMerchantStatus($event, sameFingerprint)"
+                [checked] = "sameFingerprint.status == 'Active' ? true : false">
+              </mat-slide-toggle>
+            </td>
+            <td data-title="Created">{{userService.getDateFormat(sameFingerprint.created_at)}}</td>
+            <td data-title="Action">
+              <a href="javascript:void(0);" (click)="closeModal(); userService.ghostLogin(sameFingerprint.u_token)" title="Ghost Login"
+                 class="action-gost-login" *ngIf="sameFingerprint.dwl_token">
+                <i class="os-icon os-icon-user-male-circle"></i>
+              </a>
+              <a href="/users/{{sameFingerprint.dwl_token}}/{{sameFingerprint.u_token}}" style="margin-left: 8px;" title="Edit"
+                 class="action-edit-merchant" *ngIf="sameFingerprint.dwl_token">
+                <i class="picons-thin-icon-thin-0001_compose_write_pencil_new"></i>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+    </div>
+  </div>
+</ng-template>

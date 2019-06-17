@@ -1,0 +1,71 @@
+<ng-http-loader 
+    [backgroundColor]="'#ff0000'"
+    [spinner]="spinkit.skWave"
+    [debounceDelay]="100"
+    [minDuration]="300">
+</ng-http-loader>
+
+<noscript>
+  <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W7RK4F" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+
+<button aria-label="Close" class="close" data-dismiss="modal" type="button" 
+        *ngIf="objExpressCheckoutComp.objExprCheckRequest.displayMethod == 'iframe'"
+        (click)="closeIframe()">
+  <span class="os-icon os-icon-close"></span>
+</button>
+<div class="express-checkout-body" 
+     [ngClass]="{ 'express-checkout-body-in-iframe': objExpressCheckoutComp.objExprCheckRequest.displayMethod == 'iframe' }">
+  <div class="auth-box-w">
+    <div class="logo-w" style="padding: 5%;">
+      <img alt="Logo" src="{{getLogo()}}" style="max-height: 120px;">
+    </div>
+    <div style="padding: 15px 15px 25px 15px;">
+      <h4 class="auth-header text-center" style="padding: 15px 15px 25px 15px;">
+        {{objExpressCheckoutComp.objExprCheckRequest.lightBox.title || 'Pay with Paynote'}}
+      </h4>
+      <label *ngIf="objExpressCheckoutComp.objExprCheckRequest.lightBox.subtitle" style="padding: 0.75rem;">
+        {{objExpressCheckoutComp.objExprCheckRequest.lightBox.subtitle}}
+      </label>
+      <br>
+      <label class="text-center" style="padding: 0.75rem;" *ngIf="objExpressCheckoutComp.objExprCheckRequest.user">
+        <strong>Hi, {{objExpressCheckoutComp.objExprCheckRequest.user.name || ''}}!</strong>
+      </label>
+      <div class="table-responsive" *ngIf="objExpressCheckoutComp.objExprCheckRequest.checkout.items.length">
+        <table class="table table-lightborder">
+          <tbody>
+            <tr *ngFor="let item of objExpressCheckoutComp.objExprCheckRequest.checkout.items">
+              <td>{{item.title}}</td>
+              <td class="text-right">
+                {{item.price | currency:'':'symbol'}}&nbsp;{{objExpressCheckoutComp.objExprCheckRequest.checkout.currency}}
+              </td>
+            </tr>
+            <tr>
+              <td>Total</td>
+              <td class="text-right">
+                {{objExpressCheckoutComp.objExprCheckRequest.checkout.totalValue | currency:'':'symbol'}}&nbsp;{{objExpressCheckoutComp.objExprCheckRequest.checkout.currency}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-responsive" *ngIf="objExpressCheckoutComp.objExprCheckRequest.checkout.description || true" style="padding: 15px 15px 25px 15px;">
+        <label>{{objExpressCheckoutComp.objExprCheckRequest.checkout.description || ''}}</label>
+      </div>
+      <div class="text-center">
+        <button class="btn btn-primary btn-rounded btn-block" (click)="openDialogPlaid()" style="width: 90%;display: inline-block;"
+                *ngIf="!objExpressCheckoutComp.canShowExpressCheckout">
+          Continue
+        </button>
+        <button class="btn btn-primary btn-rounded btn-block" (click)="submitPayment()" style="width: 90%;display: inline-block;"
+                *ngIf="objExpressCheckoutComp.canShowExpressCheckout">
+          {{objExpressCheckoutComp.objExprCheckRequest.lightBox.formButtonLabel || 'PAY'}}
+        </button>
+      </div>
+      <hr *ngIf="objExpressCheckoutComp.objExprCheckRequest.displayMethod == 'redirect'">
+      <a style="font-size: 12px;" href="{{getReturnUrl()}}" *ngIf="objExpressCheckoutComp.objExprCheckRequest.displayMethod == 'redirect'">
+        Cancel and return to {{getStoreName()}}
+      </a>
+    </div>
+  </div>
+</div>

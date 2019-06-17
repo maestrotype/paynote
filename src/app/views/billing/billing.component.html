@@ -1,0 +1,267 @@
+<div class="element-wrapper">
+  <div class="element-actions"> </div>
+  <h6 class="element-header">Current Bill</h6>
+  <div class="element-content">
+    <div class="row">
+      <div class="col-sm-4 col-xxxl-4">
+        <div class="element-box el-tablo" href="#">
+          <div class="label">Send checks</div>
+          <div class="value">{{currentBill.report.send}}</div>
+        </div>
+      </div>
+      <div class="col-sm-4 col-xxxl-4">
+        <div class="element-box el-tablo" href="#">
+          <div class="label">Receive checks</div>
+          <div class="value">{{currentBill.report.receive}}</div>
+        </div>
+      </div>
+      <div class="col-sm-4 col-xxxl-4">
+        <div class="element-box el-tablo" href="#">
+          <div class="label">Failed</div>
+          <div class="value">{{currentBill.report.failed}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="element-wrapper">
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div>
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-3">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search billing" 
+                       [(ngModel)]="paginationService.searchQuery" (search)="getBillingList(null)" (keyup)="getBillingList(null)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="position: relative;margin-top: 40px;border: 0;">
+          <div class="col-sm-12">
+            <table id="dataTable1" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">                  
+                  <th scope="col">
+                    Start
+                  </th>
+                  <th scope="col">
+                    End
+                  </th>
+                  <th scope="col">
+                    Amount
+                  </th>
+                  <th scope="col">
+                    Plan name
+                  </th>
+                  <th scope="col">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <!--<tr role="row">-->
+                <tr role="row" *ngFor="let billing of lstBilling.list.data" (click)= "getBillingDataForTransaction(billing)">
+
+                    <td data-title="Start" scope="row">
+                    {{userService.getDateFormat(billing.opening)}}
+                  </td>
+                  <td data-title="End">
+                    {{userService.getDateFormat(billing.closing)}}
+                  </td>
+                  <td data-title="Amount">
+                    {{billing.amount | currency:'' :'symbol' || '&nbsp;'}}
+                  </td>              
+                  <td data-title="Plan name">
+                    <span *ngIf="lstBilling.subscription">{{lstBilling.subscription.p_name}}</span>
+                  </td>                  
+                  <td scope="row">
+                    <a title="View Billing Details" (click)= "showBillingInfoInPopup( viewBillingInfo, billing)" href="javascript:void(0)">
+                       <i class="picons-thin-icon-thin-0033_search_find_zoom"></i>
+                    </a>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No billing were found.</span>
+        </div>
+        <div class="row">          
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="getBillingList($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="element-wrapper" *ngIf="billingInputObj.isBillingTrans">
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12">
+            <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable sendChecks responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('number', paginationService.sortDir, listBillingTransactions(null))">Number</a>
+                    <i *ngIf="paginationService.sortField == 'number' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'number' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('type', paginationService.sortDir, listBillingTransactions(null))">Type</a>
+                    <i *ngIf="paginationService.sortField == 'type' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'type' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    Email
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('amount', paginationService.sortDir, listBillingTransactions(null))">Amount</a>
+                    <i *ngIf="paginationService.sortField == 'amount' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'amount' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">   
+                    Status
+                  </th>
+                  <th scope="col">
+                    Name
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, listBillingTransactions(null))">Date</a>                      
+                    <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>                  
+                  </th>
+                  <th scope="col">
+                    Description
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let billTransData of lstBillingTrans">
+
+                    <td data-title="Number" scope="row">
+                    {{billTransData.number || '&nbsp;'}}
+                  </td>
+                  <td data-title="Type">
+                    {{billTransData.type || '&nbsp;'}}
+                  </td>
+                  <td data-title="Email">
+                    {{billTransData.recipient.email || '&nbsp;'}}
+                  </td>
+                  <td data-title="Amount">                    
+                    {{billTransData.amount | currency:'':'symbol'}}
+                  </td>
+                  <td data-title="Status">
+                    {{billTransData.status || '&nbsp;'}}
+                  </td>
+                  <td data-title="Name">
+                    {{billTransData.recipient.name || '&nbsp;'}}
+                  </td>
+                  <td data-title="Date" class="col-md-100">
+                    {{userService.getDateFormat(billTransData.created_at)}}
+                  </td>
+                  <td data-title="Description">
+                    {{billTransData.description || '&nbsp;'}}
+                  </td>
+                </tr>
+              </tbody>
+            </table>      
+            <div *ngIf="!isTransaction" class="ssg-nothing-found">
+              <div class="icon-w">
+                <i class="os-icon os-icon-eye-off"></i>
+              </div>
+              <span>No transaction were found.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #viewBillingInfo let-c="close" let-d="dismiss" let-create="addBlockList">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 style="margin-bottom: 0px;" class="modal-title">Bill detail</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <div class="modal-body">
+      <!--<div class="modal-body">-->
+      <div class="row"> 
+        <div class="col-sm-6 billMargin">
+          <label>Billing Start:</label> {{userService.getDateFormat(billingInfoForDialog.billing.invoice.opening)}}
+        </div>
+        <div class="col-sm-6 billMargin">
+          <label>Billing End:</label> {{userService.getDateFormat(billingInfoForDialog.billing.invoice.closing)}}
+        </div>         
+        <div class="col-sm-6 billMargin">
+          <label>Invoice Plan:</label> {{billingInfoForDialog.billing.invoice.description}}
+        </div>
+        <div class="col-sm-6 billMargin">
+          <label>Amount plan:</label> {{billingInfoForDialog.billing.invoice.amount | currency:'':'symbol'}}
+        </div>
+        <div class="col-sm-6 billMargin">
+          <label>Additional Paynotes Sent:</label> {{billingInfoForDialog.billing.report.send | currency}} х {{billingInfoForDialog.subscription.remaining.send.over | currency:'':'symbol'}}
+        </div>
+        <div class="col-sm-6 billMargin">
+          <label>Amount overage:</label> {{billingInfoForDialog.billing.report.amount_over_send | currency}}
+        </div>
+        <div class="col-sm-6 billMargin">
+          <label>Paynotes received amount:</label> {{billingInfoForDialog.billing.report.amount_receive | currency:'':'symbol'}} х {{billingInfoForDialog.subscription.remaining.receive.verify}}%. 
+        </div>
+      <div class="col-sm-6 billMargin">
+          <label>Amount received:</label> {{billingInfoForDialog.billing.report.amount_fee_receive | currency}}
+        </div>
+        <div class="col-sm-6 billMargin">
+          <label>Transaction failed:</label> {{billingInfoForDialog.billing.report.failed }}
+        </div>
+        <div class="col-sm-6 billMargin">
+          <label>Amount failed:</label> {{billingInfoForDialog.billing.report.failed_amount | currency}}
+        </div>
+        <div class="col-sm-6 billMargin">
+          <label>Transaction unpaid:</label> {{billingInfoForDialog.billing.report.unpaid }}
+        </div>
+        <div class="col-sm-6 billMargin">
+          <label>Amount unpaid:</label> {{billingInfoForDialog.billing.report.unpaid_amount | currency}}
+        </div>
+        <div class="col-sm-6 billMargin">
+          <label>Transaction canceled:</label> {{billingInfoForDialog.billing.report.canceled }}
+        </div>
+        <div class="col-sm-6 billMargin">
+          <label>Amount canceled:</label> {{billingInfoForDialog.billing.report.canceled_amount | currency}}
+        </div>
+       
+      </div>  
+      <!--</div>-->
+    </div>
+    <div class="modal-footer">
+      <br>
+      <button type="button" class="slick-prev slick-arrow" (click)="c('Close click')">Close</button>
+    </div>
+  </div>
+</ng-template>

@@ -1,0 +1,31 @@
+.from_to_transactions{
+      display: inline-block;
+    width: 50px;
+    color: #8393aa;
+    font-size: .85714rem;
+    letter-spacing: .6px;
+    line-height: .85714rem;
+    text-transform: uppercase;
+}
+.trans_symbol{
+   display: inline-block;
+}
+.added_withdrawn{
+  font-weight: bold;
+  font-size: 2em;
+}
+.added_withdrawn_amount{
+      color: #58b467;
+    font-size: 2.1em;
+    margin-left: 20px;
+}
+.added_withdrawn_amount_{
+    font-size: 2.1em;
+    margin-left: 20px;
+}
+.profile-tile {
+     margin-bottom: 0; 
+}
+h4.modal-title{
+  margin-left: 10px;
+}

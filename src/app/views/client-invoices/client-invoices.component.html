@@ -1,0 +1,129 @@
+<div class="element-wrapper">
+  <h6 class="element-header">Payment Requests</h6>
+  <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div>
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-3">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search" 
+                       [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel" (search)="getListInvoices()" (keyup)="getListInvoices(null)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="position: relative;margin-top: 40px;">
+          <hr>
+          <div class="col-sm-12 table-responsive">
+            <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    <!--Name-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('number', paginationService.sortDir, getListInvoices(null))">Number</a>
+                      <i *ngIf="paginationService.sortField == 'number' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                      <i *ngIf="paginationService.sortField == 'number' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('rec_name', paginationService.sortDir, getListInvoices(null))">Name</a>
+                      <i *ngIf="paginationService.sortField == 'rec_name' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                      <i *ngIf="paginationService.sortField == 'rec_name' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Email-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('rec_email', paginationService.sortDir, getListInvoices(null))">Email</a>
+                      <i *ngIf="paginationService.sortField == 'rec_email' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                      <i *ngIf="paginationService.sortField == 'rec_email' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Phone-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('amount', paginationService.sortDir, getListInvoices(null))">Amount</a>
+                      <i *ngIf="paginationService.sortField == 'amount' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                      <i *ngIf="paginationService.sortField == 'amount' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Status-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('status', paginationService.sortDir, getListInvoices(null))">Status</a>
+                      <i *ngIf="paginationService.sortField == 'status' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                      <i *ngIf="paginationService.sortField == 'status' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Created-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, getListInvoices(null))">Created</a>
+                      <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                      <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Created-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('description', paginationService.sortDir, getListInvoices(null))">Description</a>
+                      <i *ngIf="paginationService.sortField == 'description' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                      <i *ngIf="paginationService.sortField == 'description' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let invoice of listInvoices">
+                  <td data-title="Number" scope="row">
+                    {{invoice.number || '&nbsp;'}}
+                  </td>
+                  <td data-title="Name" scope="row">
+                    {{invoice.rec_name || '&nbsp;'}}
+                  </td>
+                  <td data-title="Email">
+                    {{invoice.rec_email || '&nbsp;'}}
+                  </td>
+                  <td data-title="Amount">
+                    {{invoice.amount | currency:'' :'symbol' || '&nbsp;'}}
+                  </td>
+                  <td data-title="Status">
+                    <strong *ngIf="invoice.status == 'New'" class="badge badge-warning">{{invoice.status || '&nbsp;'}}</strong>
+                    <span *ngIf="invoice.status != 'New'">{{invoice.status || '&nbsp;'}}</span>
+                  </td>
+                  <td data-title="Created">
+                    {{userService.getDateFormat(invoice.created_at)}}
+                  </td>
+                  <td data-title="Description">
+                    {{invoice.description || '&nbsp;'}}
+                  </td>
+                  <td data-title="Action">
+                    <a href="/invoice/{{invoice.i_token}}" title="Pay Request Payment" target="_blank" *ngIf="invoice.status == 'New'">
+                      <i class="fa fa-dollar" aria-hidden="true"></i> Pay
+                    </a>
+                    &nbsp;
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No data were found.</span>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+              <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+                <div class="showentries">Show entries</div>
+                <ng-pagination 
+                  [position]="'left'" 
+                  [pageSize]="paginationService.pageSize"                     
+                   [itemsCount]="paginationService.itemsCount"
+                  (getPageData)="getListInvoices($event)">                      
+                </ng-pagination>
+                <!---->
+              </div>
+            </div>
+          </div>
+
+      </div>
+    </div>
+  </div>
+</div>

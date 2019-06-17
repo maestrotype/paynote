@@ -1,0 +1,291 @@
+<div class="element-wrapper" style="padding-bottom: 0px;">
+  <h6 class="element-header">Create a Payment Page to Accept a Check and Get Paid</h6>
+  <div class="element-box"> 
+    <form name="form" (ngSubmit)="f.form.valid && submitBillLink()" #f="ngForm" autocomplete="nope">
+      <div class="row"> 
+        <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+          <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="form-group">
+              <label for="billLinkAmount">Amount</label>
+              <input autocomplete="off" id="billLinkAmount" class="form-control" placeholder="Amount" type="text" name="amount" 
+                     currencyMask [(ngModel)]="objBillingLinkComp.form.amount" #amount="ngModel">
+            </div>
+          </div>
+          <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="form-group">
+              <label for="billLinkDescription">Description <i class="fa fa-question-circle" title="{{messages.get('SEND_RECEIVE_DESCRIPTION_MAX_LENGTH')}}"></i></label>
+              <input id="billLinkDescription" maxlength="75" class="form-control" placeholder="Description" type="text" name="description"
+                     [(ngModel)]="objBillingLinkComp.form.description" #description="ngModel">
+            </div>
+          </div>
+          <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="form-group">
+              <label for="billLinkThankUrl">Thank You Page Redirect URL</label>
+              <input id="billLinkThankUrl" class="form-control" placeholder="https://www.google.com/thank_you_url" type="text" name="callback"
+                     [(ngModel)]="objBillingLinkComp.form.callback" #callback="ngModel">
+            </div>
+          </div>
+          
+          <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="form-group">
+              <label for="billLinkMessage">Message</label>
+              <input id="billLinkMessage" class="form-control" type="text" name="title"
+                         [(ngModel)]="objBillingLinkComp.form.title" #title="ngModel">
+            </div>
+          </div>
+          <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="form-group">
+              <label for="billLinkButton">Button</label>
+              <input id="billLinkButton" class="form-control" type="text" name="button" maxlength="25"
+                         [(ngModel)]="objBillingLinkComp.form.button" #button="ngModel">
+              <small>Max length 25 character's</small>
+            </div>
+          </div>
+          
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6 col-12">
+          <div class="row">
+            <div class="col-lg-4 col-md-4 col-sm-6">
+              <fieldset class="form-group" touranchor="tour-recurring-checks" style="margin-top: 0;">
+                <label for="" style="margin-bottom: 0.8em;">Recurring Options:</label>
+                <div class="input-group"> &nbsp;&nbsp;
+                  <label class="switch switch-default switch-pill switch-primary">
+                    <mat-slide-toggle
+                      id="receiveMoneyRecurring"
+                      class="example-margin"
+                      (change)="onChangeReccuring($event)"
+                      color="primary"
+                      [(ngModel)]="objBillingLinkComp.form.recurring" [ngModelOptions]="{standalone: true}">
+                      Billing cycle
+                    </mat-slide-toggle>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-6">
+              <label for="">Billing cycle</label>
+              <select id="receiveMoneyMakeRecurring" class="form-control" placeholder="Make recurring " name="recurringPeriod" style="width: 100%;"
+                      [(ngModel)]="objBillingLinkComp.form.billing_cycle" #billing_cycle="ngModel" [disabled]="!makeRecurringToggle">
+                <option value="day" *ngIf="subDomen != 'paynote'">Daily</option>
+                <option value="week" selected>Weekly</option>
+                <option value="month">Monthly</option>
+              </select>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-6">
+              <div class="form-group">
+                <label for="">
+                  Installments #:
+                  <i class="fa fa-question-circle" title="Total number of recurring payments for this subscription. Leave empty for infinite subscription."></i>
+                </label>
+                <input id="receiveMoneyNumberPayments" class="form-control" placeholder="&infin;" type="number" name="num_of_payments"
+                       [(ngModel)]="objBillingLinkComp.form.num_of_payments" #num_of_payments="ngModel"
+                       [disabled]="!makeRecurringToggle">
+                <small *ngIf="makeRecurringToggle" class="hint">Leave blank to schedule payments in perpetuity.</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="form-group">
+              <label for="billLinkOptions">Payment Options:</label><br>
+              <mat-checkbox [(ngModel)]="objBillingLinkComp.form.is_instant_v" #is_instant_v="ngModel" style="font-size: 14px;"
+                [ngModelOptions]="{standalone: true}" required [disabled]="true" id="billLinkOptions">
+                Instant Verification
+              </mat-checkbox>&nbsp;&nbsp;
+              <mat-checkbox [(ngModel)]="objBillingLinkComp.form.is_manual_v" #is_manual_v="ngModel" style="font-size: 14px;"
+                [ngModelOptions]="{standalone: true}">
+                Manual Verification <i class="fa fa-question-circle" title="{{utility.getTrustHtml( messages.get('PP_MANUAL_VERIFICATION_TOOLTIP'))}}"></i> 
+                - Selecting this may result in increased failed payments.
+              </mat-checkbox>
+              <div *ngIf="!is_instant_v.valid && (is_instant_v.dirty || is_instant_v.touched)" 
+                class="help-block form-text with-errors form-control-feedback">Instant Verification is required</div>
+              <br><br>
+              <mat-checkbox [(ngModel)]="objBillingLinkComp.form.is_two_auth" #is_two_auth="ngModel" style="font-size: 14px;"
+                [ngModelOptions]="{standalone: true}">
+                Two Factor Authentication <i class="fa fa-question-circle" title="{{utility.getTrustHtml( messages.get('PP_TWO_F_A_TOOLTIP'))}}"></i>
+              </mat-checkbox>
+            </div>
+          </div>
+          <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="form-group">
+              <label for="billLinkAppearance">Appearance:</label><br>
+              Logo&nbsp;&nbsp;<input  type="file" (change)="fileChangeEvent($event)" [ngModelOptions]="{standalone: true}" id="billLinkAppearance"
+                                      [(ngModel)]="objBillingLinkComp.uploadFile" #uploadFile="ngModel" accept="image/jpeg,image/png" />
+              <image-cropper
+                  [imageChangedEvent]="objBillingLinkComp.imageChangedEvent"
+                  [maintainAspectRatio]="true"
+                  [aspectRatio]="23 / 9"
+                  [resizeToWidth]="250"
+                  format="png"
+                  (imageCropped)="imageCropped($event)"
+                  (imageLoaded)="imageLoaded()"
+                  (loadImageFailed)="loadImageFailed()"
+              ></image-cropper>
+              <img [src]="objBillingLinkComp.form.logo" />
+            </div>
+          </div>
+          <div class="col-lg-12">    
+            <div class="buttons-w form-group">
+              <button id="receiveMoneyButton" [disabled]="!f.form.valid || isLoading" 
+                      class="btn btn-primary btn-rounded btn-lg">Create Payment Link</button>
+            </div> 
+          </div>
+          <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="form-group">
+              <label for="newPaymentLink">Payment Link</label>
+              <div class="row"> 
+                <div class="col-lg-10 col-md-10 col-sm-10 col-9">
+                  <input id="newPaymentLink" class="form-control" type="text" name="new-payment-link" [disabled]="true"
+                         [(ngModel)]="objBillingLinkComp.createdPaymentLink" #createdPaymentLink="ngModel">
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-2 col-3">
+                  <button type="button" ngxClipboard [cbContent]="objBillingLinkComp.createdPaymentLink" (cbOnSuccess)="handlerCopy($event)" 
+                          class="btn btn-primary btn-rounded" id="copyNewPaymentLink">Copy
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<br>
+<div class="element-wrapper">
+  <h6 class="element-header">Payment Links</h6>
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-4">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search" 
+                       [(ngModel)]="paginationService.searchQuery" #paginationService.searchQuery="ngModel" 
+                       (search)="getListPaymentLink(null)" (keyup)="getListPaymentLink(null)">
+                <button type="button" class="btn-default btn-sm btn-rounded btn" (click)="resetFilter()">
+                  <i class="icon-feather-x"></i>
+                  <span class="visible-md-inline-block visible-lg-inline-block hidden-mobile"> Clear</span>
+                </button>
+              </label>
+<!--              <button type="button" class="btn btn-danger" [disabled]="!canVoidIncoice" (click)="()">
+                <i class="fa fa-trash-o" aria-hidden="true"></i>&nbsp;VOID
+              </button>-->
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <table id="dataTable11" width="100%" class="table table-striped table-lightfont dataTable sendChecks responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+<!--                  <th scope="col">
+                    <input type="checkbox" [(ngModel)]="selectAllInvoices" (click)="selectAllCheck()">
+                  </th>-->
+                  <th scope="col">Url</th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('amount', paginationService.sortDir, getListPaymentLink(null))">Amount</a>
+                    <i *ngIf="paginationService.sortField == 'amount' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'amount' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('description', paginationService.sortDir, getListPaymentLink(null))">Description</a>
+                    <i *ngIf="paginationService.sortField == 'description' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'description' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('is_instant_v', paginationService.sortDir, getListPaymentLink(null))">IV</a>
+                    <i *ngIf="paginationService.sortField == 'is_instant_v' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'is_instant_v' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('is_manual_v', paginationService.sortDir, getListPaymentLink(null))">MV</a>
+                    <i *ngIf="paginationService.sortField == 'is_manual_v' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'is_manual_v' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('is_two_auth', paginationService.sortDir, getListPaymentLink(null))">2FA</a>
+                    <i *ngIf="paginationService.sortField == 'is_two_auth' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'is_two_auth' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('num_of_views', paginationService.sortDir, getListPaymentLink(null))">Link Accessed</a>
+                    <i *ngIf="paginationService.sortField == 'num_of_views' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'num_of_views' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('num_of_checks', paginationService.sortDir, getListPaymentLink(null))">Checks Created</a>                      
+                    <i *ngIf="paginationService.sortField == 'num_of_checks' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'num_of_checks' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>                  
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('created_at', paginationService.sortDir, getListPaymentLink(null))">Created At</a>                      
+                    <i *ngIf="paginationService.sortField == 'created_at' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'created_at' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>                  
+                  </th>
+                  <th scope="col">                      
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('callback', paginationService.sortDir, getListPaymentLink(null))">Thank You Url</a>                      
+                    <i *ngIf="paginationService.sortField == 'callback' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'callback' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>                  
+                  </th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let payLink of objBillingLinkComp.listPaymentLinks" >
+<!--                  <td data-title="">
+                    <input style="margin: 5px;" type="checkbox" [(ngModel)]="invoice.multiple" (click)="unCheckedInvoices($event)" 
+                           [disabled]="!transactionService.canCancelInvoice(invoice.status)">
+                  </td>-->
+                  <td data-title="Url" scope="row">
+                    <a href="{{getUrl(payLink)}}" target="_blank"><i class="fa fa-external-link fa-lg" aria-hidden="true"></i></a>
+                  </td>
+                  <td data-title="Amount">
+                    {{getAmount(payLink)}}&nbsp;<img src="assets/img/recurring-icon.png" *ngIf="payLink.recurring == 1" style="height: 25px;opacity: 0.4;" title="{{getRecurringWord(payLink.billing_cycle)}}">
+                  </td>
+                  <td data-title="Description" style="word-break: break-all">{{payLink.description || '&nbsp;'}}</td> 
+                  <td data-title="IV">{{payLink.is_instant_v ? 'Yes' : 'No'}}</td>
+                  <td data-title="MV">{{payLink.is_manual_v ? 'Yes' : 'No'}}</td>
+                  <td data-title="2FA">{{payLink.is_two_auth ? 'Yes' : 'No'}}</td>
+                  <td data-title="Link Accessed">{{payLink.num_of_views || 0}}</td>
+                  <td data-title="Checks Created">{{payLink.num_of_checks || 0}}</td>
+                  <td data-title="Created At">{{userService.getDateFormat(payLink.created_at)}}</td>
+                  <td data-title="Thank You Url" style="word-break: break-all">{{payLink.callback || '&nbsp;'}}</td>
+                  <td data-title="Action">
+                    <button title="Disable" style="margin: 6px;" class="btn btn-primary btn-sm btn-rounded btn-rounded-margin" type="button" 
+                            (click)="disablePayLink(payLink)">
+                      <span *ngIf="payLink.enabled">Disable</span>
+                      <span *ngIf="!payLink.enabled">Enable</span>
+                    </button>
+                    &nbsp;
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No request were found...</span>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="getListPaymentLink($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,19 @@
+.wrap-user-messages-in-blue-block {
+  width: 100%; padding: 15px; background-color: #50a3fb; text-align: center; 
+  cursor: pointer;
+}
+
+.wrap-user-messages-in-blue-block span {
+  font-size: 15px;font-weight: 600;font-style: normal;font-stretch: normal;
+  line-height: normal;letter-spacing: 0.5px;color: #ffffff;
+}
+
+.wrap-user-messages-in-red-block {
+  width: 100%; padding: 15px; background-color: #ffa5a5; text-align: center; 
+  cursor: pointer;
+}
+
+.wrap-user-messages-in-red-block span {
+  font-size: 15px;font-weight: 600;font-style: normal;font-stretch: normal;
+  line-height: normal;letter-spacing: 0.5px;color: black;
+}

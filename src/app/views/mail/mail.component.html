@@ -1,0 +1,303 @@
+
+<div class="element-wrapper">
+  <h6 class="element-header">Mail Templates</h6>
+  <div *ngIf="errorService.isSuccess" class="alert alert-success" role="alert" [innerHTML]=errorService.successMessage></div> 
+  <div class="element-box">
+    <div class="table-responsive">
+      <div class="dataTables_wrapper container-fluid dt-bootstrap4">
+        <div class="row">
+          <div class="col-sm-12 col-md-3">
+            <div id="dataTable1_filter" class="dataTables_filter">
+              <label>
+                Search:
+                <input type="search" class="form-control form-control-sm" placeholder="Search mail" 
+                       [(ngModel)]="paginationService.searchQuery" (search)="getListMail(null)" (keyup)="getListMail(null)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="position: relative;margin-top: 40px;">
+          <hr>
+          <div class="col-sm-12">
+            <table id="dataTable2" width="100%" class="table table-striped table-lightfont dataTable responsive-table" role="grid" aria-describedby="dataTable1_info" style="width: 100%;">
+              <thead>
+                <tr role="row">
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('id', paginationService.sortDir, getListMail(null))">#</a>
+                    <i *ngIf="paginationService.sortField == 'id' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'id' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Name-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('name', paginationService.sortDir, getListMail(null))">Template Name</a>
+                    <i *ngIf="paginationService.sortField == 'name' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'name' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <!--Email-->
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('from', paginationService.sortDir, getListMail(null))">From</a>
+                    <i *ngIf="paginationService.sortField == 'from' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'from' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    <a href="javascript:void(0);" (click)="paginationService.applySort('subject', paginationService.sortDir, getListMail(null))">Subject</a>
+                    <i *ngIf="paginationService.sortField == 'subject' && !paginationService.sortIcons"class="icon-feather-chevron-down"></i>
+                    <i *ngIf="paginationService.sortField == 'subject' && paginationService.sortIcons" class="icon-feather-chevron-up"></i>
+                  </th>
+                  <th scope="col">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr role="row" *ngFor="let mail of listMail">
+                    <td data-title="#" scope="row">
+                    {{mail.id || '&nbsp;'}}
+                  </td>
+                  <td data-title="Template Name">
+                    {{mail.name || '&nbsp;'}}
+                  </td>
+                  <td data-title="From">
+                    {{mail.from || '&nbsp;'}}<br>
+                    {{mail.from_name || '&nbsp;'}}
+                  </td>
+                  <td data-title="Subject">
+                    {{mail.subject || '&nbsp;'}}
+                  </td>                 
+                  <td data-title="Action">
+                    <a title="View Template" (click)= "openMailTemplateViewModal( mailsTemplateView, mail )" class="editTemplate" href="javascript:void(0)"><i class="picons-thin-icon-thin-0043_eye_visibility_show_visible"></i></a>
+                    &nbsp;
+                    <a title="Edit Template" (click)= "openMailTemplateEditModal( mailsTemplateEdit, mail)" class="editTemplate" href="javascript:void(0)"><i class="picons-thin-icon-thin-0001_compose_write_pencil_new"></i></a>
+                  </td>  
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div *ngIf="!paginationService.visiblePagination" class="ssg-nothing-found">
+          <div class="icon-w">
+            <i class="os-icon os-icon-eye-off"></i>
+          </div>
+          <span>No mail template were found. Try changing your query...</span>
+        </div>
+        <div class="row">          
+          <div class="col-sm-12 col-md-12">
+            <div *ngIf="paginationService.visiblePagination" class="dataTables_info" id="dataTable1_info" role="status" aria-live="polite">
+              <div class="showentries">Show entries</div>
+              <ng-pagination 
+                [position]="'left'" 
+                [pageSize]="paginationService.pageSize"                     
+                [itemsCount]="paginationService.itemsCount" 
+                (getPageData)="getListMail($event)">                      
+              </ng-pagination>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #mailsTemplateView let-c="close" let-d="dismiss" let-create="mailStorage">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">View Mail Template</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <!--<form name="form" (ngSubmit)="f.form.valid" #f="ngForm">-->
+    <div class="modal-body">   
+
+      <div class="modal-body">     
+        &nbsp;&nbsp;
+        <!--</div>-->
+        <div class="profile-tile">
+          <span class="profile-tile-box">
+            <div class="pt-avatar-w" style="border-radius: 0px;">
+              <i style="color:#aab7c8; font-size: 5em;" class="picons-thin-icon-thin-0314_email_mail_post_card"></i>
+            </div>
+          </span>
+
+          <div class="profile-tile-meta" style='font-size: 22px;'>
+            <ul>
+              <li>
+                <div>
+                  <span class="added_withdrawn">Template Name:</span> 
+                  <span class="added_withdrawn_source">&nbsp;
+                    {{descriptionMail.name}}
+                  </span>
+                </div>             
+              </li>
+              <li>
+                From:&nbsp;<span class="added_withdrawn_source">
+                  {{descriptionMail.from}}
+                </span>
+              </li>
+              <li>
+                From name:&nbsp;<span class="added_withdrawn_source">
+                  {{descriptionMail.from_name}}
+                </span>
+              </li>
+
+              <li>
+                Cc email:&nbsp;<span class="added_withdrawn_source">
+                  {{descriptionMail.cc}}
+                </span>
+              </li>
+              <li>
+                Bcc email:&nbsp;<span class="added_withdrawn_source">
+                  {{descriptionMail.bcc}}
+                </span>
+              </li>
+              <li>
+                Subject:&nbsp;<span class="added_withdrawn_source">
+                  {{descriptionMail.subject}}
+                </span>
+              </li>
+
+              <li>
+                Update at:&nbsp;
+                <i class="picons-thin-icon-thin-0026_time_watch_clock"></i>  
+                <span class="added_withdrawn_source">
+                  {{userService.getDateFormat(descriptionMail.updated_at, 'MMM d, y, h:mm a')}}
+                </span>
+              </li>
+              <li>
+                Mail body:&nbsp;
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <app-ngx-editor [placeholder]="'Enter text here...'" [spellcheck]="true" [(ngModel)]="descriptionMail.body"  
+              #body="ngModel" [ngModelOptions]="{standalone: true}" [config]="{showToolbar: false}"></app-ngx-editor>
+      <!--<jodit-editor [config]="textEditorConfig" class="form-controls" name="body" [(ngModel)]="descriptionMail.body"  #body="ngModel"></jodit-editor>-->   
+      <!--<div class="mailSubj" [innerHTML]="descriptionMail.body"></div>-->
+
+    </div>
+    <br>
+    <div class="modal-footer">
+      <button class="slick-prev slick-arrow" type="button" (click)="c('Close click')">Cancel</button>
+    </div>
+    <!--</form>-->
+  </div>
+</ng-template>
+
+
+
+<ng-template #mailsTemplateEdit let-c="close" let-d="dismiss" let-create="mailStorage">
+  <div class="modal-blue-bg onboarding-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Edit Mail Template</h4>
+      <button type="button" class="close" aria-label="Close" (click)="c('Cross click')">
+              <span aria-hidden="true">&times;</span>
+      </button>
+    </div> 
+    <form  name="form" (ngSubmit)="f.form.valid && updateEmailTemplate()" #f="ngForm">
+           <div class="modal-body">
+        <div class="modal-body"> 
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !name.valid && (name.dirty || name.touched)}">
+                   <label for="">Email Template Name</label>
+                <input class="form-control" placeholder="Email Template Name" type="text" [(ngModel)]="modelEditTemplate.name" 
+                       name="name" required #name="ngModel" disabled>
+                       <div class="help-block form-text text-muted form-control-feedback" 
+                       *ngIf="!name.valid && (name.dirty || name.touched)">
+                       <span *ngIf="name.errors.required">
+                    Email Template Name is required
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group" [ngClass]="{'has-error has-danger': !from.valid && (from.dirty || from.touched)}">
+                   <label for="">From Email</label>
+                <input class="form-control" placeholder="From Email" type="text" [(ngModel)]="modelEditTemplate.from" 
+                       name="from" #from="ngModel">
+                <div class="help-block form-text text-muted form-control-feedback" 
+                     *ngIf="!from.valid && (from.dirty || from.touched)">
+                     <!--                     <span *ngIf="from.errors.required">
+                                       From Email is required
+                                     </span>-->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="">From Name</label>
+              <input class="form-control" placeholder="From Name" type="test" name="from_name"
+                     [(ngModel)]="modelEditTemplate.from_name" #from_name="ngModel">
+              <!--                     <div *ngIf="!from_name.valid && (from_name.dirty || from_name.touched)" 
+                                   class="help-block form-text with-errors form-control-feedback">From Name is required</div>-->
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="">Cc Email</label>
+              <input class="form-control" placeholder="Cc Email" type="test" name="cc"
+                     [(ngModel)]="modelEditTemplate.cc" #cc="ngModel">
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="">Bcc Email</label>
+              <input class="form-control" placeholder="Bcc Email" type="text" name="bcc" appNumbers
+                     [(ngModel)]="modelEditTemplate.bcc" #bcc="ngModel">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="">Subject</label>
+              <input class="form-control" placeholder="Subject" type="text" name="subject" appNumbers
+                     [(ngModel)]="modelEditTemplate.subject" #subject="ngModel">
+                     <!--                     <div *ngIf="!subject.valid && (subject.dirty || subject.touched)" 
+                                          class="help-block form-text with-errors form-control-feedback">Subject is required</div>-->
+            </div>
+          </div>
+        </div>
+        <div class="row">
+
+
+          <div class="col-sm-12">
+            <div class="form-group">
+              <label for="">Note</label>
+              <textarea class="form-control" rows="7" placeholder="Note" name="note" appNumbers
+                        [(ngModel)]="modelEditTemplate.note" #note="ngModel"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="">Template Body</label>
+          <app-ngx-editor [placeholder]="'Enter text here...'" [spellcheck]="true" [(ngModel)]="modelEditTemplate.body"  
+              #body="ngModel" [ngModelOptions]="{standalone: true}" [config]="objMailComp.editorConfig"></app-ngx-editor>
+          <!--<jodit-editor class="form-controls" name="body" [(ngModel)]="modelEditTemplate.body"  #body="ngModel"></jodit-editor>-->         
+          <!--                 <div *ngIf="!subject.valid && (subject.dirty || subject.touched)" 
+                           class="help-block form-text with-errors form-control-feedback">Subject is required</div>-->
+        </div>        
+
+        <div *ngIf="errorService.isError" class="alert alert-danger" role="alert" [innerHTML]=errorService.errorMessage></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <!--      <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+            <button [disabled]="isLoading || !f.form.valid" class="btn btn-primary">Save</button>-->      
+      <button class="slick-prev slick-arrow" (click)="c('Close click')">Cancel</button>
+      <button class="slick-next slick-arrow" type="submit" [disabled]="isLoading || !f.form.valid">Save</button>
+    </div>
+  </form>
+</div>
+</ng-template>
